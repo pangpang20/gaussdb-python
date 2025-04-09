@@ -145,9 +145,6 @@ PQconninfoFree = pq.PQconninfoFree
 PQconninfoFree.argtypes = [PQconninfoOption_ptr]
 PQconninfoFree.restype = None
 
-PQconninfo = pq.PQconninfo
-PQconninfo.argtypes = [PGconn_ptr]
-PQconninfo.restype = PQconninfoOption_ptr
 
 PQconninfoParse = pq.PQconninfoParse
 PQconninfoParse.argtypes = [c_char_p, POINTER(c_char_p)]
@@ -262,9 +259,6 @@ PQconnectionUsedPassword = pq.PQconnectionUsedPassword
 PQconnectionUsedPassword.argtypes = [PGconn_ptr]
 PQconnectionUsedPassword.restype = c_int
 
-PQsslInUse = pq.PQsslInUse
-PQsslInUse.argtypes = [PGconn_ptr]
-PQsslInUse.restype = c_int
 
 # TODO: PQsslAttribute, PQsslAttributeNames, PQsslStruct, PQgetssl
 
