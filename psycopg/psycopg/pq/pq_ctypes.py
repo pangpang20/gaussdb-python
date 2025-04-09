@@ -151,14 +151,7 @@ class PGconn:
 
     @property
     def info(self) -> list[ConninfoOption]:
-        self._ensure_pgconn()
-        opts = impl.PQconninfo(self._pgconn_ptr)
-        if not opts:
-            raise MemoryError("couldn't allocate connection info")
-        try:
-            return Conninfo._options_from_array(opts)
-        finally:
-            impl.PQconninfoFree(opts)
+        raise NotImplementedError("This method is not implemented")
 
     def reset(self) -> None:
         self._ensure_pgconn()
@@ -275,7 +268,7 @@ class PGconn:
 
     @property
     def ssl_in_use(self) -> bool:
-        return self._call_bool(impl.PQsslInUse)
+        raise NotImplementedError("This method is not implemented")
 
     def exec_(self, command: bytes) -> PGresult:
         if not isinstance(command, bytes):
