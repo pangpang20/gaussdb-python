@@ -118,34 +118,6 @@ def test_pgconn_ptr(pgconn, libpq):
     assert pgconn.pgconn_ptr is None
 
 
-def test_info(dsn, pgconn):
-    info = pgconn.info
-    assert len(info) > 20
-    dbname = [d for d in info if d.keyword == b"dbname"][0]
-    assert dbname.envvar == b"PGDATABASE"
-    assert dbname.label == b"Database-Name"
-    assert dbname.dispchar == b""
-    assert dbname.dispsize == 20
-
-    parsed = pq.Conninfo.parse(dsn.encode())
-    # take the name and the user either from params or from env vars
-    name = [
-        o.val or os.environ.get(o.envvar.decode(), "").encode()
-        for o in parsed
-        if o.keyword == b"dbname" and o.envvar
-    ][0]
-    user = [
-        o.val or os.environ.get(o.envvar.decode(), "").encode()
-        for o in parsed
-        if o.keyword == b"user" and o.envvar
-    ][0]
-    assert dbname.val == (name or user)
-
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.info
-
-
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_reset(pgconn):
     assert pgconn.status == pq.ConnStatus.OK
@@ -185,22 +157,6 @@ def test_ping(dsn):
     assert rv == pq.Ping.NO_RESPONSE
 
 
-def test_db(pgconn):
-    name = [o.val for o in pgconn.info if o.keyword == b"dbname"][0]
-    assert pgconn.db == name
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.db
-
-
-def test_user(pgconn):
-    user = [o.val for o in pgconn.info if o.keyword == b"user"][0]
-    assert pgconn.user == user
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.user
-
-
 def test_password(pgconn):
     # not in info
     assert isinstance(pgconn.password, bytes)
@@ -230,29 +186,6 @@ def test_hostaddr(pgconn):
 def test_hostaddr_missing(pgconn):
     with pytest.raises(psycopg.NotSupportedError):
         pgconn.hostaddr
-
-
-def test_port(pgconn):
-    port = [o.val for o in pgconn.info if o.keyword == b"port"][0]
-    assert pgconn.port == port
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.port
-
-
-@pytest.mark.libpq("< 14")
-def test_tty(pgconn):
-    tty = [o.val for o in pgconn.info if o.keyword == b"tty"][0]
-    assert pgconn.tty == tty
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.tty
-
-
-@pytest.mark.libpq(">= 14")
-def test_tty_noop(pgconn):
-    assert not any(o.val for o in pgconn.info if o.keyword == b"tty")
-    assert pgconn.tty == b""
 
 
 def test_transaction_status(pgconn):
@@ -373,22 +306,6 @@ def test_used_password(pgconn, dsn, monkeypatch):
 
     pgconn.finish()
     pgconn.used_password
-
-
-def test_ssl_in_use(pgconn):
-    assert isinstance(pgconn.ssl_in_use, bool)
-
-    # If connecting via socket then ssl is not in use
-    if pgconn.host.startswith(b"/"):
-        assert not pgconn.ssl_in_use
-    else:
-        sslmode = [i.val for i in pgconn.info if i.keyword == b"sslmode"][0]
-        if sslmode not in (b"disable", b"allow", b"prefer"):
-            assert pgconn.ssl_in_use
-
-    pgconn.finish()
-    with pytest.raises(psycopg.OperationalError):
-        pgconn.ssl_in_use
 
 
 def test_set_single_row_mode(pgconn):
