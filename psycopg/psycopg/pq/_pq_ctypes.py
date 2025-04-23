@@ -236,10 +236,6 @@ PQprotocolVersion = pq.PQprotocolVersion
 PQprotocolVersion.argtypes = [PGconn_ptr]
 PQprotocolVersion.restype = c_int
 
-PQserverVersion = pq.PQserverVersion
-PQserverVersion.argtypes = [PGconn_ptr]
-PQserverVersion.restype = c_int
-
 PQerrorMessage = pq.PQerrorMessage
 PQerrorMessage.argtypes = [PGconn_ptr]
 PQerrorMessage.restype = c_char_p

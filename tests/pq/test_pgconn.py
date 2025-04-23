@@ -107,11 +107,12 @@ def test_weakref(dsn, gc_collect):
 def test_pgconn_ptr(pgconn, libpq):
     assert isinstance(pgconn.pgconn_ptr, int)
 
-    f = libpq.PQserverVersion
+    f = libpq.PQbackendPID
     f.argtypes = [ctypes.c_void_p]
     f.restype = ctypes.c_int
     ver = f(pgconn.pgconn_ptr)
-    assert ver == pgconn.server_version
+    print(pgconn.backend_pid)
+    assert ver == pgconn.backend_pid
 
     pgconn.finish()
     assert pgconn.pgconn_ptr is None
@@ -303,7 +304,7 @@ def test_protocol_version(pgconn):
 
 
 def test_server_version(pgconn):
-    assert pgconn.server_version >= 90400
+    assert pgconn.server_version >= "505.2.0"
     pgconn.finish()
     with pytest.raises(psycopg.OperationalError):
         pgconn.server_version

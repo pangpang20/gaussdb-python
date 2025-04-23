@@ -68,7 +68,7 @@ def skip_neg_scale(*args):
         *args,
         marks=[
             pytest.mark.crdb("skip", reason="negative precision numeric"),
-            pytest.mark.pg(">=15"),
+            pytest.mark.pg(">=505.2.0"),
         ],
     )
 

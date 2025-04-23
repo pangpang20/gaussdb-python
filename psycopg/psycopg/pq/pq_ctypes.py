@@ -235,8 +235,9 @@ class PGconn:
         return self._call_int(impl.PQprotocolVersion)
 
     @property
-    def server_version(self) -> int:
-        return self._call_int(impl.PQserverVersion)
+    def server_version(self) -> str:
+        res = self.exec_(b"select version()")
+        return res.get_value(0, 0).decode().split(" ")[3]
 
     @property
     def socket(self) -> int:
