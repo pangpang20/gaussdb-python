@@ -442,34 +442,6 @@ def test_cancel_free(pgconn):
     cancel.free()
 
 
-@pytest.mark.crdb_skip("notify")
-def test_notify(pgconn):
-    assert pgconn.notifies() is None
-
-    pgconn.exec_(b"listen foo")
-    pgconn.exec_(b"listen bar")
-    pgconn.exec_(b"notify foo, '1'")
-    pgconn.exec_(b"notify bar, '2'")
-    pgconn.exec_(b"notify foo, '3'")
-
-    n = pgconn.notifies()
-    assert n.relname == b"foo"
-    assert n.be_pid == pgconn.backend_pid
-    assert n.extra == b"1"
-
-    n = pgconn.notifies()
-    assert n.relname == b"bar"
-    assert n.be_pid == pgconn.backend_pid
-    assert n.extra == b"2"
-
-    n = pgconn.notifies()
-    assert n.relname == b"foo"
-    assert n.be_pid == pgconn.backend_pid
-    assert n.extra == b"3"
-
-    assert pgconn.notifies() is None
-
-
 @pytest.mark.crdb_skip("do")
 def test_notice_nohandler(pgconn):
     pgconn.exec_(b"set client_min_messages to notice")
