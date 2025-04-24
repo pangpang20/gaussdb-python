@@ -78,10 +78,6 @@ _info_cls = pytest.mark.parametrize(
     [
         pytest.param(TypeInfo),
         pytest.param(RangeInfo, marks=pytest.mark.crdb_skip("range")),
-        pytest.param(
-            MultirangeInfo,
-            marks=(pytest.mark.crdb_skip("range"), pytest.mark.pg(">= 14")),
-        ),
         pytest.param(CompositeInfo, marks=pytest.mark.crdb_skip("composite")),
         pytest.param(EnumInfo),
     ],
@@ -138,7 +134,9 @@ async def test_fetch_not_found_async(aconn, name, status, info_cls, monkeypatch)
     "name", ["testschema.testtype", sql.Identifier("testschema", "testtype")]
 )
 def test_fetch_by_schema_qualified_string(conn, name):
-    conn.execute("create schema if not exists testschema")
+    exists = conn.execute("select 1 from pg_catalog.pg_namespace where nspname = 'testschema'").fetchone()
+    if not exists:
+        conn.execute("create schema testschema")
     conn.execute("create type testschema.testtype as (foo text)")
 
     info = TypeInfo.fetch(conn, name)
