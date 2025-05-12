@@ -264,7 +264,7 @@ def create_test_range(conn):
 
     conn.execute(
         """
-        drop schema if exists testschema;
+        drop schema if exists testschema cascade;
         create schema testschema;
 
         drop type if exists testrange cascade;
