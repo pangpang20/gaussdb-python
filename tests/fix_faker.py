@@ -238,7 +238,7 @@ class Faker:
                     cls = deep_import(cls)
                 except ImportError:
                     continue
-            if issubclass(cls, Multirange) and self.conn.info.server_version < 140000:
+            if issubclass(cls, Multirange):
                 continue
 
             rv.add(cls)
@@ -383,16 +383,6 @@ class Faker:
 
     def _decimal_special_values(self):
         values = ["NaN", "sNaN"]
-
-        if self.conn.info.vendor == "PostgreSQL":
-            if self.conn.info.server_version >= 140000:
-                values.extend(["Inf", "-Inf"])
-        elif self.conn.info.vendor == "CockroachDB":
-            if self.conn.info.server_version >= 220100:
-                values.extend(["Inf", "-Inf"])
-        else:
-            pytest.fail(f"unexpected vendor: {self.conn.info.vendor}")
-
         return values
 
     def schema_Enum(self, cls):
