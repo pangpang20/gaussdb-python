@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import sys
 import operator
-from typing import Callable
+from typing import Callable, Union
 from contextlib import contextmanager
 
 import pytest
@@ -62,7 +62,7 @@ class VersionCheck:
         *,
         skip: bool = False,
         op: str | None = None,
-        version_tuple: tuple[int, ...] = (),
+        version_tuple: tuple[Union[int, str], ...] = (),
         whose: str = "(wanted)",
         postgres_rule: bool = False,
     ):
@@ -80,7 +80,7 @@ class VersionCheck:
             r"""(?ix)
             ^\s* (skip|only)?
             \s* (==|!=|>=|<=|>|<)?
-            \s* (?:(\d+)(?:\.(\d+)(?:\.(\d+))?)?)?
+            \s* (?:(\d+)(?:\.(\d+)(?:\.(\d+)(?:\.(SPC\d+))?)?)?)?
             \s* $
             """,
             spec,
@@ -90,15 +90,17 @@ class VersionCheck:
 
         skip = (m.group(1) or "only").lower() == "skip"
         op = m.group(2)
-        version_tuple = tuple(int(n) for n in m.groups()[2:] if n)
+        version_tuple = tuple(int(n) if n.isdigit() else n for n in m.groups()[2:] if n)
 
         return cls(
             skip=skip, op=op, version_tuple=version_tuple, postgres_rule=postgres_rule
         )
 
-    def get_skip_message(self, version: int | None) -> str | None:
-        got_tuple = self._parse_int_version(version)
-
+    def get_skip_message(self, version: int | str | None) -> str | None:
+        if self.whose == 'PostgreSQL':
+            got_tuple = tuple(int(n) if n.isdigit() else n for n in version.split('.'))
+        else:
+            got_tuple = self._parse_int_version(version)
         msg: str | None = None
         if self.skip:
             if got_tuple:
@@ -125,14 +127,11 @@ class VersionCheck:
 
     _OP_NAMES = {">=": "ge", "<=": "le", ">": "gt", "<": "lt", "==": "eq", "!=": "ne"}
 
-    def _match_version(self, got_tuple: tuple[int, ...]) -> bool:
+    def _match_version(self, got_tuple: tuple[Union[int, str], ...]) -> bool:
         if not self.version_tuple:
             return True
 
         version_tuple = self.version_tuple
-        if self.postgres_rule and version_tuple and version_tuple[0] >= 10:
-            assert len(version_tuple) <= 2
-            version_tuple = version_tuple[:1] + (0,) + version_tuple[1:]
 
         op: Callable[[tuple[int, ...], tuple[int, ...]], bool]
         op = getattr(operator, self._OP_NAMES[self.op])

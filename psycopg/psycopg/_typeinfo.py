@@ -171,14 +171,7 @@ ORDER BY t.oid
 
     @classmethod
     def _has_to_regtype_function(cls, conn: BaseConnection[Any]) -> bool:
-        # to_regtype() introduced in PostgreSQL 9.4 and CockroachDB 22.2
-        info = conn.info
-        if info.vendor == "PostgreSQL":
-            return info.server_version >= 90400
-        elif info.vendor == "CockroachDB":
-            return info.server_version >= 220200
-        else:
-            return False
+        return False
 
     @classmethod
     def _to_regtype(cls, conn: BaseConnection[Any]) -> sql.SQL:

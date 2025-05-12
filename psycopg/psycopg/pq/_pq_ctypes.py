@@ -74,6 +74,7 @@ class PQconninfoOption_struct(Structure):
         ("label", c_char_p),
         ("dispchar", c_char_p),
         ("dispsize", c_int),
+        ("valsize", c_size_t),
     ]
 
 
@@ -234,10 +235,6 @@ PQparameterStatus.restype = c_char_p
 PQprotocolVersion = pq.PQprotocolVersion
 PQprotocolVersion.argtypes = [PGconn_ptr]
 PQprotocolVersion.restype = c_int
-
-PQserverVersion = pq.PQserverVersion
-PQserverVersion.argtypes = [PGconn_ptr]
-PQserverVersion.restype = c_int
 
 PQerrorMessage = pq.PQerrorMessage
 PQerrorMessage.argtypes = [PGconn_ptr]

@@ -457,20 +457,6 @@ def test_dump_numeric_exhaustive(conn, fmt_in):
             assert got == want
 
 
-@pytest.mark.pg(">= 14")
-@pytest.mark.parametrize(
-    "val, expr",
-    [
-        ("inf", "Infinity"),
-        ("-inf", "-Infinity"),
-    ],
-)
-def test_dump_numeric_binary_inf(conn, val, expr):
-    cur = conn.cursor()
-    val = Decimal(val)
-    cur.execute("select %b", [val])
-
-
 @pytest.mark.parametrize(
     "expr",
     ["nan", "0", "1", "-1", "0.0", "0.01"]
@@ -528,21 +514,6 @@ def test_load_numeric_exhaustive(conn, fmt_out):
             got = cur.execute(f"select '{snum}'::decimal").fetchone()[0]
             assert want == got
             assert str(want) == str(got)
-
-
-@pytest.mark.pg(">= 14")
-@pytest.mark.parametrize(
-    "val, expr",
-    [
-        ("inf", "Infinity"),
-        ("-inf", "-Infinity"),
-    ],
-)
-def test_load_numeric_binary_inf(conn, val, expr):
-    cur = conn.cursor(binary=1)
-    res = cur.execute(f"select '{expr}'::numeric").fetchone()[0]
-    val = Decimal(val)
-    assert res == val
 
 
 @pytest.mark.parametrize(

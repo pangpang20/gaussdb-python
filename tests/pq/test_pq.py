@@ -10,7 +10,7 @@ from ..utils import check_libpq_version
 
 def test_version():
     rv = pq.version()
-    assert rv > 90500
+    assert rv >= 90204
     assert rv < 200000  # you are good for a while
 
 

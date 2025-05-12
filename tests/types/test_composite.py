@@ -156,7 +156,8 @@ def testcomp(svcconn):
     cur = svcconn.cursor()
     cur.execute(
         """
-        create schema if not exists testschema;
+        drop schema if exists testschema cascade;
+        create schema testschema;
 
         drop type if exists testcomp2 cascade;
         drop type if exists testcomp cascade;

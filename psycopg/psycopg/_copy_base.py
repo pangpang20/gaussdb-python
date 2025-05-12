@@ -55,6 +55,8 @@ QUEUE_SIZE = 1024
 # more performing than accumulating a larger buffer. See #746 for details.
 PREFER_FLUSH = sys.platform == "darwin"
 
+IS_BINARY_SIGNATURE = "is_binary_signature"
+
 
 class BaseCopy(Generic[ConnectionType]):
     """
@@ -168,6 +170,10 @@ class BaseCopy(Generic[ConnectionType]):
             return None
 
         row = self.formatter.parse_row(data)
+
+        if row == IS_BINARY_SIGNATURE:
+            row = yield from self._read_row_gen()
+
         if row is None:
             # Get the final result to finish the copy operation
             yield from self._read_gen()
@@ -261,7 +267,7 @@ class BinaryFormatter(Formatter):
         super().__init__(transformer)
         self._signature_sent = False
 
-    def parse_row(self, data: Buffer) -> tuple[Any, ...] | None:
+    def parse_row(self, data: Buffer) -> tuple[Any, ...] | str | None:
         rv: tuple[Any, ...] | None = None
 
         if not self._signature_sent:
@@ -270,7 +276,7 @@ class BinaryFormatter(Formatter):
                     "binary copy doesn't start with the expected signature"
                 )
             self._signature_sent = True
-            data = data[len(_binary_signature) :]
+            return IS_BINARY_SIGNATURE
 
         if data != _binary_trailer:
             rv = parse_row_binary(data, self.transformer)
@@ -398,8 +404,8 @@ _unpack_int4 = struct.Struct("!i").unpack_from
 
 _binary_signature = (
     b"PGCOPY\n\xff\r\n\0"  # Signature
-    b"\x00\x00\x00\x00"  # flags
-    b"\x00\x00\x00\x00"  # extra length
+    b"\x00\x00\x80\x00"  # flags
+    b"\x00\x00\x00\x02\x00\x07"  # extra length
 )
 _binary_trailer = b"\xff\xff"
 _binary_null = b"\xff\xff\xff\xff"

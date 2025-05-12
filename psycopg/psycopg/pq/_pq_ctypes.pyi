@@ -27,6 +27,7 @@ class PQconninfoOption_struct:
     label: bytes
     dispchar: bytes
     dispsize: int
+    valsize: int
 
 class PGnotify_struct:
     be_pid: int
