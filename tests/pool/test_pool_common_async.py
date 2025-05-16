@@ -601,7 +601,7 @@ async def test_debug_deadlock(pool_cls, dsn):
         logger.removeHandler(handler)
         logger.setLevel(old_level)
 
-
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 async def test_check_connection(pool_cls, aconn_cls, dsn, autocommit):
