@@ -12,6 +12,9 @@ __pycache__/
 .coverage
 htmlcov
 .idea
+.pytest_cache
+.flake8
+.yamllint.yaml
 
 .eggs/
 dist/

@@ -33,11 +33,12 @@ def pytest_configure(config):
         "dns: the test requires dnspython to run",
         "postgis: the test requires the PostGIS extension to run",
         "numpy: the test requires numpy module to be installed",
+        "gaussdb_skip(reason): Skip test for GaussDB-specific behavior",
     ]
 
     for marker in markers:
         config.addinivalue_line("markers", marker)
-
+ 
 
 def pytest_addoption(parser):
     parser.addoption(
