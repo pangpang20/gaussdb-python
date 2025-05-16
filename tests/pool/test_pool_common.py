@@ -181,7 +181,7 @@ def test_queue(pool_cls, dsn):
 
     times = [item[1] for item in results]
     if pool_cls == pool.NullConnectionPool:
-        want_times = [0.6, 0.6, 0.9, 0.9, 1.2, 1.2]   
+        want_times = [0.4, 0.4, 0.6, 0.6, 0.8, 0.8]   
         tolerance = 0.5
     else:
         want_times = [0.3, 0.3, 0.6, 0.6, 0.9, 0.9]
