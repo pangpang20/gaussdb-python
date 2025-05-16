@@ -594,6 +594,7 @@ def test_debug_deadlock(pool_cls, dsn):
 
 
 @pytest.mark.crdb_skip("pg_terminate_backend")
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 def test_check_connection(pool_cls, conn_cls, dsn, autocommit):
     conn = conn_cls.connect(dsn)
