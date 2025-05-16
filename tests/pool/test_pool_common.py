@@ -262,13 +262,13 @@ def test_dead_client(pool_cls, dsn):
                 results.append(i)
         except pool.PoolTimeout:
             if timeout > 0.2:
-                raise
+                raise 
 
     with pool_cls(dsn, min_size=min_size(pool_cls, 2), max_size=2) as p:
         results: list[int] = []
         ts = [
             spawn(worker, args=(i, timeout))
-            for i, timeout in enumerate([0.4, 0.4, 0.1, 0.4, 0.4])
+            for i, timeout in enumerate([0.6, 0.6, 0.1, 0.9, 0.9])
         ]
         gather(*ts)
 
