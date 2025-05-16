@@ -504,6 +504,7 @@ def test_jitter(pool_cls):
 
 @pytest.mark.slow
 @pytest.mark.timing
+@pytest.mark.gaussdb_skip("connection pooling")
 def test_stats_measures(pool_cls, dsn):
 
     def worker(n):
