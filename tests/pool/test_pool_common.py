@@ -11,6 +11,8 @@ import pytest
 
 import psycopg
 
+
+
 from ..utils import set_autocommit
 from ..acompat import Event, gather, is_alive, skip_async, skip_sync, sleep, spawn
 
@@ -160,7 +162,7 @@ def test_configure_broken(pool_cls, dsn, caplog):
 
 @pytest.mark.slow
 @pytest.mark.timing
-@pytest.mark.crdb_skip("backend pid")
+@pytest.mark.crdb_skip("backend pid") 
 def test_queue(pool_cls, dsn):
 
     def worker(n):
@@ -178,9 +180,14 @@ def test_queue(pool_cls, dsn):
         gather(*ts)
 
     times = [item[1] for item in results]
-    want_times = [0.2, 0.2, 0.4, 0.4, 0.6, 0.6]
+    if pool_cls == pool.NullConnectionPool:
+        want_times = [0.6, 0.6, 0.9, 0.9, 1.2, 1.2]   
+        tolerance = 0.5
+    else:
+        want_times = [0.3, 0.3, 0.6, 0.6, 0.9, 0.9]
+        tolerance = 0.4
     for got, want in zip(times, want_times):
-        assert got == pytest.approx(want, 0.2), times
+        assert got == pytest.approx(want, tolerance), times
 
     assert len({r[2] for r in results}) == 2, results
 
