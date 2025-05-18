@@ -326,7 +326,7 @@ def test_inerror_rollback(dsn, caplog):
     assert len(caplog.records) == 1
     assert "INERROR" in caplog.records[0].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 @pytest.mark.crdb_skip("copy")
 def test_active_close(dsn, caplog):
