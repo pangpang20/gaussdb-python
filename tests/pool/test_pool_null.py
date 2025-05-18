@@ -263,7 +263,7 @@ def test_no_queue_timeout(proxy):
             with p.connection(timeout=1):
                 pass
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_intrans_rollback(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
