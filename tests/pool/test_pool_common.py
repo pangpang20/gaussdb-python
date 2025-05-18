@@ -570,7 +570,7 @@ def test_stats_usage(pool_cls, dsn):
         assert stats["requests_num"] == 7
         assert stats["requests_queued"] == 4
         assert 550 <= stats["requests_wait_ms"] <= 1500
-        assert stats["requests_errors"] > 1
+        assert stats["requests_errors"] == 1
         assert 800 <= stats["usage_ms"] <= 2500
         assert stats.get("returns_bad", 0) == 0
 
