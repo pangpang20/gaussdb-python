@@ -849,6 +849,7 @@ async def test_connect_check_timeout(dsn, proxy):
 
 
 @pytest.mark.slow
+@pytest.mark.gaussdb_skip("backend pid")
 async def test_check_max_lifetime(dsn):
     async with pool.AsyncConnectionPool(dsn, min_size=1, max_lifetime=0.2) as p:
         async with p.connection() as conn:
