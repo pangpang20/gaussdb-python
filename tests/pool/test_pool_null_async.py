@@ -354,7 +354,7 @@ async def test_active_close(dsn, caplog):
     assert "ACTIVE" in caplog.records[0].message
     assert "BAD" in caplog.records[1].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_fail_rollback_close(dsn, caplog, monkeypatch):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
