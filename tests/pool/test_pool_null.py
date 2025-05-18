@@ -262,8 +262,7 @@ def test_no_queue_timeout(proxy):
         with proxy.deaf_listen(), pytest.raises(pool.PoolTimeout):
             with p.connection(timeout=1):
                 pass
-
-@pytest.mark.gaussdb_skip("backend pid")
+ 
 @pytest.mark.crdb_skip("backend pid")
 def test_intrans_rollback(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -287,7 +286,7 @@ def test_intrans_rollback(dsn, caplog):
         ensure_waiting(p)
 
         pids.append(conn.info.backend_pid)
-        conn.execute("create table test_intrans_rollback ()")
+        conn.execute("create table test_intrans_rollback (id integer)")
         assert conn.info.transaction_status == TransactionStatus.INTRANS
         p.putconn(conn)
         gather(t)
