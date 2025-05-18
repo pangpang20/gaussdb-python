@@ -736,7 +736,7 @@ async def test_check_idle(dsn):
         async with p.connection() as conn:
             assert conn.info.transaction_status == TransactionStatus.IDLE
 
-
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 async def test_connect_no_check(dsn):
     async with pool.AsyncConnectionPool(dsn, min_size=2) as p:
