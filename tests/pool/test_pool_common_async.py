@@ -320,7 +320,7 @@ async def test_queue_timeout_override(pool_cls, dsn):
     for e in errors:
         assert 0.1 < e[1] < 0.15
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_broken_reconnect(pool_cls, dsn):
     async with pool_cls(dsn, min_size=min_size(pool_cls), max_size=1) as p:
