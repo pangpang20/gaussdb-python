@@ -691,6 +691,7 @@ def test_bad_resize(dsn, min_size, max_size):
 
 @pytest.mark.slow
 @pytest.mark.timing
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_max_lifetime(dsn):
     with pool.ConnectionPool(dsn, min_size=1, max_lifetime=0.2) as p:
