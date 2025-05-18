@@ -100,7 +100,7 @@ def test_non_generic_connection_type(dsn):
     assert conn1.autocommit
     assert row1 == {"x": 1}
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_its_no_pool_at_all(dsn):
     with pool.NullConnectionPool(dsn, max_size=2) as p:
