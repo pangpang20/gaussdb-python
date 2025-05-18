@@ -269,7 +269,7 @@ async def test_reset_broken(dsn, caplog):
     assert caplog.records
     assert "WAT" in caplog.records[0].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_intrans_rollback(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
