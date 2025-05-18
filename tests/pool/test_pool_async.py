@@ -247,7 +247,7 @@ async def test_reset_badstate(dsn, caplog):
     assert caplog.records
     assert "INTRANS" in caplog.records[0].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_reset_broken(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
