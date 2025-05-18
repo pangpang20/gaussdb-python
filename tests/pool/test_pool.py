@@ -878,7 +878,7 @@ def test_stats_connect(proxy, monkeypatch):
         assert stats["connections_errors"] > 0
         assert stats["connections_lost"] == 3
 
-
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_stats_check(dsn):
     with pool.ConnectionPool(
