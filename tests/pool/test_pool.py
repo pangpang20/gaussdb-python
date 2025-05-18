@@ -703,7 +703,7 @@ def test_max_lifetime(dsn):
 
     assert pids[0] == pids[1] != pids[4], pids
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_check(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
