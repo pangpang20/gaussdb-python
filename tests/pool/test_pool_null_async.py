@@ -286,7 +286,7 @@ async def test_intrans_rollback(dsn, caplog):
         await ensure_waiting(p)
 
         pids.append(conn.info.backend_pid)
-        await conn.execute("create table test_intrans_rollback ()")
+        await conn.execute("create table test_intrans_rollback (id integer)")
         assert conn.info.transaction_status == TransactionStatus.INTRANS
         await p.putconn(conn)
         await gather(t)
