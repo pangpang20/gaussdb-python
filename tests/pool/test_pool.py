@@ -847,13 +847,14 @@ def test_connect_check_timeout(dsn, proxy):
 
 
 @pytest.mark.slow
+@pytest.mark.gaussdb_skip("backend pid")
 def test_check_max_lifetime(dsn):
     with pool.ConnectionPool(dsn, min_size=1, max_lifetime=0.2) as p:
         with p.connection() as conn:
             pid = conn.info.backend_pid
         with p.connection() as conn:
             assert conn.info.backend_pid == pid
-        sleep(0.3)
+        sleep(0.3) 
         p.check()
         with p.connection() as conn:
             assert conn.info.backend_pid != pid
