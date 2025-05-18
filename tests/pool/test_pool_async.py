@@ -787,6 +787,7 @@ async def test_connect_check(dsn, caplog, autocommit):
 
 @pytest.mark.parametrize("autocommit", [True, False])
 @pytest.mark.crdb_skip("pg_terminate_backend")
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 async def test_getconn_check(dsn, caplog, autocommit):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
 
