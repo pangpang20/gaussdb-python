@@ -193,7 +193,7 @@ def test_reset(dsn):
     assert resets == 1
     assert pids[0] == pids[1]
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_reset_badstate(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
