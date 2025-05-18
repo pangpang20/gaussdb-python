@@ -749,7 +749,7 @@ def test_connect_no_check(dsn):
                 with p.connection() as conn2:
                     conn2.execute("select 2")
 
-
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 def test_connect_check(dsn, caplog, autocommit):
