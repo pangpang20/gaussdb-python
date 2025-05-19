@@ -99,7 +99,7 @@ async def test_non_generic_connection_type(dsn):
     assert conn1.autocommit
     assert row1 == {"x": 1}
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_its_no_pool_at_all(dsn):
     async with pool.AsyncNullConnectionPool(dsn, max_size=2) as p:
@@ -192,7 +192,7 @@ async def test_reset(dsn):
     assert resets == 1
     assert pids[0] == pids[1]
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_reset_badstate(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -221,7 +221,7 @@ async def test_reset_badstate(dsn, caplog):
     assert caplog.records
     assert "INTRANS" in caplog.records[0].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_reset_broken(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -286,7 +286,7 @@ async def test_intrans_rollback(dsn, caplog):
         await ensure_waiting(p)
 
         pids.append(conn.info.backend_pid)
-        await conn.execute("create table test_intrans_rollback ()")
+        await conn.execute("create table test_intrans_rollback (id integer)")
         assert conn.info.transaction_status == TransactionStatus.INTRANS
         await p.putconn(conn)
         await gather(t)
@@ -325,7 +325,7 @@ async def test_inerror_rollback(dsn, caplog):
     assert len(caplog.records) == 1
     assert "INERROR" in caplog.records[0].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 @pytest.mark.crdb_skip("copy")
 async def test_active_close(dsn, caplog):
@@ -354,7 +354,7 @@ async def test_active_close(dsn, caplog):
     assert "ACTIVE" in caplog.records[0].message
     assert "BAD" in caplog.records[1].message
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_fail_rollback_close(dsn, caplog, monkeypatch):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -408,6 +408,7 @@ async def test_bad_resize(dsn, min_size, max_size):
 
 @pytest.mark.slow
 @pytest.mark.timing
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_max_lifetime(dsn):
     pids: list[int] = []

@@ -320,7 +320,7 @@ async def test_queue_timeout_override(pool_cls, dsn):
     for e in errors:
         assert 0.1 < e[1] < 0.15
 
-
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_broken_reconnect(pool_cls, dsn):
     async with pool_cls(dsn, min_size=min_size(pool_cls), max_size=1) as p:
@@ -515,6 +515,7 @@ async def test_jitter(pool_cls):
 
 @pytest.mark.slow
 @pytest.mark.timing
+@pytest.mark.gaussdb_skip("connection pooling")
 async def test_stats_measures(pool_cls, dsn):
     async def worker(n):
         async with p.connection() as conn:
@@ -601,7 +602,7 @@ async def test_debug_deadlock(pool_cls, dsn):
         logger.removeHandler(handler)
         logger.setLevel(old_level)
 
-
+@pytest.mark.gaussdb_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 async def test_check_connection(pool_cls, aconn_cls, dsn, autocommit):
