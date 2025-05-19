@@ -1439,7 +1439,7 @@ class InvalidObjectDefinition(ProgrammingError,
     pass
 
 class IndeterminateDatatype(ProgrammingError,
-    code='42P18', name='INDETERMINATE_DATATYPE'):
+    code='42P38', name='INDETERMINATE_DATATYPE'):
     pass
 
 class InvalidRecursion(ProgrammingError,
