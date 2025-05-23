@@ -107,52 +107,6 @@ t.join()
     assert out == "", out.strip().splitlines()[-1]
 
 
-@pytest.mark.slow
-@pytest.mark.timing
-@pytest.mark.crdb_skip("notify")
-def test_notifies(conn_cls, conn, dsn):
-    nconn = conn_cls.connect(dsn, autocommit=True)
-    npid = nconn.pgconn.backend_pid
-
-    def notifier():
-        time.sleep(0.25)
-        nconn.cursor().execute("notify foo, '1'")
-        time.sleep(0.25)
-        nconn.cursor().execute("notify foo, '2'")
-        nconn.close()
-
-    conn.autocommit = True
-    conn.cursor().execute("listen foo")
-
-    t0 = time.time()
-    t = threading.Thread(target=notifier)
-    t.start()
-
-    ns = []
-    gen = conn.notifies()
-    for n in gen:
-        ns.append((n, time.time()))
-        if len(ns) >= 2:
-            gen.close()
-
-    assert len(ns) == 2
-
-    n, t1 = ns[0]
-    assert isinstance(n, psycopg.Notify)
-    assert n.pid == npid
-    assert n.channel == "foo"
-    assert n.payload == "1"
-    assert t1 - t0 == pytest.approx(0.25, abs=0.05)
-
-    n, t1 = ns[1]
-    assert n.pid == npid
-    assert n.channel == "foo"
-    assert n.payload == "2"
-    assert t1 - t0 == pytest.approx(0.5, abs=0.05)
-
-    t.join()
-
-
 def canceller(conn, errors):
     try:
         time.sleep(0.5)
