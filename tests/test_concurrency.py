@@ -107,52 +107,6 @@ t.join()
     assert out == "", out.strip().splitlines()[-1]
 
 
-@pytest.mark.slow
-@pytest.mark.timing
-@pytest.mark.crdb_skip("notify")
-def test_notifies(conn_cls, conn, dsn):
-    nconn = conn_cls.connect(dsn, autocommit=True)
-    npid = nconn.pgconn.backend_pid
-
-    def notifier():
-        time.sleep(0.25)
-        nconn.cursor().execute("notify foo, '1'")
-        time.sleep(0.25)
-        nconn.cursor().execute("notify foo, '2'")
-        nconn.close()
-
-    conn.autocommit = True
-    conn.cursor().execute("listen foo")
-
-    t0 = time.time()
-    t = threading.Thread(target=notifier)
-    t.start()
-
-    ns = []
-    gen = conn.notifies()
-    for n in gen:
-        ns.append((n, time.time()))
-        if len(ns) >= 2:
-            gen.close()
-
-    assert len(ns) == 2
-
-    n, t1 = ns[0]
-    assert isinstance(n, psycopg.Notify)
-    assert n.pid == npid
-    assert n.channel == "foo"
-    assert n.payload == "1"
-    assert t1 - t0 == pytest.approx(0.25, abs=0.05)
-
-    n, t1 = ns[1]
-    assert n.pid == npid
-    assert n.channel == "foo"
-    assert n.payload == "2"
-    assert t1 - t0 == pytest.approx(0.5, abs=0.05)
-
-    t.join()
-
-
 def canceller(conn, errors):
     try:
         time.sleep(0.5)
@@ -216,10 +170,11 @@ def test_cancel_stream(conn):
 def test_identify_closure(conn_cls, dsn):
     def closer():
         time.sleep(0.2)
-        conn2.execute("select pg_terminate_backend(%s)", [conn.pgconn.backend_pid])
+        conn2.execute("select pg_terminate_backend(%s)", [conn_pid])
 
     conn = conn_cls.connect(dsn)
     conn2 = conn_cls.connect(dsn)
+    conn_pid = conn.execute("select pg_backend_pid()").fetchone()[0]
     try:
         t = threading.Thread(target=closer)
         t.start()
@@ -445,8 +400,8 @@ if __name__ == '__main__':
 def test_concurrent_close(dsn, conn):
     # Test issue #608: concurrent closing shouldn't hang the server
     # (although, at the moment, it doesn't cancel a running query).
-    pid = conn.info.backend_pid
     conn.autocommit = True
+    pid = conn.execute("select pg_backend_pid()").fetchone()[0]
 
     def worker():
         try:

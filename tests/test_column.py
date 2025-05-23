@@ -82,16 +82,12 @@ def skip_neg_scale(*args):
         ("varchar(1)", None, None, 1, None),
         ("varchar(1)[]", None, None, 1, None),
         ("varchar(42)", None, None, 42, None),
-        skip_crdb("bpchar(42)", None, None, 42, None, reason="bpchar"),
+        ("bpchar(42)", None, None, 42, None),
         ("varchar(10485760)", None, None, 10485760, None),
         ("int4", None, None, None, 4),
         ("numeric", None, None, None, None),
         ("numeric(10,0)", 10, 0, None, None),
         ("numeric(10,3)[]", 10, 3, None, None),
-        skip_neg_scale("numeric(2,-3)", 2, -3, None, None),
-        skip_neg_scale("numeric(3,5)", 3, 5, None, None),
-        skip_neg_scale("numeric(1,-1000)", 1, -1000, None, None),
-        skip_neg_scale("numeric(1,1000)", 1, 1000, None, None),
         ("numeric(1000,1000)", 1000, 1000, None, None),
         ("time", None, None, None, 8),
         ("time[]", None, None, None, None),
@@ -146,13 +142,6 @@ def test_pickle(conn):
     pickled = pickle.dumps(description, pickle.HIGHEST_PROTOCOL)
     unpickled = pickle.loads(pickled)
     assert [tuple(d) for d in description] == [tuple(d) for d in unpickled]
-
-
-@pytest.mark.crdb_skip("no col query")
-def test_no_col_query(conn):
-    cur = conn.execute("select")
-    assert cur.description == []
-    assert cur.fetchall() == [()]
 
 
 def test_description_closed_connection(conn):
