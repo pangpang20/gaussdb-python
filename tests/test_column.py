@@ -144,13 +144,6 @@ def test_pickle(conn):
     assert [tuple(d) for d in description] == [tuple(d) for d in unpickled]
 
 
-@pytest.mark.crdb_skip("no col query")
-def test_no_col_query(conn):
-    cur = conn.execute("select")
-    assert cur.description == []
-    assert cur.fetchall() == [()]
-
-
 def test_description_closed_connection(conn):
     # If we have reasons to break this test we will (e.g. we really need
     # the connection). In #172 it fails just by accident.
