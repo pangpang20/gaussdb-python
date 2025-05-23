@@ -170,10 +170,11 @@ def test_cancel_stream(conn):
 def test_identify_closure(conn_cls, dsn):
     def closer():
         time.sleep(0.2)
-        conn2.execute("select pg_terminate_backend(%s)", [conn.pgconn.backend_pid])
+        conn2.execute("select pg_terminate_backend(%s)", [conn_pid])
 
     conn = conn_cls.connect(dsn)
     conn2 = conn_cls.connect(dsn)
+    conn_pid = conn.execute("select pg_backend_pid()").fetchone()[0]
     try:
         t = threading.Thread(target=closer)
         t.start()
@@ -399,8 +400,8 @@ if __name__ == '__main__':
 def test_concurrent_close(dsn, conn):
     # Test issue #608: concurrent closing shouldn't hang the server
     # (although, at the moment, it doesn't cancel a running query).
-    pid = conn.info.backend_pid
     conn.autocommit = True
+    pid = conn.execute("select pg_backend_pid()").fetchone()[0]
 
     def worker():
         try:
