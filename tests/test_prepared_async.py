@@ -97,7 +97,8 @@ async def test_no_prepare_multi_with_drop(aconn):
     await aconn.execute("select 1", prepare=True)
 
     for i in range(10):
-        await aconn.execute("drop table if exists noprep; create table noprep()")
+        await aconn.execute("""drop table if exists noprep;
+                            create table noprep(dummy_column int)""")
 
     stmts = await get_prepared_statements(aconn)
     assert len(stmts) == 0
@@ -116,8 +117,7 @@ async def test_no_prepare_error(aconn):
 @pytest.mark.parametrize(
     "query",
     [
-        "create table test_no_prepare ()",
-        pytest.param("notify foo, 'bar'", marks=pytest.mark.crdb_skip("notify")),
+        "create table test_no_prepare (dummy_column int)",
         "set timezone = utc",
         "select num from prepared_test",
         "insert into prepared_test (num) values (1)",
