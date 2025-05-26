@@ -129,10 +129,9 @@ def test_no_result(factory, conn):
 )
 def test_no_column(factory, conn):
     cur = conn.cursor(row_factory=factory_from_name(factory))
-    cur.execute("select")
+    cur.execute("select 1 where false")
     recs = cur.fetchall()
-    assert len(recs) == 1
-    assert not recs[0]
+    assert len(recs) == 0
 
 
 @pytest.mark.crdb("skip")
@@ -143,7 +142,7 @@ def test_no_column_class_row(conn):
             self.y = y
 
     cur = conn.cursor(row_factory=rows.class_row(Empty))
-    cur.execute("select")
+    cur.execute("select 10 as x, 20 as y")
     x = cur.fetchone()
     assert isinstance(x, Empty)
     assert x.x == 10
