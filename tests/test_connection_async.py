@@ -646,6 +646,8 @@ async def test_transaction_param_readonly_property(aconn, param):
 async def test_set_transaction_param_implicit(aconn, param, autocommit):
     await aconn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         cur = await aconn.execute(
             "select current_setting(%s), current_setting(%s)",
@@ -668,6 +670,8 @@ async def test_set_transaction_param_reset(aconn, param):
     await aconn.commit()
 
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         cur = await aconn.execute(
             "select current_setting(%s)", [f"transaction_{param.guc}"]
@@ -690,6 +694,8 @@ async def test_set_transaction_param_reset(aconn, param):
 async def test_set_transaction_param_block(aconn, param, autocommit):
     await aconn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         async with aconn.transaction():
             cur = await aconn.execute(
