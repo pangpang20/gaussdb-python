@@ -125,11 +125,12 @@ async def test_identify_closure(aconn_cls, dsn):
     async def closer():
         await asyncio.sleep(0.2)
         await conn2.execute(
-            "select pg_terminate_backend(%s)", [aconn.pgconn.backend_pid]
+            "select pg_terminate_backend(%s)", [aconn_pid]
         )
 
     aconn = await aconn_cls.connect(dsn)
     conn2 = await aconn_cls.connect(dsn)
+    aconn_pid = aconn.pgconn.backend_pid
     try:
         t = create_task(closer())
         t0 = time.time()
