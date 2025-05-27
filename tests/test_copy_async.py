@@ -737,6 +737,7 @@ async def test_copy_to_leaks(aconn_cls, dsn, faker, fmt, set_types, method, gc):
             async with conn.cursor(binary=fmt) as cur:
                 await cur.execute(faker.drop_stmt)
                 await cur.execute(faker.create_stmt)
+                await conn.commit()
                 async with faker.find_insert_problem_async(conn):
                     await cur.executemany(faker.insert_stmt, faker.records)
 

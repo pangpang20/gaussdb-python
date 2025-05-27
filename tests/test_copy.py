@@ -775,6 +775,7 @@ def test_copy_from_leaks(conn_cls, dsn, faker, fmt, set_types, gc):
             with conn.cursor(binary=fmt) as cur:
                 cur.execute(faker.drop_stmt)
                 cur.execute(faker.create_stmt)
+                conn.commit()
 
                 stmt = sql.SQL("copy {} ({}) from stdin (format {})").format(
                     faker.table_name,
