@@ -891,7 +891,7 @@ async def test_resolve_hostaddr_conn(aconn_cls, monkeypatch, fake_resolve):
 
 @pytest.mark.crdb_skip("pg_terminate_backend")
 async def test_right_exception_on_server_disconnect(aconn):
-    with pytest.raises(e.AdminShutdown):
+    with pytest.raises(e.OperationalError):
         await aconn.execute(
             "select pg_terminate_backend(%s)", [aconn.pgconn.backend_pid]
         )
