@@ -82,6 +82,8 @@ class PGconn:
         "_self_ptr",
         "_procpid",
         "__weakref__",
+        "_backend_pid",
+        "_server_version",
     )
 
     def __init__(self, pgconn_ptr: impl.PGconn_struct):
@@ -94,6 +96,8 @@ class PGconn:
         impl.PQsetNoticeReceiver(pgconn_ptr, notice_receiver, byref(self._self_ptr))
 
         self._procpid = getpid()
+        self._backend_pid = None
+        self._server_version = None
 
     def __del__(self) -> None:
         # Close the connection only if it was created in this process,
@@ -236,8 +240,10 @@ class PGconn:
 
     @property
     def server_version(self) -> str:
-        res = self.exec_(b"select version()")
-        return res.get_value(0, 0).decode().split(" ")[3]
+        if not self._server_version:
+            res = self.exec_(b"select version()")
+            self._server_version = res.get_value(0, 0).decode().split(" ")[3]
+        return self._server_version
 
     @property
     def socket(self) -> int:
@@ -248,7 +254,10 @@ class PGconn:
 
     @property
     def backend_pid(self) -> int:
-        return self._call_int(impl.PQbackendPID)
+        if not self._backend_pid:
+            res = self.exec_(b"select pg_backend_pid()")
+            self._backend_pid = res.get_value(0, 0).decode()
+        return self._backend_pid
 
     @property
     def needs_password(self) -> bool:
