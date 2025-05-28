@@ -40,7 +40,7 @@ param_isolation = ParamDef(
     name="isolation_level",
     guc="isolation",
     values=list(psycopg.IsolationLevel),
-    non_default="serializable",
+    non_default="repeatable read",
 )
 param_read_only = ParamDef(
     name="read_only",

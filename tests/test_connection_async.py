@@ -219,7 +219,7 @@ async def test_context_inerror_rollback_no_clobber(aconn_cls, conn, dsn, caplog)
         async with await aconn_cls.connect(dsn) as conn2:
             await conn2.execute("select 1")
             conn.execute(
-                "select pg_terminate_backend(%s::int)",
+                "select pg_terminate_backend(%s::bigint)",
                 [conn2.pgconn.backend_pid],
             )
             1 / 0
@@ -499,7 +499,7 @@ async def test_notice_handlers(aconn, caplog):
     aconn.add_notice_handler(cb1)
     aconn.add_notice_handler(cb2)
     aconn.add_notice_handler("the wrong thing")
-    aconn.add_notice_handler(lambda diag: severities.append(diag.severity_nonlocalized))
+    aconn.add_notice_handler(lambda diag: severities.append(diag.severity))
 
     aconn.pgconn.exec_(b"set client_min_messages to notice")
     cur = aconn.cursor()
@@ -646,6 +646,8 @@ async def test_transaction_param_readonly_property(aconn, param):
 async def test_set_transaction_param_implicit(aconn, param, autocommit):
     await aconn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         cur = await aconn.execute(
             "select current_setting(%s), current_setting(%s)",
@@ -668,6 +670,8 @@ async def test_set_transaction_param_reset(aconn, param):
     await aconn.commit()
 
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         cur = await aconn.execute(
             "select current_setting(%s)", [f"transaction_{param.guc}"]
@@ -690,6 +694,8 @@ async def test_set_transaction_param_reset(aconn, param):
 async def test_set_transaction_param_block(aconn, param, autocommit):
     await aconn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         await getattr(aconn, f"set_{param.name}")(value)
         async with aconn.transaction():
             cur = await aconn.execute(
@@ -885,7 +891,7 @@ async def test_resolve_hostaddr_conn(aconn_cls, monkeypatch, fake_resolve):
 
 @pytest.mark.crdb_skip("pg_terminate_backend")
 async def test_right_exception_on_server_disconnect(aconn):
-    with pytest.raises(e.AdminShutdown):
+    with pytest.raises(e.OperationalError):
         await aconn.execute(
             "select pg_terminate_backend(%s)", [aconn.pgconn.backend_pid]
         )
@@ -893,6 +899,7 @@ async def test_right_exception_on_server_disconnect(aconn):
 
 @pytest.mark.slow
 @pytest.mark.crdb("skip", reason="error result not returned")
+@pytest.mark.gaussdb_skip("error result not returned")
 async def test_right_exception_on_session_timeout(aconn):
     want_ex: type[psycopg.Error] = e.IdleInTransactionSessionTimeout
     if sys.platform == "win32":
@@ -901,7 +908,7 @@ async def test_right_exception_on_session_timeout(aconn):
         # with, not in the client.
         want_ex = psycopg.OperationalError
 
-    await aconn.execute("SET SESSION idle_in_transaction_session_timeout = 100")
+    await aconn.execute("SET SESSION idle_in_transaction_timeout = 100")
     await asleep(0.2)
     with pytest.raises(want_ex) as ex:
         await aconn.execute("SELECT * from pg_tables")

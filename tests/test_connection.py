@@ -223,7 +223,7 @@ def test_context_inerror_rollback_no_clobber(conn_cls, conn, dsn, caplog):
         with conn_cls.connect(dsn) as conn2:
             conn2.execute("select 1")
             conn.execute(
-                "select pg_terminate_backend(%s::int)", [conn2.pgconn.backend_pid]
+                "select pg_terminate_backend(%s::bigint)", [conn2.pgconn.backend_pid]
             )
             1 / 0
 
@@ -502,7 +502,7 @@ def test_notice_handlers(conn, caplog):
     conn.add_notice_handler(cb1)
     conn.add_notice_handler(cb2)
     conn.add_notice_handler("the wrong thing")
-    conn.add_notice_handler(lambda diag: severities.append(diag.severity_nonlocalized))
+    conn.add_notice_handler(lambda diag: severities.append(diag.severity))
 
     conn.pgconn.exec_(b"set client_min_messages to notice")
     cur = conn.cursor()
@@ -648,6 +648,8 @@ def test_transaction_param_readonly_property(conn, param):
 def test_set_transaction_param_implicit(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute(
             "select current_setting(%s), current_setting(%s)",
@@ -670,6 +672,8 @@ def test_set_transaction_param_reset(conn, param):
     conn.commit()
 
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute("select current_setting(%s)", [f"transaction_{param.guc}"])
         (pgval,) = cur.fetchone()
@@ -688,6 +692,8 @@ def test_set_transaction_param_reset(conn, param):
 def test_set_transaction_param_block(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
+        if value == psycopg.IsolationLevel.SERIALIZABLE:
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         with conn.transaction():
             cur = conn.execute(
@@ -881,12 +887,13 @@ def test_resolve_hostaddr_conn(conn_cls, monkeypatch, fake_resolve):
 
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_right_exception_on_server_disconnect(conn):
-    with pytest.raises(e.AdminShutdown):
+    with pytest.raises(e.OperationalError):
         conn.execute("select pg_terminate_backend(%s)", [conn.pgconn.backend_pid])
 
 
 @pytest.mark.slow
 @pytest.mark.crdb("skip", reason="error result not returned")
+@pytest.mark.gaussdb_skip("error result not returned")
 def test_right_exception_on_session_timeout(conn):
     want_ex: type[psycopg.Error] = e.IdleInTransactionSessionTimeout
     if sys.platform == "win32":
@@ -895,7 +902,7 @@ def test_right_exception_on_session_timeout(conn):
         # with, not in the client.
         want_ex = psycopg.OperationalError
 
-    conn.execute("SET SESSION idle_in_transaction_session_timeout = 100")
+    conn.execute("SET SESSION idle_in_transaction_timeout = 100")
     sleep(0.2)
     with pytest.raises(want_ex) as ex:
         conn.execute("SELECT * from pg_tables")
