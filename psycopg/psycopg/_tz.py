@@ -22,8 +22,8 @@ _timezones: dict[bytes | None, tzinfo] = {
 
 def get_tzinfo(pgconn: PGconn | None) -> tzinfo:
     """Return the Python timezone info of the connection's timezone."""
-    tzname = pgconn.parameter_status(b"TimeZone") if pgconn else None
     try:
+        tzname = pgconn.exec_(b"SHOW TimeZone").get_value(0, 0) if pgconn else None
         return _timezones[tzname]
     except KeyError:
         sname = tzname.decode() if tzname else "UTC"
