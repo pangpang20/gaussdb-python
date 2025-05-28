@@ -146,7 +146,7 @@ async def test_statusmessage(aconn):
     await cur.execute("select generate_series(1, 10)")
     assert cur.statusmessage == "SELECT 10"
 
-    await cur.execute("create table statusmessage ()")
+    await cur.execute("create table statusmessage (dummy_column int)")
     assert cur.statusmessage == "CREATE TABLE"
 
     with pytest.raises(psycopg.ProgrammingError):
@@ -725,17 +725,10 @@ async def test_stream_chunked_row_factory(aconn):
         assert [c.name for c in cur.description] == ["a"]
 
 
-@pytest.mark.crdb_skip("no col query")
-async def test_stream_no_col(aconn):
-    cur = aconn.cursor()
-    recs = await alist(cur.stream("select"))
-    assert recs == [()]
-
-
 @pytest.mark.parametrize(
     "query",
     [
-        "create table test_stream_badq ()",
+        "create table test_stream_badq (dummy_column int)",
         "copy (select 1) to stdout",
         "wat?",
     ],

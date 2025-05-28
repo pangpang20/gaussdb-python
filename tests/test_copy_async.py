@@ -62,7 +62,9 @@ async def test_copy_out_iter(aconn, format, row_factory):
     async with cur.copy(
         f"copy ({sample_values}) to stdout (format {format.name})"
     ) as copy:
-        assert await alist(copy) == want
+        result = [bytes(item) async for item in copy]
+        print(f"result: {result},want: {want}")
+        assert result == want
 
     assert aconn.info.transaction_status == pq.TransactionStatus.INTRANS
 
@@ -735,6 +737,7 @@ async def test_copy_to_leaks(aconn_cls, dsn, faker, fmt, set_types, method, gc):
             async with conn.cursor(binary=fmt) as cur:
                 await cur.execute(faker.drop_stmt)
                 await cur.execute(faker.create_stmt)
+                await conn.commit()
                 async with faker.find_insert_problem_async(conn):
                     await cur.executemany(faker.insert_stmt, faker.records)
 

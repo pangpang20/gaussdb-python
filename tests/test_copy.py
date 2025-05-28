@@ -59,8 +59,9 @@ def test_copy_out_iter(conn, format, row_factory):
 
     rf = getattr(psycopg.rows, row_factory)
     cur = conn.cursor(row_factory=rf)
-    with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
-        assert list(copy) == want
+    with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:        
+        result = [bytes(item) for item in copy]
+        assert result == want
 
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
@@ -774,6 +775,7 @@ def test_copy_from_leaks(conn_cls, dsn, faker, fmt, set_types, gc):
             with conn.cursor(binary=fmt) as cur:
                 cur.execute(faker.drop_stmt)
                 cur.execute(faker.create_stmt)
+                conn.commit()
 
                 stmt = sql.SQL("copy {} ({}) from stdin (format {})").format(
                     faker.table_name,

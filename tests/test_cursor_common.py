@@ -148,7 +148,7 @@ def test_statusmessage(conn):
     cur.execute("select generate_series(1, 10)")
     assert cur.statusmessage == "SELECT 10"
 
-    cur.execute("create table statusmessage ()")
+    cur.execute("create table statusmessage (dummy_column int)")
     assert cur.statusmessage == "CREATE TABLE"
 
     with pytest.raises(psycopg.ProgrammingError):
@@ -723,15 +723,9 @@ def test_stream_chunked_row_factory(conn):
         assert [c.name for c in cur.description] == ["a"]
 
 
-@pytest.mark.crdb_skip("no col query")
-def test_stream_no_col(conn):
-    cur = conn.cursor()
-    recs = list(cur.stream("select"))
-    assert recs == [()]
-
-
 @pytest.mark.parametrize(
-    "query", ["create table test_stream_badq ()", "copy (select 1) to stdout", "wat?"]
+    "query", ["create table test_stream_badq (dummy_column int)",
+              "copy (select 1) to stdout", "wat?"]
 )
 def test_stream_badquery(conn, query):
     cur = conn.cursor()

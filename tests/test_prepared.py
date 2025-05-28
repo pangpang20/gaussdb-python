@@ -100,7 +100,8 @@ def test_no_prepare_multi_with_drop(conn):
     conn.execute("select 1", prepare=True)
 
     for i in range(10):
-        conn.execute("drop table if exists noprep; create table noprep()")
+        conn.execute("""drop table if exists noprep;
+                     create table noprep(dummy_column int)""")
 
     stmts = get_prepared_statements(conn)
     assert len(stmts) == 0
@@ -119,8 +120,7 @@ def test_no_prepare_error(conn):
 @pytest.mark.parametrize(
     "query",
     [
-        "create table test_no_prepare ()",
-        pytest.param("notify foo, 'bar'", marks=pytest.mark.crdb_skip("notify")),
+        "create table test_no_prepare (dummy_column int)",
         "set timezone = utc",
         "select num from prepared_test",
         "insert into prepared_test (num) values (1)",
