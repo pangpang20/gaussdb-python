@@ -44,6 +44,7 @@ def test_port(conn):
         conn.info.port
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_get_params(conn, dsn):
     info = conn.info.get_parameters()
     for k, v in conninfo_to_dict(dsn).items():
@@ -53,6 +54,7 @@ def test_get_params(conn, dsn):
             assert k not in info
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_dsn(conn, dsn):
     dsn = conn.info.dsn
     assert "password" not in dsn
@@ -61,6 +63,7 @@ def test_dsn(conn, dsn):
             assert f"{k}=" in dsn
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_get_params_env(conn_cls, dsn, monkeypatch):
     dsn = conninfo_to_dict(dsn)
     dsn.pop("application_name", None)
@@ -74,6 +77,7 @@ def test_get_params_env(conn_cls, dsn, monkeypatch):
         assert conn.info.get_parameters()["application_name"] == "hello test"
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_dsn_env(conn_cls, dsn, monkeypatch):
     dsn = conninfo_to_dict(dsn)
     dsn.pop("application_name", None)
@@ -114,6 +118,7 @@ def test_pipeline_status_no_pipeline(conn):
     assert conn.info.pipeline_status.name == "OFF"
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_no_password(dsn):
     dsn2 = make_conninfo(dsn, password="the-pass-word")
     pgconn = psycopg.pq.PGconn.connect_start(dsn2.encode())
@@ -123,6 +128,7 @@ def test_no_password(dsn):
     assert info.get_parameters()["dbname"] == info.dbname
 
 
+@pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
 def test_dsn_no_password(dsn):
     dsn2 = make_conninfo(dsn, password="the-pass-word")
     pgconn = psycopg.pq.PGconn.connect_start(dsn2.encode())
