@@ -223,7 +223,7 @@ def test_context_inerror_rollback_no_clobber(conn_cls, conn, dsn, caplog):
         with conn_cls.connect(dsn) as conn2:
             conn2.execute("select 1")
             conn.execute(
-                "select pg_terminate_backend(%s::int)", [conn2.pgconn.backend_pid]
+                "select pg_terminate_backend(%s::bigint)", [conn2.pgconn.backend_pid]
             )
             1 / 0
 
