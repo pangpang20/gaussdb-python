@@ -887,6 +887,7 @@ def test_right_exception_on_server_disconnect(conn):
 
 @pytest.mark.slow
 @pytest.mark.crdb("skip", reason="error result not returned")
+@pytest.mark.gaussdb_skip("error result not returned")
 def test_right_exception_on_session_timeout(conn):
     want_ex: type[psycopg.Error] = e.IdleInTransactionSessionTimeout
     if sys.platform == "win32":
@@ -895,7 +896,7 @@ def test_right_exception_on_session_timeout(conn):
         # with, not in the client.
         want_ex = psycopg.OperationalError
 
-    conn.execute("SET SESSION idle_in_transaction_session_timeout = 100")
+    conn.execute("SET SESSION idle_in_transaction_timeout = 100")
     sleep(0.2)
     with pytest.raises(want_ex) as ex:
         conn.execute("SELECT * from pg_tables")
