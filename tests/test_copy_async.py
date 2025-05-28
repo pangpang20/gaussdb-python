@@ -793,7 +793,7 @@ async def test_copy_from_leaks(aconn_cls, dsn, faker, fmt, set_types, gc):
             async with conn.cursor(binary=fmt) as cur:
                 await cur.execute(faker.drop_stmt)
                 await cur.execute(faker.create_stmt)
-
+                await conn.commit()
                 stmt = sql.SQL("copy {} ({}) from stdin (format {})").format(
                     faker.table_name,
                     sql.SQL(", ").join(faker.fields_names),

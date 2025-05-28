@@ -59,7 +59,7 @@ def test_copy_out_iter(conn, format, row_factory):
 
     rf = getattr(psycopg.rows, row_factory)
     cur = conn.cursor(row_factory=rf)
-    with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:        
+    with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
         result = [bytes(item) for item in copy]
         assert result == want
 
