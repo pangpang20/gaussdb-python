@@ -135,6 +135,12 @@ class PGconn:
 
     def finish(self) -> None:
         self._pgconn_ptr, p = None, self._pgconn_ptr
+        self._backend_pid, pid = None, self._backend_pid
+        self._server_version, v = None, self._server_version
+        if pid:
+            del pid
+        if v:
+            del v
         if p:
             PQfinish(p)
 
