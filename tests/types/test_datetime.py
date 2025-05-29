@@ -425,6 +425,7 @@ class TestDateTimeTz:
         assert rec[1] == val
 
     @pytest.mark.crdb_skip("copy")
+    @pytest.mark.gaussdb_skip("copy")
     def test_load_copy(self, conn):
         cur = conn.cursor(binary=False)
         with cur.copy(
