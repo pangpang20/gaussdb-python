@@ -717,9 +717,10 @@ def test_copy_to_leaks(conn_cls, dsn, faker, fmt, set_types, method, gc):
 
     def work():
         with conn_cls.connect(dsn) as conn:
-            with conn.cursor(binary=fmt) as cur:
+            with conn.cursor(binary=(fmt == pq.Format.BINARY)) as cur:
                 cur.execute(faker.drop_stmt)
                 cur.execute(faker.create_stmt)
+                conn.commit()
                 with faker.find_insert_problem(conn):
                     cur.executemany(faker.insert_stmt, faker.records)
 

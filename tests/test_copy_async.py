@@ -790,7 +790,7 @@ async def test_copy_from_leaks(aconn_cls, dsn, faker, fmt, set_types, gc):
 
     async def work():
         async with await aconn_cls.connect(dsn) as conn:
-            async with conn.cursor(binary=fmt) as cur:
+            async with conn.cursor(binary=(fmt == pq.Format.BINARY)) as cur:
                 await cur.execute(faker.drop_stmt)
                 await cur.execute(faker.create_stmt)
                 await conn.commit()
