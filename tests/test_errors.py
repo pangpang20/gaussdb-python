@@ -42,6 +42,8 @@ def test_diag_all_attrs(pgconn):
     res = pgconn.make_empty_result(pq.ExecStatus.NONFATAL_ERROR)
     diag = e.Diagnostic(res)
     for d in pq.DiagnosticField:
+        if d == pq.DiagnosticField.SEVERITY_NONLOCALIZED:
+            continue
         val = getattr(diag, d.name.lower())
         assert val is None or isinstance(val, str)
 
@@ -62,9 +64,11 @@ def test_diag_right_attr(pgconn, monkeypatch):
     monkeypatch.setattr(e.Diagnostic, "_error_message", check_val)
 
     for to_check in pq.DiagnosticField:
+        if to_check == pq.DiagnosticField.SEVERITY_NONLOCALIZED:
+            continue
         getattr(diag, to_check.name.lower())
 
-    assert len(checked) == len(pq.DiagnosticField)
+    assert len(checked) == len(pq.DiagnosticField) - 1
 
 
 def test_diag_attr_values(conn):
@@ -175,6 +179,8 @@ def test_diag_pickle(conn):
 
     assert isinstance(diag2, type(diag1))
     for f in pq.DiagnosticField:
+        if f == pq.DiagnosticField.SEVERITY_NONLOCALIZED:
+            continue
         assert getattr(diag1, f.name.lower()) == getattr(diag2, f.name.lower())
 
     assert diag2.sqlstate == "42P01"

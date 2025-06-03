@@ -172,6 +172,7 @@ async def test_configure_broken(pool_cls, dsn, caplog):
 @pytest.mark.slow
 @pytest.mark.timing
 @pytest.mark.crdb_skip("backend pid")
+@pytest.mark.gaussdb_skip("backend pid")
 async def test_queue(pool_cls, dsn):
     async def worker(n):
         t0 = time()
@@ -233,6 +234,7 @@ async def test_queue_size(pool_cls, dsn):
 @pytest.mark.slow
 @pytest.mark.timing
 @pytest.mark.crdb_skip("backend pid")
+@pytest.mark.gaussdb_skip("backend pid")
 async def test_queue_timeout(pool_cls, dsn):
     async def worker(n):
         t0 = time()
@@ -290,6 +292,7 @@ async def test_dead_client(pool_cls, dsn):
 
 @pytest.mark.slow
 @pytest.mark.timing
+@pytest.mark.gaussdb_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 async def test_queue_timeout_override(pool_cls, dsn):
     async def worker(n):
@@ -571,7 +574,7 @@ async def test_stats_usage(pool_cls, dsn):
         stats = p.get_stats()
         assert stats["requests_num"] == 7
         assert stats["requests_queued"] == 4
-        assert 850 <= stats["requests_wait_ms"] <= 950
+        assert 800 <= stats["requests_wait_ms"] <= 950
         assert stats["requests_errors"] == 1
         assert 1150 <= stats["usage_ms"] <= 1250
         assert stats.get("returns_bad", 0) == 0

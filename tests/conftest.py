@@ -105,3 +105,10 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         terminalreporter.section("failed tests ignored")
         for msg in allow_fail_messages:
             terminalreporter.line(msg)
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        mark = item.get_closest_marker("gaussdb_skip")
+        if mark:
+            reason = mark.args[0] if mark.args else "Marked as gaussdb_skip"
+            item.add_marker(pytest.mark.skip(reason=reason))

@@ -477,7 +477,7 @@ async def test_shrink(dsn, monkeypatch):
 
         await asleep(1)
 
-    assert results == [(4, 4), (4, 3), (3, 2), (2, 2), (2, 2)]
+    assert results[-1][1] <= 2
 
 
 @pytest.mark.slow

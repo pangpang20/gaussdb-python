@@ -262,7 +262,7 @@ class PGconn:
     def backend_pid(self) -> int:
         if not self._backend_pid:
             res = self.exec_(b"select pg_backend_pid()")
-            self._backend_pid = res.get_value(0, 0).decode()
+            self._backend_pid = int(res.get_value(0, 0).decode())
         return self._backend_pid
 
     @property
