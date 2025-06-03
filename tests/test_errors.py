@@ -68,7 +68,7 @@ def test_diag_right_attr(pgconn, monkeypatch):
             continue
         getattr(diag, to_check.name.lower())
 
-    assert len(checked) == len(pq.DiagnosticField)-1
+    assert len(checked) == len(pq.DiagnosticField) - 1
 
 
 def test_diag_attr_values(conn):
