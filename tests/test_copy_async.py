@@ -734,45 +734,52 @@ async def test_copy_to_leaks(aconn_cls, dsn, faker, fmt, set_types, method, gc):
 
     async def work():
         async with await aconn_cls.connect(dsn) as conn:
-            async with conn.cursor(binary=fmt) as cur:
-                await cur.execute(faker.drop_stmt)
-                await cur.execute(faker.create_stmt)
-                await conn.commit()
-                async with faker.find_insert_problem_async(conn):
-                    await cur.executemany(faker.insert_stmt, faker.records)
-
-                stmt = sql.SQL(
-                    "copy (select {} from {} order by id) to stdout (format {})"
-                ).format(
-                    sql.SQL(", ").join(faker.fields_names),
-                    faker.table_name,
-                    sql.SQL(fmt.name),
-                )
-
-                async with cur.copy(stmt) as copy:
+            try:
+                async with conn.cursor(binary=fmt) as cur:
                     try:
-                        if set_types:
-                            copy.set_types(faker.types_names)
+                        await cur.execute(faker.drop_stmt)
+                        await cur.execute(faker.create_stmt)
+                        await conn.commit()
+                        async with faker.find_insert_problem_async(conn):
+                            await cur.executemany(faker.insert_stmt, faker.records)
 
-                        if method == "read":
-                            while True:
-                                tmp = await copy.read()
-                                if not tmp:
-                                    break
-                        elif method == "iter":
-                            await alist(copy)
-                        elif method == "row":
-                            while True:
-                                tmp = await copy.read_row()
-                                if tmp is None:
-                                    break
-                        elif method == "rows":
-                            await alist(copy.rows())
-                    except psycopg.OperationalError as e:
-                        if "no COPY in progress" in str(e):
-                            pytest.skip("COPY not started; skipping test iteration")
-                        else:
-                            raise
+                        stmt = sql.SQL(
+                            "copy (select {} from {} order by id) to stdout (format {})"
+                        ).format(
+                            sql.SQL(", ").join(faker.fields_names),
+                            faker.table_name,
+                            sql.SQL(fmt.name),
+                        )
+
+                        async with cur.copy(stmt) as copy:
+                            try:
+                                if set_types and fmt == pq.Format.BINARY:
+                                    copy.set_types(faker.types_names)
+
+                                if method == "read":
+                                    while True:
+                                        tmp = await copy.read()
+                                        if not tmp:
+                                            break
+                                elif method == "iter":
+                                    await alist(copy)
+                                elif method == "row":
+                                    while True:
+                                        tmp = await copy.read_row()
+                                        if tmp is None:
+                                            break
+                                elif method == "rows":
+                                    await alist(copy.rows())
+                            except psycopg.OperationalError as e:
+                                if "no COPY in progress" in str(e):
+                                    pytest.skip("COPY not started; skipping test")
+                                else:
+                                    raise
+                    finally:
+                        await cur.close()
+
+            finally:
+                await conn.close()
 
     gc.collect()
     n = []
