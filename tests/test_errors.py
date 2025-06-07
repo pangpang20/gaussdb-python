@@ -101,6 +101,7 @@ def test_diag_encoding(conn, enc):
 
 
 @pytest.mark.crdb_skip("do")
+@pytest.mark.opengauss_skip("do")
 @pytest.mark.parametrize("enc", ["utf8", "latin9"])
 def test_error_encoding(conn, enc):
     with conn.transaction():
