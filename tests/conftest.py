@@ -34,6 +34,7 @@ def pytest_configure(config):
         "postgis: the test requires the PostGIS extension to run",
         "numpy: the test requires numpy module to be installed",
         "gaussdb_skip(reason): Skip test for GaussDB-specific behavior",
+        "opengauss_skip(reason): Skip test for openGauss-specific behavior",
     ]
 
     for marker in markers:
@@ -108,7 +109,12 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
-        mark = item.get_closest_marker("gaussdb_skip")
-        if mark:
-            reason = mark.args[0] if mark.args else "Marked as gaussdb_skip"
-            item.add_marker(pytest.mark.skip(reason=reason))
+        gaussdb_mark = item.get_closest_marker("gaussdb_skip")
+        if gaussdb_mark:
+            reason = gaussdb_mark.args[0] if gaussdb_mark.args else "Marked as gaussdb_skip"
+            item.add_marker(pytest.gaussdb_mark.skip(reason=reason))
+
+        opengauss_mark = item.get_closest_marker("opengauss_skip")
+        if opengauss_mark:
+            reason = opengauss_mark.args[0] if opengauss_mark.args else "Marked as opengauss_skip"
+            item.add_marker(pytest.opengauss_mark.skip(reason=reason))
