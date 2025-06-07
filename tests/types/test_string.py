@@ -159,6 +159,7 @@ def test_dump_text_oid(conn, fmt_in):
 
 
 @pytest.mark.crdb_skip("copy")
+@pytest.mark.opengauss_skip("binary copy signature mismatch")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("encoding", ["utf8", crdb_encoding("latin9")])
 @pytest.mark.parametrize("typename", ["text", "varchar", "name", "bpchar"])
@@ -200,6 +201,7 @@ def test_load_badenc(conn, typename, fmt_out):
 
 
 @pytest.mark.crdb_skip("encoding")
+@pytest.mark.opengauss_skip("binary copy signature mismatch")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("typename", ["text", "varchar", "name", "bpchar"])
 def test_load_ascii(conn, typename, fmt_out):
