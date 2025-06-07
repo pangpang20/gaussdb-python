@@ -26,6 +26,7 @@ def test_uuid_dump(conn, fmt_in, val):
 
 
 @pytest.mark.crdb_skip("copy")
+@pytest.mark.opengauss_skip("copy")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize(
     "val",
