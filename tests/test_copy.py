@@ -28,6 +28,7 @@ from .test_adapt import StrNoneBinaryDumper, StrNoneDumper
 pytestmark = pytest.mark.crdb_skip("copy")
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_read(conn, format):
     if format == pq.Format.TEXT:
@@ -49,6 +50,7 @@ def test_copy_out_read(conn, format):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("row_factory", ["tuple_row", "dict_row", "namedtuple_row"])
 def test_copy_out_iter(conn, format, row_factory):
@@ -88,6 +90,7 @@ def test_copy_out_param(conn, ph, params):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("typetype", ["names", "oids"])
 def test_read_rows(conn, format, typetype):
@@ -106,6 +109,7 @@ def test_read_rows(conn, format, typetype):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows(conn, format):
     cur = conn.cursor()
@@ -134,6 +138,7 @@ def test_set_custom_type(conn, hstore):
     assert rows == [({"a": "1", "b": "2"},)]
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_allchars(conn, format):
     cur = conn.cursor()
@@ -155,6 +160,7 @@ def test_copy_out_allchars(conn, format):
     assert rows == chars
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_read_row_notypes(conn, format):
     cur = conn.cursor()
@@ -170,6 +176,7 @@ def test_read_row_notypes(conn, format):
     assert rows == ref
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows_notypes(conn, format):
     cur = conn.cursor()
@@ -179,6 +186,7 @@ def test_rows_notypes(conn, format):
     assert rows == ref
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("err", [-1, 1])
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_badntypes(conn, format, err):
@@ -753,8 +761,11 @@ def test_copy_to_leaks(conn_cls, dsn, faker, fmt, set_types, method, gc):
                                             break
                                 elif method == "rows":
                                     list(copy.rows())
-                            except psycopg.OperationalError as e:
-                                if "no COPY in progress" in str(e):
+                            except (psycopg.OperationalError, psycopg.DataError) as e:
+                                if (
+                                    "no COPY in progress" in str(e)
+                                    or "binary copy doesn't start" in str(e)
+                                ):
                                     pytest.skip("COPY not started; skipping test")
                                 else:
                                     raise
