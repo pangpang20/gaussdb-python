@@ -649,7 +649,8 @@ def test_set_transaction_param_implicit(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute(
             "select current_setting(%s), current_setting(%s)",
@@ -673,7 +674,8 @@ def test_set_transaction_param_reset(conn, param):
 
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute("select current_setting(%s)", [f"transaction_{param.guc}"])
         (pgval,) = cur.fetchone()
@@ -693,7 +695,8 @@ def test_set_transaction_param_block(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, which is equivalent to REPEATABLE READ")
+            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ")
         getattr(conn, f"set_{param.name}")(value)
         with conn.transaction():
             cur = conn.execute(
@@ -894,6 +897,7 @@ def test_right_exception_on_server_disconnect(conn):
 @pytest.mark.slow
 @pytest.mark.crdb("skip", reason="error result not returned")
 @pytest.mark.gaussdb_skip("error result not returned")
+@pytest.mark.opengauss_skip("error result not returned")
 def test_right_exception_on_session_timeout(conn):
     want_ex: type[psycopg.Error] = e.IdleInTransactionSessionTimeout
     if sys.platform == "win32":
