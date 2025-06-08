@@ -45,6 +45,7 @@ def test_port(conn):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_get_params(conn, dsn):
     info = conn.info.get_parameters()
     for k, v in conninfo_to_dict(dsn).items():
@@ -55,6 +56,7 @@ def test_get_params(conn, dsn):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_dsn(conn, dsn):
     dsn = conn.info.dsn
     assert "password" not in dsn
@@ -64,6 +66,7 @@ def test_dsn(conn, dsn):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_get_params_env(conn_cls, dsn, monkeypatch):
     dsn = conninfo_to_dict(dsn)
     dsn.pop("application_name", None)
@@ -78,6 +81,7 @@ def test_get_params_env(conn_cls, dsn, monkeypatch):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_dsn_env(conn_cls, dsn, monkeypatch):
     dsn = conninfo_to_dict(dsn)
     dsn.pop("application_name", None)
@@ -119,6 +123,7 @@ def test_pipeline_status_no_pipeline(conn):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_no_password(dsn):
     dsn2 = make_conninfo(dsn, password="the-pass-word")
     pgconn = psycopg.pq.PGconn.connect_start(dsn2.encode())
@@ -129,6 +134,7 @@ def test_no_password(dsn):
 
 
 @pytest.mark.gaussdb_skip("This method PGconn.info is not implemented in GaussDB")
+@pytest.mark.opengauss_skip("This method PGconn.info is not implemented in openGauss")
 def test_dsn_no_password(dsn):
     dsn2 = make_conninfo(dsn, password="the-pass-word")
     pgconn = psycopg.pq.PGconn.connect_start(dsn2.encode())
