@@ -111,7 +111,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
 
 def get_database_type():
-    dsn = os.getenv("DSN")
+    dsn = os.getenv("DSN") or os.getenv("PSYCOPG_TEST_DSN")
     if not dsn:
         print("DSN environment variable not set")
         return ""

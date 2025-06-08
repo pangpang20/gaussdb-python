@@ -1,15 +1,15 @@
 name: 3rd party tests
 
 on:
-  push:
-    branches:
-      - "master"
-      - "maint-3.1"
-      - "sqlalchemy_pipeline"
-      - "django_pipeline"
-    paths-ignore:
-      - "docs/*"
-      - "tools/*"
+  # push:
+  #   branches:
+  #     - "master"
+  #     - "maint-3.1"
+  #     - "sqlalchemy_pipeline"
+  #     - "django_pipeline"
+  #   paths-ignore:
+  #     - "docs/*"
+  #     - "tools/*"
   workflow_dispatch:
 
 concurrency:
