@@ -724,8 +724,12 @@ def test_stream_chunked_row_factory(conn):
 
 
 @pytest.mark.parametrize(
-    "query", ["create table test_stream_badq (dummy_column int)",
-              "copy (select 1) to stdout", "wat?"]
+    "query",
+    [
+        "create table test_stream_badq (dummy_column int)",
+        "copy (select 1) to stdout",
+        "wat?",
+    ],
 )
 def test_stream_badquery(conn, query):
     cur = conn.cursor()

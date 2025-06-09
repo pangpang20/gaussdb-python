@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import os
+import re
 import sys
 import asyncio
 import selectors
 from typing import Any
-from psycopg import pq
-import os
-import re
+
 import pytest
+
+from psycopg import pq
 
 pytest_plugins = (
     "tests.fix_db",
@@ -130,7 +132,9 @@ def get_database_type():
             conn.finish()
             return ""
 
-        version = res.get_value(0, 0).decode("utf-8").lower()
+        raw_version = res.get_value(0, 0)
+        version = raw_version.decode("utf-8").lower() if raw_version is not None else ""
+
         res.clear()
         conn.finish()
         if re.search(r"\bgaussdb\b", version):
@@ -144,15 +148,20 @@ def get_database_type():
 
 def pytest_collection_modifyitems(config, items):
     res = get_database_type()
+    print(f"Database type: {res}")
     for item in items:
         gaussdb_mark = item.get_closest_marker("gaussdb_skip")
         if gaussdb_mark and res == "gaussdb":
-            reason = gaussdb_mark.args[0] if gaussdb_mark.args \
-                else "Marked as gaussdb_skip"
+            reason = (
+                gaussdb_mark.args[0] if gaussdb_mark.args else "Marked as gaussdb_skip"
+            )
             item.add_marker(pytest.mark.skip(reason=reason))
 
         opengauss_mark = item.get_closest_marker("opengauss_skip")
         if opengauss_mark and res == "opengauss":
-            reason = opengauss_mark.args[0] if opengauss_mark.args \
+            reason = (
+                opengauss_mark.args[0]
+                if opengauss_mark.args
                 else "Marked as opengauss_skip"
+            )
             item.add_marker(pytest.mark.skip(reason=reason))

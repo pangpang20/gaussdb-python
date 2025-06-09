@@ -10,7 +10,7 @@ import re
 import sys
 import struct
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any, Generic, Optional, Tuple
 from collections.abc import Sequence
 
 from . import adapt
@@ -171,7 +171,7 @@ class BaseCopy(Generic[ConnectionType]):
 
         row = self.formatter.parse_row(data)
 
-        if row == IS_BINARY_SIGNATURE:
+        if isinstance(row, str) and row == IS_BINARY_SIGNATURE:
             row = yield from self._read_row_gen()
 
         if row is None:
@@ -267,21 +267,19 @@ class BinaryFormatter(Formatter):
         super().__init__(transformer)
         self._signature_sent = False
 
-    def parse_row(self, data: Buffer) -> tuple[Any, ...] | str | None:
-        rv: tuple[Any, ...] | None = None
-
+    def parse_row(self, data: Buffer) -> Optional[Tuple[Any, ...]]:
         if not self._signature_sent:
             if data[: len(_binary_signature)] != _binary_signature:
                 raise e.DataError(
                     "binary copy doesn't start with the expected signature"
                 )
             self._signature_sent = True
-            return IS_BINARY_SIGNATURE
+            return None
 
         if data != _binary_trailer:
-            rv = parse_row_binary(data, self.transformer)
+            return parse_row_binary(data, self.transformer)
 
-        return rv
+        return None
 
     def write(self, buffer: Buffer | str) -> Buffer:
         data = self._ensure_bytes(buffer)

@@ -401,7 +401,9 @@ class TestDateTimeTz:
     def test_load_datetimetz_tz(self, conn, fmt_out, tzname, expr, tzoff):
         conn.execute("select set_config('TimeZone', %s, true)", [tzname])
         cur = conn.cursor(binary=fmt_out)
-        ts = cur.execute("select extract(timezone from %s::timestamptz)", [expr]).fetchone()[0]
+        ts = cur.execute(
+            "select extract(timezone from %s::timestamptz)", [expr]
+        ).fetchone()[0]
         assert ts == tzoff
 
     @pytest.mark.parametrize(

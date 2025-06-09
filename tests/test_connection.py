@@ -649,8 +649,10 @@ def test_set_transaction_param_implicit(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
-                which is equivalent to REPEATABLE READ")
+            pytest.skip(
+                "GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ"
+            )
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute(
             "select current_setting(%s), current_setting(%s)",
@@ -674,8 +676,10 @@ def test_set_transaction_param_reset(conn, param):
 
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
-                which is equivalent to REPEATABLE READ")
+            pytest.skip(
+                "GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ"
+            )
         getattr(conn, f"set_{param.name}")(value)
         cur = conn.execute("select current_setting(%s)", [f"transaction_{param.guc}"])
         (pgval,) = cur.fetchone()
@@ -695,8 +699,10 @@ def test_set_transaction_param_block(conn, param, autocommit):
     conn.set_autocommit(autocommit)
     for value in param.values:
         if value == psycopg.IsolationLevel.SERIALIZABLE:
-            pytest.skip("GaussDB currently does not support SERIALIZABLE, \
-                which is equivalent to REPEATABLE READ")
+            pytest.skip(
+                "GaussDB currently does not support SERIALIZABLE, \
+                which is equivalent to REPEATABLE READ"
+            )
         getattr(conn, f"set_{param.name}")(value)
         with conn.transaction():
             cur = conn.execute(

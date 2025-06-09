@@ -17,3 +17,6 @@ per-file-ignores =
     # Pytest's importorskip() getting in the way
     tests/types/test_numpy.py: E402
     tests/types/test_shapely.py: E402
+
+    tools/async_to_sync.py: E999
+    tools/bump_version.py: E999

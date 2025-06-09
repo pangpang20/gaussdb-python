@@ -100,32 +100,31 @@ class Bumper:
         if not self.bump_level:
             return self.current_version
 
-        match self.bump_level:
-            case BumpLevel.MAJOR:
-                # 1.2.3 -> 2.0.0
-                parts[0] += 1
-                parts[1] = parts[2] = parts[3] = 0
-            case BumpLevel.MINOR:
-                # 1.2.3 -> 1.3.0
-                # 1.2.0.dev1 -> 1.2.0
-                if parts[3] == 0:
-                    parts[1] += 1
-                    parts[2] = 0
-                else:
-                    parts[3] = 0
-            case BumpLevel.PATCH:
-                # 1.2.3 -> 1.2.4
-                # 1.2.3.dev4 -> 1.2.3
-                if parts[3] == 0:
-                    parts[2] += 1
-                else:
-                    parts[3] = 0
-            case BumpLevel.DEV:
-                # 1.2.3 -> 1.2.4.dev1
-                # 1.2.3.dev1 -> 1.2.3.dev2
-                if parts[3] == 0:
-                    parts[2] += 1
-                parts[3] += 1
+        if self.bump_level == BumpLevel.MAJOR:
+            # 1.2.3 -> 2.0.0
+            parts[0] += 1
+            parts[1] = parts[2] = parts[3] = 0
+        elif self.bump_level == BumpLevel.MINOR:
+            # 1.2.3 -> 1.3.0
+            # 1.2.0.dev1 -> 1.2.0
+            if parts[3] == 0:
+                parts[1] += 1
+                parts[2] = 0
+            else:
+                parts[3] = 0
+        elif self.bump_level == BumpLevel.PATCH:
+            # 1.2.3 -> 1.2.4
+            # 1.2.3.dev4 -> 1.2.3
+            if parts[3] == 0:
+                parts[2] += 1
+            else:
+                parts[3] = 0
+        elif self.bump_level == BumpLevel.DEV:
+            # 1.2.3 -> 1.2.4.dev1
+            # 1.2.3.dev1 -> 1.2.3.dev2
+            if parts[3] == 0:
+                parts[2] += 1
+            parts[3] += 1
 
         sparts = [str(part) for part in parts[:3]]
         if parts[3]:

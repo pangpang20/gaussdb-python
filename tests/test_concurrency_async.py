@@ -25,7 +25,6 @@ async def test_commit_concurrency(aconn):
     stop = False
 
     async def committer():
-        nonlocal stop
         while not stop:
             await aconn.commit()
             await asyncio.sleep(0)  # Allow the other worker to work
@@ -124,9 +123,7 @@ async def test_cancel_stream(aconn):
 async def test_identify_closure(aconn_cls, dsn):
     async def closer():
         await asyncio.sleep(0.2)
-        await conn2.execute(
-            "select pg_terminate_backend(%s)", [aconn_pid]
-        )
+        await conn2.execute("select pg_terminate_backend(%s)", [aconn_pid])
 
     aconn = await aconn_cls.connect(dsn)
     conn2 = await aconn_cls.connect(dsn)

@@ -52,6 +52,10 @@ def check_version(got, want, whose_version, postgres_rule=True):
     return pred.get_skip_message(got)
 
 
+def _filter_int_tuple(t: tuple[object, ...]) -> tuple[int, ...]:
+    return tuple(x for x in t if isinstance(x, int))
+
+
 class VersionCheck:
     """
     Helper to compare a version number with a test spec.
@@ -97,10 +101,21 @@ class VersionCheck:
         )
 
     def get_skip_message(self, version: int | str | None) -> str | None:
-        if self.whose == 'PostgreSQL':
-            got_tuple = tuple(int(n) if n.isdigit() else n for n in version.split('.'))
+        if self.whose == "PostgreSQL":
+            if isinstance(version, str):
+                got_tuple = tuple(
+                    int(n) if n.isdigit() else n for n in version.split(".")
+                )
+                if not all(isinstance(x, int) for x in got_tuple):
+                    return "Invalid version format"
+            elif isinstance(version, int):
+                got_tuple = self._parse_int_version(version)
+            else:
+                return "Version is None"
         else:
-            got_tuple = self._parse_int_version(version)
+            got_tuple = self._parse_int_version(
+                version if isinstance(version, int) else None
+            )
         msg: str | None = None
         if self.skip:
             if got_tuple:
@@ -135,7 +150,7 @@ class VersionCheck:
 
         op: Callable[[tuple[int, ...], tuple[int, ...]], bool]
         op = getattr(operator, self._OP_NAMES[self.op])
-        return op(got_tuple, version_tuple)
+        return op(_filter_int_tuple(got_tuple), _filter_int_tuple(version_tuple))
 
     def _parse_int_version(self, version: int | None) -> tuple[int, ...]:
         if version is None:

@@ -97,8 +97,10 @@ async def test_no_prepare_multi_with_drop(aconn):
     await aconn.execute("select 1", prepare=True)
 
     for i in range(10):
-        await aconn.execute("""drop table if exists noprep;
-                            create table noprep(dummy_column int)""")
+        await aconn.execute(
+            """drop table if exists noprep;
+            create table noprep(dummy_column int)"""
+        )
 
     stmts = await get_prepared_statements(aconn)
     assert len(stmts) == 0

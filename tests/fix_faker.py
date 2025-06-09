@@ -314,7 +314,7 @@ class Faker:
 
     def match_any(self, spec, got, want):
         if spec == dt.timedelta:
-            assert abs((got - want).total_seconds()) < 86400*2
+            assert abs((got - want).total_seconds()) < 86400 * 2
         else:
             assert got == want
 
@@ -422,7 +422,7 @@ class Faker:
                 assert got == want
 
     def _server_rounds(self):
-        '''Return True if the connected server perform float rounding.'''
+        """Return True if the connected server perform float rounding."""
         return True
 
     def make_Float4(self, spec):

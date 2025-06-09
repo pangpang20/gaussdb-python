@@ -11,7 +11,6 @@ import pytest
 
 import psycopg
 
-
 from ..utils import set_autocommit
 from ..acompat import Event, gather, is_alive, skip_async, skip_sync, sleep, spawn
 
@@ -667,7 +666,6 @@ def test_cancellation_in_queue(pool_cls, dsn):
         def worker(i):
             try:
                 logging.info("worker %s started", i)
-                nonlocal got_conns
 
                 with p.connection() as conn:
                     logging.info("worker %s got conn", i)

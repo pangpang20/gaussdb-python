@@ -779,10 +779,9 @@ async def test_copy_to_leaks(aconn_cls, dsn, faker, fmt, set_types, method, gc):
                                 elif method == "rows":
                                     await alist(copy.rows())
                             except (psycopg.OperationalError, psycopg.DataError) as e:
-                                if (
-                                    "no COPY in progress" in str(e)
-                                    or "binary copy doesn't start" in str(e)
-                                ):
+                                if "no COPY in progress" in str(
+                                    e
+                                ) or "binary copy doesn't start" in str(e):
                                     pytest.skip("COPY not started; skipping test")
                                 else:
                                     raise
