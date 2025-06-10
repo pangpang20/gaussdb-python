@@ -25,7 +25,9 @@ jobs:
           python-version: "3.9"
 
       - name: install packages to tests
-        run: pip install ./psycopg[dev,test]
+        run: |
+          pip install ./psycopg[dev,test]
+          pip install types-polib
 
       - name: Lint codebase
         run: pre-commit run -a --color=always
