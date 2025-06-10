@@ -21,7 +21,7 @@ jobs:
         ports:
           - 5432:5432
         env:
-          GS_USERNAME: ${{ secrets.OPENGAUSS_USERNAME }}
+          GS_USERNAME: root
           GS_USER_PASSWORD: ${{ secrets.OPENGAUSS_PASSWORD }}
           GS_PASSWORD: ${{ secrets.OPENGAUSS_PASSWORD }}
         options: >-
@@ -72,10 +72,10 @@ jobs:
         run: |
           source venv/bin/activate
           for i in {1..15}; do
-            pg_isready -h localhost -p 5432 -U ${{ secrets.OPENGAUSS_USERNAME }} && break
+            pg_isready -h localhost -p 5432 -U root && break
             sleep 5
           done
-          if ! pg_isready -h localhost -p 5432 -U ${{ secrets.OPENGAUSS_USERNAME }}; then
+          if ! pg_isready -h localhost -p 5432 -U root; then
             echo "openGauss is not ready"
             exit 1
           fi
@@ -92,7 +92,7 @@ jobs:
         env:
           PYTHONPATH: ./psycopg:./psycopg_pool
           PSYCOPG_IMPL: python
-          PSYCOPG_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=${{ secrets.OPENGAUSS_USERNAME }} password=${{ secrets.OPENGAUSS_PASSWORD }} "
+          PSYCOPG_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=${{ secrets.OPENGAUSS_PASSWORD }} "
         run: |
           source venv/bin/activate
           pytest -s -v
