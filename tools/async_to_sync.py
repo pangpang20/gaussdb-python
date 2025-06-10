@@ -240,27 +240,31 @@ class AsyncToSync(ast.NodeTransformer):  # type: ignore
         # Assume that the test guards an async object becoming sync and remove
         # the async side, because it will likely contain `await` constructs
         # illegal into a sync function.
-        value: bool
-        comment: str
-        match node:
-            # manage `is_async()`
-            case ast.If(test=ast.Call(func=ast.Name(id="is_async"))):
-                for child in node.orelse:
-                    self.visit(child)
-                return node.orelse
+        # manage `if is_async()`
+        if (
+            isinstance(node.test, ast.Call)
+            and isinstance(node.test.func, ast.Name)
+            and node.test.func.id == "is_async"
+        ):
+            for child in node.orelse:
+                self.visit(child)
+            return node.orelse
 
-            # Manage `if True|False:  # ASYNC`
-            # drop the unneeded branch
-            case ast.If(
-                test=ast.Constant(value=bool(value)),
-                body=[ast.Comment(value=comment), *_],
-            ) if comment.startswith("# ASYNC"):
-                stmts: list[ast.AST]
-                # body[0] is the ASYNC comment, drop it
-                stmts = node.orelse if value else node.body[1:]
-                for child in stmts:
-                    self.visit(child)
-                return stmts
+        # manage `if True|False:  # ASYNC`
+        if isinstance(node.test, ast.Constant) and isinstance(node.test.value, bool):
+            if node.body and isinstance(node.body[0], ast.Expr):
+                expr = node.body[0]
+                if (
+                    isinstance(expr.value, ast.Constant)
+                    and isinstance(expr.value.value, str)
+                    and expr.value.value.startswith("# ASYNC")
+                ):
+                    # body[0] is the ASYNC comment, drop it
+                    value = node.test.value
+                    stmts = node.orelse if value else node.body[1:]
+                    for child in stmts:
+                        self.visit(child)
+                    return stmts
 
         self.generic_visit(node)
         return node
@@ -343,20 +347,23 @@ class RenameAsyncToSync(ast.NodeTransformer):  # type: ignore
         for arg in node.args.args:
             arg.arg = self.names_map.get(arg.arg, arg.arg)
         for arg in node.args.args:
-            attr: str
-            match arg.annotation:
-                case ast.arg(annotation=ast.Attribute(attr=attr)):
-                    arg.annotation.attr = self.names_map.get(attr, attr)
-                case ast.arg(annotation=ast.Subscript(value=ast.Attribute(attr=attr))):
-                    arg.annotation.value.attr = self.names_map.get(attr, attr)
+            annotation = arg.annotation
+            if isinstance(annotation, ast.Attribute):
+                attr = annotation.attr
+                annotation.attr = self.names_map.get(attr, attr)
+
+            elif isinstance(annotation, ast.Subscript):
+                value = annotation.value
+                if isinstance(value, ast.Attribute):
+                    attr = value.attr
+                    value.attr = self.names_map.get(attr, attr)
 
         self.generic_visit(node)
         return node
 
     def visit_Call(self, node: ast.Call) -> ast.AST:
-        match node:
-            case ast.Call(func=ast.Name(id="cast")):
-                node.args[0] = self._convert_if_literal_string(node.args[0])
+        if isinstance(node.func, ast.Name) and node.func.id == "cast" and node.args:
+            node.args[0] = self._convert_if_literal_string(node.args[0])
 
         self.generic_visit(node)
         return node
@@ -369,29 +376,35 @@ class RenameAsyncToSync(ast.NodeTransformer):  # type: ignore
         return node
 
     def _fix_docstring(self, body: list[ast.AST]) -> None:
-        doc: str
-        match body and body[0]:
-            case ast.Expr(value=ast.Constant(value=str(doc))):
+        if body and isinstance(body[0], ast.Expr):
+            expr = body[0]
+            val = expr.value
+            if isinstance(val, ast.Constant) and isinstance(val, str):
+                doc = expr.value.value
                 doc = doc.replace("Async", "")
                 doc = doc.replace("(async", "(sync")
-                body[0].value.value = doc
+                expr.value.value = doc
 
     def _fix_decorator(self, decorator_list: list[ast.AST]) -> None:
         for dec in decorator_list:
-            match dec:
-                case ast.Call(
-                    func=ast.Attribute(value=ast.Name(id="pytest"), attr="fixture"),
-                    keywords=[ast.keyword(arg="params", value=ast.List())],
-                ):
-                    elts = dec.keywords[0].value.elts
-                    for i, elt in enumerate(elts):
-                        elts[i] = self._convert_if_literal_string(elt)
+            if (
+                isinstance(dec, ast.Call)
+                and isinstance(dec.func, ast.Attribute)
+                and isinstance(dec.func.value, ast.Name)
+                and dec.func.value.id == "pytest"
+                and dec.func.attr == "fixture"
+                and len(dec.keywords) == 1
+                and isinstance(dec.keywords[0], ast.keyword)
+                and dec.keywords[0].arg == "params"
+                and isinstance(dec.keywords[0].value, ast.List)
+            ):
+                elts = dec.keywords[0].value.elts
+                for i, elt in enumerate(elts):
+                    elts[i] = self._convert_if_literal_string(elt)
 
     def _convert_if_literal_string(self, node: ast.AST) -> ast.AST:
-        value: str
-        match node:
-            case ast.Constant(value=str(value)):
-                node.value = self._visit_type_string(value)
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            node.value = self._visit_type_string(node.value)
 
         return node
 
@@ -413,13 +426,12 @@ class RenameAsyncToSync(ast.NodeTransformer):  # type: ignore
         # Handle :
         #   class AsyncCursor(BaseCursor["AsyncConnection[Any]", Row]):
         # the base cannot be a token, even with __future__ annotation.
-        elts: list[ast.AST]
         for base in node.bases:
-            match base:
-                case ast.Subscript(slice=ast.Tuple(elts=elts)):
-                    for i, elt in enumerate(elts):
-                        elts[i] = self._convert_if_literal_string(elt)
-                case ast.Subscript(slice=ast.Constant()):
+            if isinstance(base, ast.Subscript):
+                if isinstance(base.slice, ast.Tuple):
+                    for i, elt in enumerate(base.slice.elts):
+                        base.slice.elts[i] = self._convert_if_literal_string(elt)
+                elif isinstance(base.slice, ast.Constant):
                     base.slice = self._convert_if_literal_string(base.slice)
 
         return node
@@ -458,13 +470,16 @@ class RenameAsyncToSync(ast.NodeTransformer):  # type: ignore
         return node
 
     def _manage_async_generator(self, node: ast.Subscript) -> ast.AST | None:
-        match node:
-            case ast.Subscript(
-                value=ast.Name(id="AsyncGenerator"), slice=ast.Tuple(elts=[_, _])
-            ):
-                node.slice.elts.insert(1, deepcopy(node.slice.elts[1]))
-                self.generic_visit(node)
-                return node
+        if (
+            isinstance(node, ast.Subscript)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "AsyncGenerator"
+            and isinstance(node.slice, ast.Tuple)
+            and len(node.slice.elts) == 2
+        ):
+            node.slice.elts.insert(1, deepcopy(node.slice.elts[1]))
+            self.generic_visit(node)
+            return node
         return None
 
 

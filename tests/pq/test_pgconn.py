@@ -235,6 +235,7 @@ def test_protocol_version(pgconn):
         pgconn.protocol_version
 
 
+@pytest.mark.opengauss_skip("version")
 def test_server_version(pgconn):
     assert pgconn.server_version >= "505.2.0"
     pgconn.finish()

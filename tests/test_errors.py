@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import re
 import sys
 import pickle
 from weakref import ref
 
 import pytest
-import re
 
 import psycopg
 from psycopg import errors as e
@@ -56,7 +56,6 @@ def test_diag_right_attr(pgconn, monkeypatch):
     checked: list[pq.DiagnosticField] = []
 
     def check_val(self, v):
-        nonlocal to_check
         assert to_check == v
         checked.append(v)
         return None
@@ -84,8 +83,12 @@ def test_diag_attr_values(conn):
         conn.execute("insert into test_exc values(2)")
     diag = exc.value.diag
     assert diag.sqlstate == "23514"
-    assert re.search(r'constraint "([^"]+)"', diag.message_primary).group(1) == "chk_eq1"
-    assert re.search(r'relation "([^"]+)"', diag.message_primary).group(1) == "test_exc"
+    match_obj = re.search(r'constraint "([^"]+)"', diag.message_primary or "")
+    assert match_obj is not None
+    assert match_obj.group(1) == "chk_eq1"
+    match_obj = re.search(r'relation "([^"]+)"', diag.message_primary or "")
+    assert match_obj is not None
+    assert match_obj.group(1) == "test_exc"
 
 
 @pytest.mark.crdb_skip("do")
@@ -101,6 +104,7 @@ def test_diag_encoding(conn, enc):
 
 
 @pytest.mark.crdb_skip("do")
+@pytest.mark.opengauss_skip("do")
 @pytest.mark.parametrize("enc", ["utf8", "latin9"])
 def test_error_encoding(conn, enc):
     with conn.transaction():

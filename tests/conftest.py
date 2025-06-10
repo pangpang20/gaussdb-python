@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import os
+import re
 import sys
 import asyncio
 import selectors
 from typing import Any
 
 import pytest
+
+from psycopg import pq
 
 pytest_plugins = (
     "tests.fix_db",
@@ -34,11 +38,12 @@ def pytest_configure(config):
         "postgis: the test requires the PostGIS extension to run",
         "numpy: the test requires numpy module to be installed",
         "gaussdb_skip(reason): Skip test for GaussDB-specific behavior",
+        "opengauss_skip(reason): Skip test for openGauss-specific behavior",
     ]
 
     for marker in markers:
         config.addinivalue_line("markers", marker)
- 
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -106,9 +111,57 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
         for msg in allow_fail_messages:
             terminalreporter.line(msg)
 
+
+def get_database_type():
+    dsn = os.getenv("DSN") or os.getenv("PSYCOPG_TEST_DSN")
+    if not dsn:
+        print("DSN environment variable not set")
+        return ""
+
+    try:
+        conn = pq.PGconn.connect(dsn.encode("utf-8"))
+        if conn.status != pq.ConnStatus.OK:
+            print(f"Connection failed: {conn.error_message.decode()}")
+            conn.finish()
+            return ""
+
+        res = conn.exec_(b"SELECT version();")
+        if res.status != pq.ExecStatus.TUPLES_OK:
+            print(f"Query failed: {conn.error_message.decode()}")
+            res.clear()
+            conn.finish()
+            return ""
+
+        raw_version = res.get_value(0, 0)
+        version = raw_version.decode("utf-8").lower() if raw_version is not None else ""
+
+        res.clear()
+        conn.finish()
+        if re.search(r"\bgaussdb\b", version):
+            return "gaussdb"
+        if re.search(r"\bopengauss\b", version):
+            return "opengauss"
+    except Exception as e:
+        print(f"Failed to get database version: {e}")
+        return ""
+
+
 def pytest_collection_modifyitems(config, items):
+    res = get_database_type()
+    print(f"Database type: {res}")
     for item in items:
-        mark = item.get_closest_marker("gaussdb_skip")
-        if mark:
-            reason = mark.args[0] if mark.args else "Marked as gaussdb_skip"
+        gaussdb_mark = item.get_closest_marker("gaussdb_skip")
+        if gaussdb_mark and res == "gaussdb":
+            reason = (
+                gaussdb_mark.args[0] if gaussdb_mark.args else "Marked as gaussdb_skip"
+            )
+            item.add_marker(pytest.mark.skip(reason=reason))
+
+        opengauss_mark = item.get_closest_marker("opengauss_skip")
+        if opengauss_mark and res == "opengauss":
+            reason = (
+                opengauss_mark.args[0]
+                if opengauss_mark.args
+                else "Marked as opengauss_skip"
+            )
             item.add_marker(pytest.mark.skip(reason=reason))

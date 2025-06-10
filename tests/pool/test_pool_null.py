@@ -23,6 +23,9 @@ except ImportError:
     # Tests should have been skipped if the package is not available
     pass
 
+if True:  # ASYNC
+    pytestmark = [pytest.mark.anyio]
+
 
 def test_default_sizes(dsn):
     with pool.NullConnectionPool(dsn) as p:
@@ -100,7 +103,9 @@ def test_non_generic_connection_type(dsn):
     assert conn1.autocommit
     assert row1 == {"x": 1}
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_its_no_pool_at_all(dsn):
     with pool.NullConnectionPool(dsn, max_size=2) as p:
@@ -193,7 +198,9 @@ def test_reset(dsn):
     assert resets == 1
     assert pids[0] == pids[1]
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_reset_badstate(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -222,7 +229,9 @@ def test_reset_badstate(dsn, caplog):
     assert caplog.records
     assert "INTRANS" in caplog.records[0].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_reset_broken(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -262,7 +271,8 @@ def test_no_queue_timeout(proxy):
         with proxy.deaf_listen(), pytest.raises(pool.PoolTimeout):
             with p.connection(timeout=1):
                 pass
- 
+
+
 @pytest.mark.crdb_skip("backend pid")
 def test_intrans_rollback(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -325,7 +335,9 @@ def test_inerror_rollback(dsn, caplog):
     assert len(caplog.records) == 1
     assert "INERROR" in caplog.records[0].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 @pytest.mark.crdb_skip("copy")
 def test_active_close(dsn, caplog):
@@ -354,7 +366,9 @@ def test_active_close(dsn, caplog):
     assert "ACTIVE" in caplog.records[0].message
     assert "BAD" in caplog.records[1].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_fail_rollback_close(dsn, caplog, monkeypatch):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -409,6 +423,7 @@ def test_bad_resize(dsn, min_size, max_size):
 @pytest.mark.slow
 @pytest.mark.timing
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_max_lifetime(dsn):
     pids: list[int] = []
@@ -459,7 +474,6 @@ def test_cancellation_in_queue(dsn):
         def worker(i):
             try:
                 logging.info("worker %s started", i)
-                nonlocal got_conns
 
                 with p.connection() as conn:
                     logging.info("worker %s got conn", i)

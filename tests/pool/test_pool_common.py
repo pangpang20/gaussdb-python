@@ -11,8 +11,6 @@ import pytest
 
 import psycopg
 
-
-
 from ..utils import set_autocommit
 from ..acompat import Event, gather, is_alive, skip_async, skip_sync, sleep, spawn
 
@@ -162,7 +160,7 @@ def test_configure_broken(pool_cls, dsn, caplog):
 
 @pytest.mark.slow
 @pytest.mark.timing
-@pytest.mark.crdb_skip("backend pid") 
+@pytest.mark.crdb_skip("backend pid")
 def test_queue(pool_cls, dsn):
 
     def worker(n):
@@ -181,7 +179,7 @@ def test_queue(pool_cls, dsn):
 
     times = [item[1] for item in results]
     if pool_cls == pool.NullConnectionPool:
-        want_times = [0.4, 0.4, 0.6, 0.6, 0.8, 0.8]   
+        want_times = [0.4, 0.4, 0.6, 0.6, 0.8, 0.8]
         tolerance = 0.5
     else:
         want_times = [0.3, 0.3, 0.6, 0.6, 0.9, 0.9]
@@ -269,7 +267,7 @@ def test_dead_client(pool_cls, dsn):
                 results.append(i)
         except pool.PoolTimeout:
             if timeout > 0.2:
-                raise 
+                raise
 
     with pool_cls(dsn, min_size=min_size(pool_cls, 2), max_size=2) as p:
         results: list[int] = []
@@ -317,7 +315,9 @@ def test_queue_timeout_override(pool_cls, dsn):
     for e in errors:
         assert 0.1 < e[1] < 0.15
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_broken_reconnect(pool_cls, dsn):
     with pool_cls(dsn, min_size=min_size(pool_cls), max_size=1) as p:
@@ -666,7 +666,6 @@ def test_cancellation_in_queue(pool_cls, dsn):
         def worker(i):
             try:
                 logging.info("worker %s started", i)
-                nonlocal got_conns
 
                 with p.connection() as conn:
                     logging.info("worker %s got conn", i)

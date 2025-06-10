@@ -7,7 +7,6 @@ from psycopg.types import TypeInfo
 from psycopg.types.enum import EnumInfo
 from psycopg.types.range import RangeInfo
 from psycopg.types.composite import CompositeInfo
-from psycopg.types.multirange import MultirangeInfo
 
 from .fix_crdb import crdb_encoding
 
@@ -134,7 +133,9 @@ async def test_fetch_not_found_async(aconn, name, status, info_cls, monkeypatch)
     "name", ["testschema.testtype", sql.Identifier("testschema", "testtype")]
 )
 def test_fetch_by_schema_qualified_string(conn, name):
-    exists = conn.execute("select 1 from pg_catalog.pg_namespace where nspname = 'testschema'").fetchone()
+    exists = conn.execute(
+        "select 1 from pg_catalog.pg_namespace where nspname = 'testschema'"
+    ).fetchone()
     if not exists:
         conn.execute("create schema testschema")
     conn.execute("create type testschema.testtype as (foo text)")

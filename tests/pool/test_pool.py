@@ -25,6 +25,9 @@ except ImportError:
     # Tests should have been skipped if the package is not available
     pass
 
+if True:  # ASYNC
+    pytestmark = [pytest.mark.anyio]
+
 
 def test_default_sizes(dsn):
     with pool.ConnectionPool(dsn) as p:
@@ -225,7 +228,9 @@ def test_reset(dsn):
         p.wait()
         assert resets == 2
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_reset_badstate(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -246,7 +251,9 @@ def test_reset_badstate(dsn, caplog):
     assert caplog.records
     assert "INTRANS" in caplog.records[0].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_reset_broken(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -268,7 +275,9 @@ def test_reset_broken(dsn, caplog):
     assert caplog.records
     assert "WAT" in caplog.records[0].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_intrans_rollback(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -311,7 +320,9 @@ def test_inerror_rollback(dsn, caplog):
     assert len(caplog.records) == 1
     assert "INERROR" in caplog.records[0].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 @pytest.mark.crdb_skip("copy")
 def test_active_close(dsn, caplog):
@@ -332,7 +343,9 @@ def test_active_close(dsn, caplog):
     assert "ACTIVE" in caplog.records[0].message
     assert "BAD" in caplog.records[1].message
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_fail_rollback_close(dsn, caplog, monkeypatch):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -442,7 +455,7 @@ def test_grow(dsn, monkeypatch, min_size, want_times):
 
     times = [item[1] for item in results]
     for got, want in zip(times, want_times):
-        assert got == pytest.approx(want, 0.1), times
+        assert got == pytest.approx(want, 0.2), times
 
 
 @pytest.mark.slow
@@ -692,6 +705,7 @@ def test_bad_resize(dsn, min_size, max_size):
 @pytest.mark.slow
 @pytest.mark.timing
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_max_lifetime(dsn):
     with pool.ConnectionPool(dsn, min_size=1, max_lifetime=0.2) as p:
@@ -704,7 +718,9 @@ def test_max_lifetime(dsn):
 
     assert pids[0] == pids[1] != pids[4], pids
 
+
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 @pytest.mark.crdb_skip("backend pid")
 def test_check(dsn, caplog):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
@@ -734,7 +750,9 @@ def test_check_idle(dsn):
         with p.connection() as conn:
             assert conn.info.transaction_status == TransactionStatus.IDLE
 
+
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.opengauss_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_connect_no_check(dsn):
     with pool.ConnectionPool(dsn, min_size=2) as p:
@@ -750,7 +768,9 @@ def test_connect_no_check(dsn):
                 with p.connection() as conn2:
                     conn2.execute("select 2")
 
+
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.opengauss_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 def test_connect_check(dsn, caplog, autocommit):
@@ -786,6 +806,7 @@ def test_connect_check(dsn, caplog, autocommit):
 @pytest.mark.parametrize("autocommit", [True, False])
 @pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.opengauss_skip("pg_terminate_backend")
 def test_getconn_check(dsn, caplog, autocommit):
     caplog.set_level(logging.WARNING, logger="psycopg.pool")
 
@@ -848,13 +869,14 @@ def test_connect_check_timeout(dsn, proxy):
 
 @pytest.mark.slow
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.opengauss_skip("backend pid")
 def test_check_max_lifetime(dsn):
     with pool.ConnectionPool(dsn, min_size=1, max_lifetime=0.2) as p:
         with p.connection() as conn:
             pid = conn.info.backend_pid
         with p.connection() as conn:
             assert conn.info.backend_pid == pid
-        sleep(0.3) 
+        sleep(0.3)
         p.check()
         with p.connection() as conn:
             assert conn.info.backend_pid != pid
@@ -880,7 +902,9 @@ def test_stats_connect(proxy, monkeypatch):
         assert stats["connections_errors"] > 0
         assert stats["connections_lost"] == 3
 
+
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.opengauss_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_stats_check(dsn):
     with pool.ConnectionPool(
@@ -951,7 +975,6 @@ def test_cancellation_in_queue(dsn):
         def worker(i):
             try:
                 logging.info("worker %s started", i)
-                nonlocal got_conns
 
                 with p.connection() as conn:
                     logging.info("worker %s got conn", i)

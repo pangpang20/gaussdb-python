@@ -264,6 +264,7 @@ class TestDatetime:
 
     @pytest.mark.parametrize("datestyle_out", datestyles_out)
     @pytest.mark.parametrize("val, msg", overflow_samples)
+    @pytest.mark.opengauss_skip("timestamp does not support years beyond 9999")
     def test_overflow_message(self, conn, datestyle_out, val, msg):
         cur = conn.cursor()
         cur.execute(f"set datestyle = {datestyle_out}, YMD")
@@ -273,6 +274,7 @@ class TestDatetime:
         assert msg in str(excinfo.value)
 
     @pytest.mark.parametrize("val, msg", overflow_samples)
+    @pytest.mark.opengauss_skip("timestamp does not support years beyond 9999")
     def test_overflow_message_binary(self, conn, val, msg):
         cur = conn.cursor(binary=True)
         cur.execute("select %s::timestamp", (val,))
@@ -399,7 +401,9 @@ class TestDateTimeTz:
     def test_load_datetimetz_tz(self, conn, fmt_out, tzname, expr, tzoff):
         conn.execute("select set_config('TimeZone', %s, true)", [tzname])
         cur = conn.cursor(binary=fmt_out)
-        ts = cur.execute("select extract(timezone from %s::timestamptz)", [expr]).fetchone()[0]
+        ts = cur.execute(
+            "select extract(timezone from %s::timestamptz)", [expr]
+        ).fetchone()[0]
         assert ts == tzoff
 
     @pytest.mark.parametrize(
@@ -426,6 +430,7 @@ class TestDateTimeTz:
 
     @pytest.mark.crdb_skip("copy")
     @pytest.mark.gaussdb_skip("copy")
+    @pytest.mark.opengauss_skip("copy")
     def test_load_copy(self, conn):
         cur = conn.cursor(binary=False)
         with cur.copy(

@@ -14,7 +14,7 @@ from collections.abc import Iterable, MutableSequence
 
 from .. import _oids
 from .. import errors as e
-from .. import postgres, sql
+from .. import postgres
 from ..pq import Format
 from ..abc import AdaptContext, Buffer, Dumper, DumperKey, Query
 from .range import Range, T, dump_range_binary, dump_range_text, fail_dump
@@ -47,9 +47,7 @@ class MultirangeInfo(TypeInfo):
 
     @classmethod
     def _get_info_query(cls, conn: BaseConnection[Any]) -> Query:
-        raise e.NotSupportedError(
-                "multirange types are not supported in GaussDB"
-            )
+        raise e.NotSupportedError("multirange types are not supported in GaussDB")
 
     def _added(self, registry: TypesRegistry) -> None:
         # Map multiranges ranges and subtypes to info

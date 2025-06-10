@@ -110,6 +110,7 @@ def test_load_array(conn, val, jtype, fmt_out):
 
 
 @pytest.mark.crdb_skip("copy")
+@pytest.mark.opengauss_skip("binary copy signature mismatch")
 @pytest.mark.parametrize("val", samples)
 @pytest.mark.parametrize("jtype", ["json", "jsonb"])
 @pytest.mark.parametrize("fmt_out", pq.Format)

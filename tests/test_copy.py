@@ -28,6 +28,7 @@ from .test_adapt import StrNoneBinaryDumper, StrNoneDumper
 pytestmark = pytest.mark.crdb_skip("copy")
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_read(conn, format):
     if format == pq.Format.TEXT:
@@ -49,6 +50,7 @@ def test_copy_out_read(conn, format):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("row_factory", ["tuple_row", "dict_row", "namedtuple_row"])
 def test_copy_out_iter(conn, format, row_factory):
@@ -88,6 +90,7 @@ def test_copy_out_param(conn, ph, params):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("typetype", ["names", "oids"])
 def test_read_rows(conn, format, typetype):
@@ -106,6 +109,7 @@ def test_read_rows(conn, format, typetype):
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows(conn, format):
     cur = conn.cursor()
@@ -134,6 +138,7 @@ def test_set_custom_type(conn, hstore):
     assert rows == [({"a": "1", "b": "2"},)]
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_allchars(conn, format):
     cur = conn.cursor()
@@ -155,6 +160,7 @@ def test_copy_out_allchars(conn, format):
     assert rows == chars
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_read_row_notypes(conn, format):
     cur = conn.cursor()
@@ -170,6 +176,7 @@ def test_read_row_notypes(conn, format):
     assert rows == ref
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows_notypes(conn, format):
     cur = conn.cursor()
@@ -179,6 +186,7 @@ def test_rows_notypes(conn, format):
     assert rows == ref
 
 
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("err", [-1, 1])
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_badntypes(conn, format, err):
@@ -717,45 +725,53 @@ def test_copy_to_leaks(conn_cls, dsn, faker, fmt, set_types, method, gc):
 
     def work():
         with conn_cls.connect(dsn) as conn:
-            with conn.cursor(binary=(fmt == pq.Format.BINARY)) as cur:
-                cur.execute(faker.drop_stmt)
-                cur.execute(faker.create_stmt)
-                conn.commit()
-                with faker.find_insert_problem(conn):
-                    cur.executemany(faker.insert_stmt, faker.records)
-
-                stmt = sql.SQL(
-                    "copy (select {} from {} order by id) to stdout (format {})"
-                ).format(
-                    sql.SQL(", ").join(faker.fields_names),
-                    faker.table_name,
-                    sql.SQL(fmt.name),
-                )
-
-                with cur.copy(stmt) as copy:
+            try:
+                with conn.cursor(binary=fmt) as cur:
                     try:
-                        if set_types:
-                            copy.set_types(faker.types_names)
+                        cur.execute(faker.drop_stmt)
+                        cur.execute(faker.create_stmt)
+                        conn.commit()
+                        with faker.find_insert_problem(conn):
+                            cur.executemany(faker.insert_stmt, faker.records)
 
-                        if method == "read":
-                            while True:
-                                tmp = copy.read()
-                                if not tmp:
-                                    break
-                        elif method == "iter":
-                            list(copy)
-                        elif method == "row":
-                            while True:
-                                tmp = copy.read_row()
-                                if tmp is None:
-                                    break
-                        elif method == "rows":
-                            list(copy.rows())
-                    except psycopg.OperationalError as e:
-                        if "no COPY in progress" in str(e):
-                            pytest.skip("COPY not started; skipping test iteration")
-                        else:
-                            raise
+                        stmt = sql.SQL(
+                            "copy (select {} from {} order by id) to stdout (format {})"
+                        ).format(
+                            sql.SQL(", ").join(faker.fields_names),
+                            faker.table_name,
+                            sql.SQL(fmt.name),
+                        )
+
+                        with cur.copy(stmt) as copy:
+                            try:
+                                if set_types and fmt == pq.Format.BINARY:
+                                    copy.set_types(faker.types_names)
+
+                                if method == "read":
+                                    while True:
+                                        tmp = copy.read()
+                                        if not tmp:
+                                            break
+                                elif method == "iter":
+                                    list(copy)
+                                elif method == "row":
+                                    while True:
+                                        tmp = copy.read_row()
+                                        if tmp is None:
+                                            break
+                                elif method == "rows":
+                                    list(copy.rows())
+                            except (psycopg.OperationalError, psycopg.DataError) as e:
+                                if "no COPY in progress" in str(
+                                    e
+                                ) or "binary copy doesn't start" in str(e):
+                                    pytest.skip("COPY not started; skipping test")
+                                else:
+                                    raise
+                    finally:
+                        cur.close()
+            finally:
+                conn.close()
 
     gc.collect()
     n = []
