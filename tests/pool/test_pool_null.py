@@ -23,6 +23,9 @@ except ImportError:
     # Tests should have been skipped if the package is not available
     pass
 
+if True:  # ASYNC
+    pytestmark = [pytest.mark.anyio]
+
 
 def test_default_sizes(dsn):
     with pool.NullConnectionPool(dsn) as p:

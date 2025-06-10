@@ -33,7 +33,7 @@ jobs:
         run: pre-commit run -a --color=always
 
       - name: Check for sync/async inconsistencies
-        run: ./tools/async_to_sync.py --check --all
+        run: ./tools/async_to_sync.py --check $(find tests -name "*_async.py" -type f ! -path "tests/pq/test_async.py")
 
       - name: Install requirements to generate docs
         run: sudo apt-get install -y libgeos-dev

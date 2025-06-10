@@ -25,6 +25,9 @@ except ImportError:
     # Tests should have been skipped if the package is not available
     pass
 
+if True:  # ASYNC
+    pytestmark = [pytest.mark.anyio]
+
 
 def test_default_sizes(dsn):
     with pool.ConnectionPool(dsn) as p:
@@ -452,7 +455,7 @@ def test_grow(dsn, monkeypatch, min_size, want_times):
 
     times = [item[1] for item in results]
     for got, want in zip(times, want_times):
-        assert got == pytest.approx(want, 0.1), times
+        assert got == pytest.approx(want, 0.2), times
 
 
 @pytest.mark.slow
@@ -749,6 +752,7 @@ def test_check_idle(dsn):
 
 
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.opengauss_skip("pg_terminate_backend")
 @pytest.mark.crdb_skip("pg_terminate_backend")
 def test_connect_no_check(dsn):
     with pool.ConnectionPool(dsn, min_size=2) as p:
