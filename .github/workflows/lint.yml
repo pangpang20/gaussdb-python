@@ -44,10 +44,10 @@ jobs:
 
       - name: Install packages for async_to_sync
         run: |
-            pip install ./gaussdb[dev,test]
-            pip install types-polib
-            pip install ./tools/isort-gaussdb/
-            pip install ./gaussdb_pool
+          pip install ./tools/isort-gaussdb/
+          pip install ./gaussdb[dev,test]
+          pip install types-polib
+          pip install ./gaussdb_pool
 
       - name: Check for sync/async inconsistencies
         run: ./tools/async_to_sync.py --check $(find tests -name "*_async.py" -type f ! -path "tests/pq/test_async.py" ! -path "tests/test_concurrency_async.py")
