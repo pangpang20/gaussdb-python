@@ -2,7 +2,7 @@
 Functions to manipulate conninfo strings
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

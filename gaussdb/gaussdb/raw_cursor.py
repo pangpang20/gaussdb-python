@@ -2,7 +2,7 @@
 gaussdb raw queries cursors
 """
 
-# Copyright (C) 2023 The GaussDB Team
+# Copyright (C) 2023 The Psycopg Team
 
 from __future__ import annotations
 

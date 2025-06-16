@@ -6,7 +6,7 @@ This is an internal module. Types are publicly exposed by
 time and avoid circular import problems.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 # A couple of special cases used a bit everywhere.
 INVALID_OID = 0

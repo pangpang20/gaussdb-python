@@ -8,7 +8,7 @@ the `pq` module instead, which is in charge of choosing the best
 implementation.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

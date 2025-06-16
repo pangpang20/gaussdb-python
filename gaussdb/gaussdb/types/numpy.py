@@ -2,7 +2,7 @@
 Adapters for numpy types.
 """
 
-# Copyright (C) 2022 The GaussDB Team
+# Copyright (C) 2022 The Psycopg Team
 
 from typing import Any
 

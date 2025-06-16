@@ -2,7 +2,7 @@
 gaussdb client-side binding cursors
 """
 
-# Copyright (C) 2022 The GaussDB Team
+# Copyright (C) 2022 The Psycopg Team
 
 from __future__ import annotations
 

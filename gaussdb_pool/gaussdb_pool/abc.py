@@ -2,7 +2,7 @@
 Types used in the gaussdb_pool package
 """
 
-# Copyright (C) 2023 The GaussDB Team
+# Copyright (C) 2023 The Psycopg Team
 
 from __future__ import annotations
 

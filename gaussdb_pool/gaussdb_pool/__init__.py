@@ -2,7 +2,7 @@
 gaussdb connection pool package
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 from .pool import ConnectionPool
 from .errors import PoolClosed, PoolTimeout, TooManyRequests

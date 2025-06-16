@@ -39,4 +39,4 @@ For development information check out `the project readme`__.
 .. __: https://github.com/gaussdb/gaussdb#readme
 
 
-Copyright (C) 2020 The GaussDB Team
+Copyright (C) 2020 The Psycopg Team

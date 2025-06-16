@@ -10,7 +10,7 @@ Tasks are called "Task", not "Event", here, because we actually make use of
 `[threading/asyncio].Event` and the two would be confusing.
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 from __future__ import annotations
 

@@ -7,7 +7,7 @@ is exported is `gaussdb.adapt` (which we may not use to avoid circular
 dependencies problems).
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

@@ -2,7 +2,7 @@
 compatibility functions for different Python versions
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 import sys
 

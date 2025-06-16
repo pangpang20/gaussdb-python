@@ -2,7 +2,7 @@
 gaussdb pool version file.
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 from importlib import metadata
 

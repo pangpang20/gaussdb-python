@@ -22,4 +22,4 @@ more details.
        #installing-the-connection-pool
 
 
-Copyright (C) 2020 The GaussDB Team
+Copyright (C) 2020 The Psycopg Team

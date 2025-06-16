@@ -2,7 +2,7 @@
 gaussdb types package
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from .. import _typeinfo
 

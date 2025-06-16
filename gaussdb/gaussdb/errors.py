@@ -16,7 +16,7 @@ DBAPI-defined Exceptions are defined in the following hierarchy::
           |__NotSupportedError
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

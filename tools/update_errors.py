@@ -6,7 +6,7 @@ Generate per-sqlstate errors from PostgreSQL source code.
 The script can be run at a new PostgreSQL release to refresh the module.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 import os
 import re

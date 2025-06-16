@@ -2,7 +2,7 @@
 gaussdb -- PostgreSQL database adapter for Python
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 import logging
 

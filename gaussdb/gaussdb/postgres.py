@@ -2,7 +2,7 @@
 Types configuration specific to PostgreSQL.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from .abc import AdaptContext
 from ._typemod import BitTypeModifier, CharTypeModifier, NumericTypeModifier
