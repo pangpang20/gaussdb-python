@@ -29,6 +29,7 @@ pytestmark = pytest.mark.crdb_skip("copy")
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_read(conn, format):
     if format == pq.Format.TEXT:
@@ -51,6 +52,7 @@ def test_copy_out_read(conn, format):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("row_factory", ["tuple_row", "dict_row", "namedtuple_row"])
 def test_copy_out_iter(conn, format, row_factory):
@@ -91,6 +93,7 @@ def test_copy_out_param(conn, ph, params):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 @pytest.mark.parametrize("typetype", ["names", "oids"])
 def test_read_rows(conn, format, typetype):
@@ -110,10 +113,14 @@ def test_read_rows(conn, format, typetype):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows(conn, format):
     cur = conn.cursor()
     with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
+        print(f"copy ({sample_values}) to stdout (format {format.name})")
+        aa = conn.info.transaction_status == pq.TransactionStatus.ACTIVE
+        print(f"pq.TransactionStatus:{aa}")
         copy.set_types(["int4", "int4", "text"])
         rows = list(copy.rows())
 
@@ -139,6 +146,7 @@ def test_set_custom_type(conn, hstore):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_allchars(conn, format):
     cur = conn.cursor()
@@ -161,6 +169,7 @@ def test_copy_out_allchars(conn, format):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_read_row_notypes(conn, format):
     cur = conn.cursor()
@@ -177,6 +186,7 @@ def test_read_row_notypes(conn, format):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("format", pq.Format)
 def test_rows_notypes(conn, format):
     cur = conn.cursor()
@@ -187,6 +197,7 @@ def test_rows_notypes(conn, format):
 
 
 @pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 @pytest.mark.parametrize("err", [-1, 1])
 @pytest.mark.parametrize("format", pq.Format)
 def test_copy_out_badntypes(conn, format, err):
@@ -796,11 +807,10 @@ def test_copy_from_leaks(conn_cls, dsn, faker, fmt, set_types, gc):
 
     def work():
         with conn_cls.connect(dsn) as conn:
-            with conn.cursor(binary=fmt) as cur:
+            with conn.cursor(binary=fmt == pq.Format.BINARY) as cur:
                 cur.execute(faker.drop_stmt)
                 cur.execute(faker.create_stmt)
                 conn.commit()
-
                 stmt = sql.SQL("copy {} ({}) from stdin (format {})").format(
                     faker.table_name,
                     sql.SQL(", ").join(faker.fields_names),

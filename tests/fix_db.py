@@ -14,7 +14,7 @@ from gaussdb import pq, sql
 from gaussdb.conninfo import conninfo_to_dict, make_conninfo
 from gaussdb.pq._debug import PGconnDebug
 
-from .utils import check_postgres_version
+from .utils import check_gaussdb_version
 
 # Set by warm_up_database() the first time the dsn fixture is used
 pg_version: int
@@ -330,7 +330,7 @@ def check_connection_version(node):
     for mark in node.iter_markers():
         if mark.name == "pg":
             assert len(mark.args) == 1
-            msg = check_postgres_version(pg_version, mark.args[0])
+            msg = check_gaussdb_version(pg_version, mark.args[0])
             if msg:
                 pytest.skip(msg)
 

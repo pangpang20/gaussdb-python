@@ -30,10 +30,10 @@ def check_libpq_version(got, want):
 
     and skips the test if the requested version doesn't match what's loaded.
     """
-    return check_version(got, want, "libpq", postgres_rule=True)
+    return check_version(got, want, "libpq", gaussdb_rule=True)
 
 
-def check_postgres_version(got, want):
+def check_gaussdb_version(got, want):
     """
     Verify if the server version is a version accepted.
 
@@ -43,11 +43,11 @@ def check_postgres_version(got, want):
 
     and skips the test if the server version doesn't match what expected.
     """
-    return check_version(got, want, "PostgreSQL", postgres_rule=True)
+    return check_version(got, want, "PostgreSQL", gaussdb_rule=True)
 
 
-def check_version(got, want, whose_version, postgres_rule=True):
-    pred = VersionCheck.parse(want, postgres_rule=postgres_rule)
+def check_version(got, want, whose_version, gaussdb_rule=True):
+    pred = VersionCheck.parse(want, gaussdb_rule=gaussdb_rule)
     pred.whose = whose_version
     return pred.get_skip_message(got)
 
@@ -68,17 +68,17 @@ class VersionCheck:
         op: str | None = None,
         version_tuple: tuple[Union[int, str], ...] = (),
         whose: str = "(wanted)",
-        postgres_rule: bool = False,
+        gaussdb_rule: bool = False,
     ):
         self.skip = skip
         self.op = op or "=="
         self.version_tuple = version_tuple
         self.whose = whose
         # Treat 10.1 as 10.0.1
-        self.postgres_rule = postgres_rule
+        self.gaussdb_rule = gaussdb_rule
 
     @classmethod
-    def parse(cls, spec: str, *, postgres_rule: bool = False) -> VersionCheck:
+    def parse(cls, spec: str, *, gaussdb_rule: bool = False) -> VersionCheck:
         # Parse a spec like "> 9.6", "skip < 21.2.0"
         m = re.match(
             r"""(?ix)
@@ -97,7 +97,7 @@ class VersionCheck:
         version_tuple = tuple(int(n) if n.isdigit() else n for n in m.groups()[2:] if n)
 
         return cls(
-            skip=skip, op=op, version_tuple=version_tuple, postgres_rule=postgres_rule
+            skip=skip, op=op, version_tuple=version_tuple, gaussdb_rule=gaussdb_rule
         )
 
     def get_skip_message(self, version: int | str | None) -> str | None:

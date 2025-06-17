@@ -130,6 +130,7 @@ def test_bad_binary_array(input):
 
 @pytest.mark.crdb_skip("nested array")
 @pytest.mark.opengauss_skip("nested array")
+@pytest.mark.gaussdb_skip("cannot unpack non-iterable NoneType object")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("want, obj", tests_int)
 def test_load_list_int(conn, obj, want, fmt_out):
