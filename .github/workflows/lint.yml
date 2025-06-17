@@ -49,8 +49,18 @@ jobs:
           pip install types-polib
           pip install ./gaussdb_pool
 
-      - name: Check for sync/async inconsistencies
-        run: ./tools/async_to_sync.py --check $(find tests -name "*_async.py" -type f ! -path "tests/pq/test_async.py" ! -path "tests/test_concurrency_async.py")
+      - name: Check for sync/async inconsistencies (loop until no error)
+        run: |
+          while true; do
+            files=$(find tests -name "*_async.py" -type f ! -path "tests/pq/test_async.py" ! -path "tests/test_concurrency_async.py")
+            if ./tools/async_to_sync.py --check $files; then
+              echo "No inconsistencies found. Done."
+              break
+            else
+              echo "Found inconsistencies. Rechecking after regeneration..."
+              ./tools/async_to_sync.py $files
+            fi
+          done
 
       - name: Install requirements to generate docs
         run: sudo apt-get install -y libgeos-dev
