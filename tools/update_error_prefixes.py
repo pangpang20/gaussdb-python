@@ -66,8 +66,8 @@ def update_file(fn: Path, content: str) -> None:
 
 def parse_cmdline() -> Namespace:
     for default_pgroot in (
-        HERE / "../../fs/postgres",  # it happens to be my laptop
-        HERE / "../../postgres",  # the last entry is the default if none found
+        HERE / "../../fs/gaussdb",  # it happens to be my laptop
+        HERE / "../../gaussdb",  # the last entry is the default if none found
     ):
         if default_pgroot.exists():
             break
@@ -81,7 +81,7 @@ def parse_cmdline() -> Namespace:
         metavar="DIR",
         default=default_pgroot,
         type=Path,
-        help="root PostgreSQL source directory [default: %(default)s]",
+        help="root GaussDB source directory [default: %(default)s]",
     )
     parser.add_argument(
         "--dest",

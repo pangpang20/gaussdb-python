@@ -14,7 +14,7 @@ from collections.abc import Iterable, MutableSequence
 
 from .. import _oids
 from .. import errors as e
-from .. import postgres
+from .. import gaussdb
 from ..pq import Format
 from ..abc import AdaptContext, Buffer, Dumper, DumperKey, Query
 from .range import Range, T, dump_range_binary, dump_range_text, fail_dump
@@ -196,7 +196,7 @@ class BaseMultirangeDumper(RecursiveDumper):
 
         dumper: BaseMultirangeDumper
         if type(item) is int:
-            # postgres won't cast int4range -> int8range so we must use
+            # gaussdb won't cast int4range -> int8range so we must use
             # text format and unknown oid here
             sd = self._tx.get_dumper(item, PyFormat.TEXT)
             dumper = MultirangeDumper(self.cls, self._tx)
@@ -377,7 +377,7 @@ def register_multirange(
     # Register arrays and type info
     info.register(context)
 
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb.adapters
 
     # generate and register a customized text loader
     loader: type[BaseMultirangeLoader[Any]]
