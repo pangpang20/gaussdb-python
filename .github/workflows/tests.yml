@@ -1,4 +1,4 @@
-name: CI for gaussdb-python
+name: Tests
 
 on:
   push:
