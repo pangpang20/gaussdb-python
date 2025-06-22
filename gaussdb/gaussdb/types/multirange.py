@@ -14,7 +14,7 @@ from collections.abc import Iterable, MutableSequence
 
 from .. import _oids
 from .. import errors as e
-from .. import gaussdb
+from .. import gaussdb_
 from ..pq import Format
 from ..abc import AdaptContext, Buffer, Dumper, DumperKey, Query
 from .range import Range, T, dump_range_binary, dump_range_text, fail_dump
@@ -56,7 +56,7 @@ class MultirangeInfo(TypeInfo):
 
 
 class Multirange(MutableSequence[Range[T]]):
-    """Python representation for a PostgreSQL multirange type.
+    """Python representation for a GaussDB multirange type.
 
     :param items: Sequence of ranges to initialise the object.
     """
@@ -377,7 +377,7 @@ def register_multirange(
     # Register arrays and type info
     info.register(context)
 
-    adapters = context.adapters if context else gaussdb.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     # generate and register a customized text loader
     loader: type[BaseMultirangeLoader[Any]]

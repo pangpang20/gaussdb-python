@@ -32,9 +32,9 @@ class QueryPart(NamedTuple):
     format: PyFormat
 
 
-class PostgresQuery:
+class GaussDBQuery:
     """
-    Helper to convert a Python query and parameters into Postgres format.
+    Helper to convert a Python query and parameters into GaussDB format.
     """
 
     __slots__ = """
@@ -49,7 +49,7 @@ class PostgresQuery:
         # these are tuples so they can be used as keys e.g. in prepared stmts
         self.types: tuple[int, ...] = ()
 
-        # The format requested by the user and the ones to really pass Postgres
+        # The format requested by the user and the ones to really pass GaussDB
         self._want_formats: list[PyFormat] | None = None
         self.formats: Sequence[pq.Format] | None = None
 
@@ -139,7 +139,7 @@ class PostgresQuery:
         Verify the compatibility between a query and a set of params.
         """
 
-        if PostgresQuery.is_params_sequence(vars):
+        if GaussDBQuery.is_params_sequence(vars):
             if len(vars) != len(parts) - 1:
                 raise e.ProgrammingError(
                     f"the query has {len(parts) - 1} placeholders but"
@@ -177,9 +177,9 @@ def _query2pg_nocache(
     query: bytes, encoding: str
 ) -> tuple[bytes, list[PyFormat], list[str] | None, list[QueryPart]]:
     """
-    Convert Python query and params into something Postgres understands.
+    Convert Python query and params into something GaussDB understands.
 
-    - Convert Python placeholders (``%s``, ``%(name)s``) into Postgres
+    - Convert Python placeholders (``%s``, ``%(name)s``) into GaussDB
       format (``$1``, ``$2``)
     - placeholders can be %s, %t, or %b (auto, text or binary)
     - return ``query`` (bytes), ``formats`` (list of formats) ``order``
@@ -231,9 +231,9 @@ def _query2pg_nocache(
 _query2pg = lru_cache(_query2pg_nocache)
 
 
-class PostgresClientQuery(PostgresQuery):
+class GaussDBClientQuery(GaussDBQuery):
     """
-    PostgresQuery subclass merging query and arguments client-side.
+    GaussDBQuery subclass merging query and arguments client-side.
     """
 
     __slots__ = ("template",)

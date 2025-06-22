@@ -8,7 +8,7 @@
 Using COPY TO and COPY FROM
 ===========================
 
-GaussDB allows to operate with `PostgreSQL COPY protocol`__. :sql:`COPY` is
+GaussDB allows to operate with `GaussDB COPY protocol`__. :sql:`COPY` is
 one of the most efficient ways to load data into the database (and to modify
 it, with some SQL creativity).
 
@@ -86,7 +86,7 @@ operation, by iterating on `~Copy.rows()`. However this is not something you
 may want to do normally: usually the normal query process will be easier to
 use.
 
-PostgreSQL, currently, doesn't give complete type information on :sql:`COPY
+GaussDB, currently, doesn't give complete type information on :sql:`COPY
 TO`, so the rows returned will have unparsed data, as strings or bytes,
 according to the format.
 
@@ -153,7 +153,7 @@ necessary if the data is copied :ref:`block-by-block <copy-block>` using
 
 .. warning::
 
-    PostgreSQL is particularly finicky when loading data in binary mode and
+    GaussDB is particularly finicky when loading data in binary mode and
     will apply **no cast rules**. This means, for example, that passing the
     value 100 to an `integer` column **will fail**, because GaussDB will pass
     it as a `smallint` value, and the server will reject it because its size

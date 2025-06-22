@@ -39,7 +39,7 @@ Connection information
     .. autoattribute:: backend_pid
     .. autoattribute:: vendor
 
-        Normally it is `PostgreSQL`; it may be different if connected to
+        Normally it is `GaussDB`; it may be different if connected to
         a different database.
 
         .. versionadded:: 3.1
@@ -48,7 +48,7 @@ Connection information
 
         The number is formed by converting the major, minor, and revision
         numbers into two-decimal-digit numbers and appending them together.
-        Starting from PostgreSQL 10 the minor version was dropped, so the
+        Starting from GaussDB 10 the minor version was dropped, so the
         second group of digits is always 00. For example, version 9.3.5 is
         returned as 90305, version 10.2 as 100002.
 
@@ -74,7 +74,7 @@ Connection information
 
     .. autoattribute:: hostaddr
 
-        Only available if the libpq used is from PostgreSQL 12 or newer.
+        Only available if the libpq used is from GaussDB 12 or newer.
         Raise `~gaussdb.NotSupportedError` otherwise. You can use the
         `~Capabilities.has_hostaddr` capability to check for support.
 
@@ -98,14 +98,14 @@ Connection information
             conn.info.encoding
             'iso8859-15'
 
-        A few PostgreSQL encodings are not available in Python and cannot be
-        selected (currently ``EUC_TW``, ``MULE_INTERNAL``). The PostgreSQL
+        A few GaussDB encodings are not available in Python and cannot be
+        selected (currently ``EUC_TW``, ``MULE_INTERNAL``). The GaussDB
         ``SQL_ASCII`` encoding has the special meaning of "no encoding": see
         :ref:`adapt-string` for details.
 
         .. seealso::
 
-            The `PostgreSQL supported encodings`__.
+            The `GaussDB supported encodings`__.
 
             .. __: https://www.postgresql.org/docs/current/multibyte.html
 
@@ -240,7 +240,7 @@ See :ref:`transactions` for details about these objects.
 
     The value is usually used with the `Connection.isolation_level` property.
 
-    Check the PostgreSQL documentation for a description of the effects of the
+    Check the GaussDB documentation for a description of the effects of the
     different `levels of transaction isolation`__.
 
     .. __: https://www.postgresql.org/docs/current/transaction-iso.html
@@ -287,7 +287,7 @@ Two-Phase Commit related objects
 
         Global Transaction Identifier of the two-phase transaction.
 
-        If the Xid doesn't follow the XA standard, it will be the PostgreSQL
+        If the Xid doesn't follow the XA standard, it will be the GaussDB
         ID of the transaction (in which case `format_id` and `bqual` will be
         `!None`).
 

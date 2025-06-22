@@ -13,7 +13,7 @@ from typing import Any, Callable, cast
 from functools import cache
 
 from .. import errors as e
-from .. import postgres, pq
+from .. import gaussdb_, pq
 from ..abc import AdaptContext, Buffer, Dumper, DumperKey, Loader, NoneType, Transformer
 from .._oids import INVALID_OID, TEXT_ARRAY_OID, TEXT_OID
 from ..adapt import PyFormat, RecursiveDumper, RecursiveLoader
@@ -77,7 +77,7 @@ class BaseListDumper(RecursiveDumper):
             return v
 
         # If we got an int, let's see what is the biggest one in order to
-        # choose the smallest OID and allow Postgres to do the right cast.
+        # choose the smallest OID and allow GaussDB to do the right cast.
         imax: int = max(items)
         imin: int = min(items)
         if imin >= 0:
@@ -201,8 +201,6 @@ class ListDumper(BaseListDumper):
 def _get_needs_quotes_regexp(delimiter: bytes) -> re.Pattern[bytes]:
     """Return a regexp to recognise when a value needs quotes
 
-    from https://www.postgresql.org/docs/current/arrays.html#ARRAYS-IO
-
     The array output routine will put double quotes around element values if
     they are empty strings, contain curly braces, delimiter characters,
     double quotes, backslashes, or white space, or match the word NULL.
@@ -249,7 +247,7 @@ class ListBinaryDumper(BaseListDumper):
         return dumper
 
     def dump(self, obj: list[Any]) -> Buffer | None:
-        # Postgres won't take unknown for element oid: fall back on text
+        # GaussDB won't take unknown for element oid: fall back on text
         sub_oid = self.sub_dumper and self.sub_dumper.oid or TEXT_OID
 
         if not obj:
@@ -317,7 +315,7 @@ def register_array(info: TypeInfo, context: AdaptContext | None = None) -> None:
     if not info.array_oid:
         raise ValueError(f"the type info {info} doesn't describe an array")
 
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     loader = _make_loader(info.name, info.oid, info.delimiter)
     adapters.register_loader(info.array_oid, loader)

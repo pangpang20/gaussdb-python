@@ -225,7 +225,7 @@ Adapting gaussdb to your program
 
 The above :ref:`pattern of use <usage>` only shows the default behaviour of
 the adapter. GaussDB can be customised in several ways, to allow the smoothest
-integration between your Python program and your PostgreSQL database:
+integration between your Python program and your GaussDB database:
 
 - If your program is concurrent and based on `asyncio` instead of on
   threads/processes, you can use :ref:`async connections and cursors <async>`.
@@ -233,6 +233,6 @@ integration between your Python program and your PostgreSQL database:
 - If you want to customise the objects that the cursor returns, instead of
   receiving tuples, you can specify your :ref:`row factories <row-factories>`.
 
-- If you want to customise how Python values and PostgreSQL types are mapped
+- If you want to customise how Python values and GaussDB types are mapped
   into each other, beside the :ref:`basic type mapping <types-adaptation>`,
   you can :ref:`configure your types <adaptation>`.

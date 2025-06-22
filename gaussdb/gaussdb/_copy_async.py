@@ -184,7 +184,7 @@ class AsyncWriter(ABC):
 
 class AsyncLibpqWriter(AsyncWriter):
     """
-    An `AsyncWriter` to write copy data to a Postgres database.
+    An `AsyncWriter` to write copy data to a GaussDB database.
     """
 
     __module__ = "gaussdb.copy"

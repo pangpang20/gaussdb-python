@@ -4,7 +4,7 @@ Connection classes
 ==================
 
 The `Connection` and `AsyncConnection` classes are the main wrappers for a
-PostgreSQL database session. You can imagine them similar to a :program:`psql`
+GaussDB database session. You can imagine them similar to a :program:`psql`
 session.
 
 One of the differences compared to :program:`psql` is that a `Connection`
@@ -259,7 +259,7 @@ The `!Connection` class
 
         The `~pq.PGconn` libpq connection wrapper underlying the `!Connection`.
 
-        It can be used to send low level commands to PostgreSQL and access
+        It can be used to send low level commands to GaussDB and access
         features not currently wrapped by GaussDB.
 
     .. autoattribute:: info
@@ -310,7 +310,7 @@ The `!Connection` class
         .. warning::
 
             The `!cancel()` method is implemented using the :pq:`PQcancel`
-            function, which is deprecated since PostgreSQL 17, and has a few
+            function, which is deprecated since GaussDB, and has a few
             shortcomings:
 
             - it is blocking even on async connections,
@@ -380,7 +380,7 @@ The `!Connection` class
 
         The `!xid` may be either an object returned by the `xid()` method or a
         plain string: the latter allows to create a transaction using the
-        provided string as PostgreSQL transaction id. See also
+        provided string as GaussDB transaction id. See also
         `tpc_recover()`.
 
 
@@ -393,7 +393,7 @@ The `!Connection` class
         `tpc_commit()` or `tpc_rollback()` will be
         called.
 
-        .. seealso:: The |PREPARE TRANSACTION|_ PostgreSQL command.
+        .. seealso:: The |PREPARE TRANSACTION|_ GaussDB command.
 
         .. |PREPARE TRANSACTION| replace:: :sql:`PREPARE TRANSACTION`
         .. _PREPARE TRANSACTION: https://www.postgresql.org/docs/current/static/sql-prepare-transaction.html
@@ -418,7 +418,7 @@ The `!Connection` class
 
         On return, the TPC transaction is ended.
 
-        .. seealso:: The |COMMIT PREPARED|_ PostgreSQL command.
+        .. seealso:: The |COMMIT PREPARED|_ GaussDB command.
 
         .. |COMMIT PREPARED| replace:: :sql:`COMMIT PREPARED`
         .. _COMMIT PREPARED: https://www.postgresql.org/docs/current/static/sql-commit-prepared.html
@@ -439,7 +439,7 @@ The `!Connection` class
 
         On return, the TPC transaction is ended.
 
-        .. seealso:: The |ROLLBACK PREPARED|_ PostgreSQL command.
+        .. seealso:: The |ROLLBACK PREPARED|_ GaussDB command.
 
         .. |ROLLBACK PREPARED| replace:: :sql:`ROLLBACK PREPARED`
         .. _ROLLBACK PREPARED: https://www.postgresql.org/docs/current/static/sql-rollback-prepared.html
@@ -452,9 +452,9 @@ The `!Connection` class
 
         If a transaction was not initiated by GaussDB, the returned Xids will
         have attributes `~Xid.format_id` and `~Xid.bqual` set to `!None` and
-        the `~Xid.gtrid` set to the PostgreSQL transaction ID: such Xids are
+        the `~Xid.gtrid` set to the GaussDB transaction ID: such Xids are
         still usable for recovery.  GaussDB uses the same algorithm of the
-        `PostgreSQL JDBC driver`__ to encode a XA triple in a string, so
+        `GaussDB JDBC driver`__ to encode a XA triple in a string, so
         transactions initiated by a program using such driver should be
         unpacked correctly.
 

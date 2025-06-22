@@ -105,7 +105,7 @@ intersphinx_mapping = {
 
 autodoc_member_order = "bysource"
 
-# PostgreSQL docs version to link libpq functions to
+# GaussDB docs version to link libpq functions to
 libpq_docs_version = "17"
 
 # Where to point on :ticket: role

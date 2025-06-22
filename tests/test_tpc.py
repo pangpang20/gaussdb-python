@@ -223,8 +223,6 @@ class TestTPC:
         assert xid.gtrid == gtrid
         assert xid.bqual == bqual
 
-    # 199 is PostgreSQL's limit in transaction id length
-
     @pytest.mark.parametrize("tid", ["", "hello, world!", "x" * 199])
     def test_unparsed_roundtrip(self, conn_cls, conn, dsn, tpc, tid):
         conn.tpc_begin(tid)

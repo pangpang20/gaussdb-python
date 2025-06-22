@@ -737,7 +737,7 @@ class PGconn:
         self, passwd: bytes, user: bytes, algorithm: bytes | None = None
     ) -> bytes:
         """
-        Return the encrypted form of a PostgreSQL password.
+        Return the encrypted form of a GaussDB password.
 
         See :pq:`PQencryptPasswordConn` for details.
         """
@@ -753,7 +753,7 @@ class PGconn:
 
     def change_password(self, user: bytes, passwd: bytes) -> None:
         """
-        Change a PostgreSQL password.
+        Change a GaussDB password.
 
         :raises OperationalError: if the command to change password failed.
 

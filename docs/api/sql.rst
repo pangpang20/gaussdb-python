@@ -100,7 +100,7 @@ The `!sql` objects are in the following inheritance hierarchy:
 
 |   `Composable`: the base class exposing the common interface
 |   ``|__`` `SQL`: a literal snippet of an SQL query
-|   ``|__`` `Identifier`: a PostgreSQL identifier or dot-separated sequence of identifiers
+|   ``|__`` `Identifier`: a GaussDB identifier or dot-separated sequence of identifiers
 |   ``|__`` `Literal`: a value hardcoded into a query
 |   ``|__`` `Placeholder`: a `%s`\ -style placeholder whose value will be added later e.g. by `~gaussdb.Cursor.execute()`
 |   ``|__`` `Composed`: a sequence of `!Composable` instances.

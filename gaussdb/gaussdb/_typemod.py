@@ -1,5 +1,5 @@
 """
-PostgreSQL type modifiers.
+GaussDB type modifiers.
 
 The type modifiers parse catalog information to obtain the type modifier
 of a column - the numeric part of varchar(10) or decimal(6,2).

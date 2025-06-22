@@ -17,7 +17,7 @@ class NoneDumper(Dumper):
     """
 
     def dump(self, obj: None) -> Buffer | None:
-        raise NotImplementedError("NULL is passed to Postgres in other ways")
+        raise NotImplementedError("NULL is passed to GaussDB in other ways")
 
     def quote(self, obj: None) -> Buffer:
         return b"NULL"

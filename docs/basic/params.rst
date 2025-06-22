@@ -199,7 +199,7 @@ argument of the `Cursor.execute()` method::
 Binary parameters and results
 -----------------------------
 
-PostgreSQL has two different ways to transmit data between client and server:
+GaussDB has two different ways to transmit data between client and server:
 `~gaussdb.pq.Format.TEXT`, always available, and `~gaussdb.pq.Format.BINARY`,
 available most of the times but not always. Usually the binary format is more
 efficient to use.
@@ -214,7 +214,7 @@ for a value you can use respectively a ``%b`` placeholder or a ``%t``
 placeholder instead of the normal ``%s``. `~Cursor.execute()` will fail if a
 `~gaussdb.adapt.Dumper` for the right data type and format is not available.
 
-The same two formats, text or binary, are used by PostgreSQL to return data
+The same two formats, text or binary, are used by GaussDB to return data
 from a query to the client. Unlike with parameters, where you can choose the
 format value-by-value, all the columns returned by a query will have the same
 format. Every type returned by the query should have a `~gaussdb.adapt.Loader`
@@ -222,7 +222,7 @@ configured, otherwise the data will be returned as unparsed `!str` (for text
 results) or buffer (for binary results).
 
 .. note::
-    The `pg_type`_ table defines which format is supported for each PostgreSQL
+    The `pg_type`_ table defines which format is supported for each GaussDB
     data type. Text input/output is managed by the functions declared in the
     ``typinput`` and ``typoutput`` fields (always present), binary
     input/output is managed by the ``typsend`` and ``typreceive`` (which are
@@ -230,7 +230,7 @@ results) or buffer (for binary results).
 
     .. _pg_type: https://www.postgresql.org/docs/current/catalog-pg-type.html
 
-Because not every PostgreSQL type supports binary output, by default, the data
+Because not every GaussDB type supports binary output, by default, the data
 will be returned in text format. In order to return data in binary format you
 can create the cursor using `Connection.cursor`\ `!(binary=True)` or execute
 the query using `Cursor.execute`\ `!(binary=True)`. A case in which

@@ -28,7 +28,7 @@ class _BaseStrDumper(Dumper):
 
 class _StrBinaryDumper(_BaseStrDumper):
     """
-    Base class to dump a Python strings to a Postgres text type, in binary format.
+    Base class to dump a Python strings to a GaussDB text type, in binary format.
 
     Subclasses shall specify the oids of real types (text, varchar, name...).
     """
@@ -42,14 +42,14 @@ class _StrBinaryDumper(_BaseStrDumper):
 
 class _StrDumper(_BaseStrDumper):
     """
-    Base class to dump a Python strings to a Postgres text type, in text format.
+    Base class to dump a Python strings to a GaussDB text type, in text format.
 
     Subclasses shall specify the oids of real types (text, varchar, name...).
     """
 
     def dump(self, obj: str) -> Buffer | None:
         if "\x00" in obj:
-            raise DataError("PostgreSQL text fields cannot contain NUL (0x00) bytes")
+            raise DataError("GaussDB text fields cannot contain NUL (0x00) bytes")
         else:
             return obj.encode(self._encoding)
 
@@ -74,7 +74,7 @@ class StrDumper(_StrDumper):
     Dumper for strings in text format to the text oid.
 
     Note that this dumper is not used by default because the type is too strict
-    and PostgreSQL would require an explicit casts to everything that is not a
+    and GaussDB would require an explicit casts to everything that is not a
     text field. However it is useful where the unknown oid is ambiguous and the
     text oid is required, for instance with variadic functions.
     """

@@ -207,8 +207,6 @@ class DiagnosticField(IntEnum):
 
     __module__ = "gaussdb.pq"
 
-    # from src/include/postgres_ext.h
-
     SEVERITY = ord("S")
     SEVERITY_NONLOCALIZED = ord("V")
     SQLSTATE = ord("C")

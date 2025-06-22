@@ -50,7 +50,7 @@ checking.
 
     .. autoattribute:: oid
 
-        If the OID is not specified, PostgreSQL will try to infer the type
+        If the OID is not specified, GaussDB will try to infer the type
         from the context, but this may fail in some contexts and may require a
         cast (e.g. specifying :samp:`%s::{type}` for its placeholder).
 

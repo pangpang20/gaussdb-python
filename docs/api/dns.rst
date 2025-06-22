@@ -117,7 +117,7 @@ server before performing a connection.
     Raise `~gaussdb.OperationalError` if connection is not possible (e.g. no
     host resolve, inconsistent lists length).
 
-    See `the PostgreSQL docs`__ for explanation of how these params are used,
+    See `the GaussDB docs`__ for explanation of how these params are used,
     and how they support multiple entries.
 
     .. __: https://www.postgresql.org/docs/current/libpq-connect.html

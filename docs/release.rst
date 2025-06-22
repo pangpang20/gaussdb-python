@@ -60,7 +60,7 @@ How to make a gaussdb release
 - Run ``tools/bump_version.py -l dev`` to bump to the next dev version.
 
 
-When a new PostgreSQL major version is released
+When a new GaussDB major version is released
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Add the new version to ``tools/update_errors.py`` and run the script to add

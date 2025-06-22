@@ -1,5 +1,5 @@
 """
-Objects to return information about a PostgreSQL connection.
+Objects to return information about a GaussDB connection.
 """
 
 # Copyright (C) 2020 The Psycopg Team

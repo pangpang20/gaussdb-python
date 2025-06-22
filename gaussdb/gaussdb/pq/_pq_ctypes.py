@@ -115,8 +115,6 @@ PGcancel_ptr = POINTER(PGcancel_struct)
 PGresAttDesc_ptr = POINTER(PGresAttDesc_struct)
 
 
-# Function definitions as explained in PostgreSQL 12 documentation
-
 # 33.1. Database Connection Control Functions
 
 # PQconnectdbParams: doesn't seem useful, won't wrap for now
@@ -194,7 +192,7 @@ PQhost.restype = c_char_p
 def not_supported_before(fname: str, pgversion: int) -> Any:
     def not_supported(*args: Any, **kwargs: Any) -> NoReturn:
         raise NotSupportedError(
-            f"{fname} requires libpq from PostgreSQL {version_pretty(pgversion)} on"
+            f"{fname} requires libpq from GaussDB {version_pretty(pgversion)} on"
             f" the client; version {version_pretty(libpq_version)} available instead"
         )
 

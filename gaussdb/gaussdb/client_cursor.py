@@ -15,7 +15,7 @@ from . import pq
 from .abc import ConnectionType, Params, Query
 from .rows import Row
 from .cursor import Cursor
-from ._queries import PostgresClientQuery, PostgresQuery
+from ._queries import GaussDBClientQuery, GaussDBQuery
 from ._preparing import Prepare
 from ._cursor_base import BaseCursor
 from .cursor_async import AsyncCursor
@@ -31,7 +31,7 @@ BINARY = pq.Format.BINARY
 
 
 class ClientCursorMixin(BaseCursor[ConnectionType, Row]):
-    _query_cls = PostgresClientQuery
+    _query_cls = GaussDBClientQuery
 
     def mogrify(self, query: Query, params: Params | None = None) -> str:
         """
@@ -47,7 +47,7 @@ class ClientCursorMixin(BaseCursor[ConnectionType, Row]):
 
     def _execute_send(
         self,
-        query: PostgresQuery,
+        query: GaussDBQuery,
         *,
         force_extended: bool = False,
         binary: bool | None = None,
@@ -78,7 +78,7 @@ class ClientCursorMixin(BaseCursor[ConnectionType, Row]):
             self._pgconn.send_query(query.query)
 
     def _get_prepared(
-        self, pgq: PostgresQuery, prepare: bool | None = None
+        self, pgq: GaussDBQuery, prepare: bool | None = None
     ) -> tuple[Prepare, bytes]:
         return (Prepare.NO, b"")
 

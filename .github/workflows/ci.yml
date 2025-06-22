@@ -56,7 +56,7 @@ jobs:
           sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
           sudo ldconfig
           ldconfig -p | grep pq
-           
+
       - name: Install dependencies
         run: |
           source venv/bin/activate

@@ -185,7 +185,7 @@ class Writer(ABC):
 
 class LibpqWriter(Writer):
     """
-    An `Writer` to write copy data to a Postgres database.
+    An `Writer` to write copy data to a GaussDB database.
     """
 
     __module__ = "gaussdb.copy"

@@ -13,7 +13,7 @@ from functools import cache
 from collections import namedtuple
 from collections.abc import Iterator, Sequence
 
-from .. import abc, postgres, pq, sql
+from .. import abc, gaussdb_, pq, sql
 from .._oids import TEXT_OID
 from ..adapt import Buffer, Dumper, Loader, PyFormat, RecursiveDumper, Transformer
 from .._struct import pack_len, unpack_len
@@ -303,7 +303,7 @@ def register_composite(
     if not factory:
         factory = _nt_from_info(info)
 
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     # generate and register a customized text loader
     loader: type[BaseCompositeLoader]

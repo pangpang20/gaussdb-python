@@ -4,7 +4,7 @@ import pytest
 
 from gaussdb.crdb import CrdbConnection, adapters
 from gaussdb.adapt import PyFormat, Transformer
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 from gaussdb.types.array import ListDumper
 
 from ..test_adapt import MyStr, make_bin_dumper, make_bin_loader, make_dumper
@@ -17,10 +17,10 @@ pytestmark = pytest.mark.crdb
 def test_return_untyped(conn, fmt_in):
     # Analyze and check for changes using strings in untyped/typed contexts
     cur = conn.cursor()
-    # Currently string are passed as text oid to CockroachDB, unlike Postgres,
+    # Currently string are passed as text oid to CockroachDB, unlike GaussDB,
     # to which strings are passed as unknown. This is because CRDB doesn't
     # allow the unknown oid to be emitted; execute("SELECT %s", ["str"]) raises
-    # an error. However, unlike PostgreSQL, text can be cast to any other type.
+    # an error. However, unlike GaussDB, text can be cast to any other type.
     cur.execute(f"select %{fmt_in.value}, %{fmt_in.value}", ["hello", 10])
     assert cur.fetchone() == ("hello", 10)
 

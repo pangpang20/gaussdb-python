@@ -1,9 +1,9 @@
 """
-Helper object to transform values between Python and PostgreSQL
+Helper object to transform values between Python and GaussDB
 
 Python implementation of the object. Use the `_transformer module to import
 the right implementation (Python or C). The public place where the object
-is exported is `gaussdb.adapt` (which we may not use to avoid circular
+is exported is `gaussdb_.adapt` (which we may not use to avoid circular
 dependencies problems).
 """
 
@@ -40,7 +40,7 @@ PY_TEXT = PyFormat.TEXT
 
 class Transformer(AdaptContext):
     """
-    An object that can adapt efficiently between Python and PostgreSQL.
+    An object that can adapt efficiently between Python and GaussDB.
 
     The life cycle of the object is the query, so it is assumed that attributes
     such as the server version or the connection encoding will not change. The
@@ -49,7 +49,7 @@ class Transformer(AdaptContext):
 
     """
 
-    __module__ = "gaussdb.adapt"
+    __module__ = "gaussdb_.adapt"
 
     __slots__ = """
         types formats
@@ -72,9 +72,9 @@ class Transformer(AdaptContext):
             self._adapters = context.adapters
             self._conn = context.connection
         else:
-            from . import postgres
+            from . import gaussdb_
 
-            self._adapters = postgres.adapters
+            self._adapters = gaussdb_.adapters
             self._conn = None
 
         # mapping fmt, class -> Dumper instance

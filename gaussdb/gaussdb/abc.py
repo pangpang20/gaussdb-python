@@ -95,7 +95,7 @@ class AdaptContext(Protocol):
 
 class Dumper(Protocol):
     """
-    Convert Python objects of type `!cls` to PostgreSQL representation.
+    Convert Python objects of type `!cls` to GaussDB representation.
     """
 
     format: pq.Format
@@ -112,7 +112,7 @@ class Dumper(Protocol):
     def __init__(self, cls: type, context: AdaptContext | None = None): ...
 
     def dump(self, obj: Any) -> Buffer | None:
-        """Convert the object `!obj` to PostgreSQL representation.
+        """Convert the object `!obj` to GaussDB representation.
 
         :param obj: the object to convert.
         """
@@ -133,7 +133,7 @@ class Dumper(Protocol):
 
         Normally the type of the object is all it takes to define how to dump
         the object to the database. For instance, a Python `~datetime.date` can
-        be simply converted into a PostgreSQL :sql:`date`.
+        be simply converted into a GaussDB :sql:`date`.
 
         In a few cases, just the type is not enough. For example:
 
@@ -141,9 +141,9 @@ class Dumper(Protocol):
           :sql:`timestamptz` or a :sql:`timestamp`, according to whether it
           specifies a `!tzinfo` or not.
 
-        - A Python int could be stored as several Postgres types: int2, int4,
+        - A Python int could be stored as several GaussDB types: int2, int4,
           int8, numeric. If a type too small is used, it may result in an
-          overflow. If a type too large is used, PostgreSQL may not want to
+          overflow. If a type too large is used, GaussDB may not want to
           cast it to a smaller type.
 
         - Python lists should be dumped according to the type they contain to
@@ -178,7 +178,7 @@ class Dumper(Protocol):
 
 class Loader(Protocol):
     """
-    Convert PostgreSQL values with type OID `!oid` to Python objects.
+    Convert GaussDB values with type OID `!oid` to Python objects.
     """
 
     format: pq.Format

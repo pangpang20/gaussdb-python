@@ -80,9 +80,9 @@ class Xid:
 
     def _as_tid(self) -> str:
         """
-        Return the PostgreSQL transaction_id for this XA xid.
+        Return the GaussDB transaction_id for this XA xid.
 
-        PostgreSQL wants just a string, while the DBAPI supports the XA
+        GaussDB wants just a string, while the DBAPI supports the XA
         standard and thus a triple. We use the same conversion algorithm
         implemented by JDBC in order to allow some form of interoperation.
 

@@ -1,8 +1,8 @@
 import pytest
 
-from gaussdb import postgres, pq, sql
+from gaussdb import gaussdb_, pq, sql
 from gaussdb.adapt import PyFormat
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 from gaussdb.types.range import Range
 from gaussdb.types.composite import CompositeInfo, TupleBinaryDumper, TupleDumper
 from gaussdb.types.composite import register_composite
@@ -15,7 +15,7 @@ pytestmark = pytest.mark.crdb_skip("composite")
 
 tests_str = [
     ("", ()),
-    # Funnily enough there's no way to represent (None,) in Postgres
+    # Funnily enough there's no way to represent (None,) in GaussDB
     ("null", ()),
     ("null,null", (None, None)),
     ("null, ''", (None, "")),
@@ -351,23 +351,23 @@ def test_register_scope(conn, testcomp):
     register_composite(info)
     for fmt in pq.Format:
         for oid in (info.oid, info.array_oid):
-            assert postgres.adapters._loaders[fmt].pop(oid)
+            assert gaussdb_.adapters._loaders[fmt].pop(oid)
 
     for f in PyFormat:
-        assert postgres.adapters._dumpers[f].pop(info.python_type)
+        assert gaussdb_.adapters._dumpers[f].pop(info.python_type)
 
     cur = conn.cursor()
     register_composite(info, cur)
     for fmt in pq.Format:
         for oid in (info.oid, info.array_oid):
-            assert oid not in postgres.adapters._loaders[fmt]
+            assert oid not in gaussdb_.adapters._loaders[fmt]
             assert oid not in conn.adapters._loaders[fmt]
             assert oid in cur.adapters._loaders[fmt]
 
     register_composite(info, conn)
     for fmt in pq.Format:
         for oid in (info.oid, info.array_oid):
-            assert oid not in postgres.adapters._loaders[fmt]
+            assert oid not in gaussdb_.adapters._loaders[fmt]
             assert oid in conn.adapters._loaders[fmt]
 
 

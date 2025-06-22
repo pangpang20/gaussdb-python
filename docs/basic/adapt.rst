@@ -13,7 +13,7 @@ Adapting basic Python types
 Many standard Python types are adapted into SQL and returned as Python
 objects when a query is executed.
 
-Converting the following data types between Python and PostgreSQL works
+Converting the following data types between Python and GaussDB works
 out-of-the-box and doesn't require any configuration. In case you need to
 customise the conversion you should take a look at :ref:`adaptation`.
 
@@ -27,7 +27,7 @@ Booleans adaptation
 -------------------
 
 Python `bool` values `!True` and `!False` are converted to the equivalent
-`PostgreSQL boolean type`__::
+`GaussDB boolean type`__::
 
     >>> cur.execute("SELECT %s, %s", (True, False))
     # equivalent to "SELECT true, false"
@@ -51,20 +51,20 @@ Numbers adaptation
 
 .. seealso::
 
-    - `PostgreSQL numeric types
+    - `GaussDB numeric types
       <https://www.postgresql.org/docs/current/static/datatype-numeric.html>`__
 
-- Python `int` values can be converted to PostgreSQL :sql:`smallint`,
+- Python `int` values can be converted to GaussDB :sql:`smallint`,
   :sql:`integer`, :sql:`bigint`, or :sql:`numeric`, according to their numeric
   value. GaussDB will choose the smallest data type available, because
-  PostgreSQL can automatically cast a type up (e.g. passing a `smallint` where
-  PostgreSQL expect an `integer` is gladly accepted) but will not cast down
+  GaussDB can automatically cast a type up (e.g. passing a `smallint` where
+  GaussDB expect an `integer` is gladly accepted) but will not cast down
   automatically (e.g. if a function has an :sql:`integer` argument, passing it
   a :sql:`bigint` value will fail, even if the value is 1).
 
-- Python `float` values are converted to PostgreSQL :sql:`float8`.
+- Python `float` values are converted to GaussDB :sql:`float8`.
 
-- Python `~decimal.Decimal` values are converted to PostgreSQL :sql:`numeric`.
+- Python `~decimal.Decimal` values are converted to GaussDB :sql:`numeric`.
 
 On the way back, smaller types (:sql:`int2`, :sql:`int4`, :sql:`float4`) are
 promoted to the larger Python counterpart.
@@ -73,7 +73,7 @@ promoted to the larger Python counterpart.
 
     Sometimes you may prefer to receive :sql:`numeric` data as `!float`
     instead, for performance reason or ease of manipulation: you can configure
-    an adapter to :ref:`cast PostgreSQL numeric to Python float
+    an adapter to :ref:`cast GaussDB numeric to Python float
     <adapt-example-float>`. This of course may imply a loss of precision.
 
 .. versionchanged:: 3.2
@@ -96,10 +96,10 @@ Strings adaptation
 
 .. seealso::
 
-    - `PostgreSQL character types
+    - `GaussDB character types
       <https://www.postgresql.org/docs/current/datatype-character.html>`__
 
-Python `str` are converted to PostgreSQL string syntax, and PostgreSQL types
+Python `str` are converted to GaussDB string syntax, and GaussDB types
 such as :sql:`text` and :sql:`varchar` are converted back to Python `!str`:
 
 .. code:: python
@@ -111,7 +111,7 @@ such as :sql:`text` and :sql:`varchar` are converted back to Python `!str`:
     conn.execute("SELECT entry FROM menu WHERE id = 1").fetchone()[0]
     'Crème Brûlée at 4.99€'
 
-PostgreSQL databases `have an encoding`__, and `the session has an encoding`__
+GaussDB databases `have an encoding`__, and `the session has an encoding`__
 too, exposed in the `!Connection.info.`\ `~ConnectionInfo.encoding`
 attribute. If your database and connection are in UTF-8 encoding you will
 likely have no problem, otherwise you will have to make sure that your
@@ -154,7 +154,7 @@ coming from the database, which will be returned as `bytes`:
 Alternatively you can cast the unknown encoding data to :sql:`bytea` to
 retrieve it as bytes, leaving other strings unaltered: see :ref:`adapt-binary`
 
-Note that PostgreSQL text cannot contain the ``0x00`` byte. If you need to
+Note that GaussDB text cannot contain the ``0x00`` byte. If you need to
 store Python strings that may contain binary zeros you should use a
 :sql:`bytea` field.
 
@@ -190,19 +190,19 @@ Date/time types adaptation
 
 .. seealso::
 
-    - `PostgreSQL date/time types
+    - `GaussDB date/time types
       <https://www.postgresql.org/docs/current/datatype-datetime.html>`__
 
-- Python `~datetime.date` objects are converted to PostgreSQL :sql:`date`.
-- Python `~datetime.datetime` objects are converted to PostgreSQL
+- Python `~datetime.date` objects are converted to GaussDB :sql:`date`.
+- Python `~datetime.datetime` objects are converted to GaussDB
   :sql:`timestamp` (if they don't have a `!tzinfo` set) or :sql:`timestamptz`
   (if they do).
-- Python `~datetime.time` objects are converted to PostgreSQL :sql:`time`
+- Python `~datetime.time` objects are converted to GaussDB :sql:`time`
   (if they don't have a `!tzinfo` set) or :sql:`timetz` (if they do).
-- Python `~datetime.timedelta` objects are converted to PostgreSQL
+- Python `~datetime.timedelta` objects are converted to GaussDB
   :sql:`interval`.
 
-PostgreSQL :sql:`timestamptz` values are returned with a timezone set to the
+GaussDB :sql:`timestamptz` values are returned with a timezone set to the
 `connection TimeZone setting`__, which is available as a Python
 `~zoneinfo.ZoneInfo` object in the `!Connection.info`.\ `~ConnectionInfo.timezone`
 attribute::
@@ -217,7 +217,7 @@ attribute::
 
 .. note::
 
-    PostgreSQL :sql:`timestamptz` doesn't store "a timestamp with a timezone
+    GaussDB :sql:`timestamptz` doesn't store "a timestamp with a timezone
     attached": it stores a timestamp always in UTC, which is converted, on
     output, to the connection TimeZone setting::
 
@@ -226,7 +226,7 @@ attribute::
         >>> conn.execute("SELECT '2042-07-01 12:00Z'::timestamptz").fetchone()[0]  # UTC input
         datetime.datetime(2042, 7, 1, 14, 0, tzinfo=zoneinfo.ZoneInfo(key='Europe/Rome'))
 
-    Check out the `PostgreSQL documentation about timezones`__ for all the
+    Check out the `GaussDB documentation about timezones`__ for all the
     details.
 
     .. __: https://www.postgresql.org/docs/current/datatype-datetime.html
@@ -239,7 +239,7 @@ attribute::
     too.
 
     Although silly, times with timezone are supported both by Python and by
-    PostgreSQL. However they are only supported with fixed offset timezones:
+    GaussDB. However they are only supported with fixed offset timezones:
     Postgres :sql:`timetz` values loaded from the database will result in
     Python `!time` objects with `!tzinfo` attributes specified as fixed
     offset, for instance by a `~datetime.timezone` value::
@@ -265,7 +265,7 @@ attribute::
 Dates and times limits in Python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-PostgreSQL date and time objects can represent values that cannot be
+GaussDB date and time objects can represent values that cannot be
 represented by the Python `datetime` objects:
 
 - dates and timestamps after the year 9999, the special value "infinity";
@@ -320,7 +320,7 @@ DateStyle or IntervalStyle.
 JSON adaptation
 ---------------
 
-GaussDB can map between Python objects and PostgreSQL `json/jsonb
+GaussDB can map between Python objects and GaussDB `json/jsonb
 types`__, allowing to customise the load and dump function used.
 
 .. __: https://www.postgresql.org/docs/current/datatype-json.html
@@ -388,8 +388,8 @@ take precedence over what is specified by `!set_json_dumps()`.
 Lists adaptation
 ----------------
 
-Python `list` objects are adapted to `PostgreSQL arrays`__ and back. Only
-lists containing objects of the same type can be dumped to PostgreSQL (but the
+Python `list` objects are adapted to `GaussDB arrays`__ and back. Only
+lists containing objects of the same type can be dumped to GaussDB (but the
 list may contain `!None` elements).
 
 .. __: https://www.postgresql.org/docs/current/arrays.html
@@ -423,7 +423,7 @@ list may contain `!None` elements).
 UUID adaptation
 ---------------
 
-Python `uuid.UUID` objects are adapted to PostgreSQL `UUID type`__ and back::
+Python `uuid.UUID` objects are adapted to GaussDB `UUID type`__ and back::
 
     >>> conn.execute("select gen_random_uuid()").fetchone()[0]
     UUID('97f0dd62-3bd2-459e-89b8-a5e36ea3c16c')
@@ -440,11 +440,11 @@ Python `uuid.UUID` objects are adapted to PostgreSQL `UUID type`__ and back::
 Network data types adaptation
 -----------------------------
 
-Objects from the `ipaddress` module are converted to PostgreSQL `network
+Objects from the `ipaddress` module are converted to GaussDB `network
 address types`__:
 
 - `~ipaddress.IPv4Address`, `~ipaddress.IPv4Interface` objects are converted
-  to the PostgreSQL :sql:`inet` type. On the way back, :sql:`inet` values
+  to the GaussDB :sql:`inet` type. On the way back, :sql:`inet` values
   indicating a single address are converted to `!IPv4Address`, otherwise they
   are converted to `!IPv4Interface`
 
@@ -473,21 +473,21 @@ Enum adaptation
 
 .. versionadded:: 3.1
 
-GaussDB can adapt Python `~enum.Enum` subclasses into PostgreSQL enum types
+GaussDB can adapt Python `~enum.Enum` subclasses into GaussDB enum types
 (created with the |CREATE TYPE AS ENUM|_ command).
 
 .. |CREATE TYPE AS ENUM| replace:: :sql:`CREATE TYPE ... AS ENUM (...)`
 .. _CREATE TYPE AS ENUM: https://www.postgresql.org/docs/current/static/datatype-enum.html
 
 In order to set up a bidirectional enum mapping, you should get information
-about the PostgreSQL enum using the `~types.enum.EnumInfo` class and
+about the GaussDB enum using the `~types.enum.EnumInfo` class and
 register it using `~types.enum.register_enum()`. The behaviour of unregistered
 and registered enums is different.
 
 - If the enum is not registered with `register_enum()`:
 
   - Pure `!Enum` classes are dumped as normal strings, using their member
-    names as value. The unknown oid is used, so PostgreSQL should be able to
+    names as value. The unknown oid is used, so GaussDB should be able to
     use this string in most contexts (such as an enum or a text field).
 
     .. versionchanged:: 3.1
@@ -498,7 +498,7 @@ and registered enums is different.
     MyIntEnum(int, Enum)` is more specifically an `!int` than an `!Enum`, so
     it's dumped by default according to `!int` rules).
 
-  - PostgreSQL enums are loaded as Python strings. If you want to load arrays
+  - GaussDB enums are loaded as Python strings. If you want to load arrays
     of such enums you will have to find their OIDs using `types.TypeInfo.fetch()`
     and register them using `~types.TypeInfo.register()`.
 
@@ -507,7 +507,7 @@ and registered enums is different.
 
   - Enums classes, both pure and mixed-in, are dumped by name.
 
-  - The registered PostgreSQL enum is loaded back as the registered Python
+  - The registered GaussDB enum is loaded back as the registered Python
     enum members.
 
 .. autoclass:: gaussdb.types.enum.EnumInfo
@@ -519,7 +519,7 @@ and registered enums is different.
    .. attribute:: labels
 
        After `~gaussdb.types.TypeInfo.fetch()`, it contains the labels defined
-       in the PostgreSQL enum type.
+       in the GaussDB enum type.
 
    .. attribute:: enum
 
@@ -529,10 +529,10 @@ and registered enums is different.
 .. autofunction:: gaussdb.types.enum.register_enum
 
    After registering, fetching data of the registered enum will cast
-   PostgreSQL enum labels into corresponding Python enum members.
+   GaussDB enum labels into corresponding Python enum members.
 
    If no `!enum` is specified, a new `Enum` is created based on
-   PostgreSQL enum labels.
+   GaussDB enum labels.
 
 Example::
 
@@ -565,13 +565,13 @@ Example::
     ... ).fetchone()
     [<UserRole.ADMIN: 1>, <UserRole.GUEST: 3>]
 
-If the Python and the PostgreSQL enum don't match 1:1 (for instance if members
+If the Python and the GaussDB enum don't match 1:1 (for instance if members
 have a different name, or if more than one Python enum should map to the same
-PostgreSQL enum, or vice versa), you can specify the exceptions using the
+GaussDB enum, or vice versa), you can specify the exceptions using the
 `!mapping` parameter.
 
 `!mapping` should be a dictionary with Python enum members as keys and the
-matching PostgreSQL enum labels as values, or a list of `(member, label)`
+matching GaussDB enum labels as values, or a list of `(member, label)`
 pairs with the same meaning (useful when some members are repeated). Order
 matters: if an element on either side is specified more than once, the last
 pair in the sequence will take precedence::
@@ -595,7 +595,7 @@ pair in the sequence will take precedence::
     >>> conn.execute("SELECT %s::text[]", [list(UserRole)]).fetchone()[0]
     ['ABBOT', 'MONK', 'GUEST']
 
-A particularly useful case is when the PostgreSQL labels match the *values* of
+A particularly useful case is when the GaussDB labels match the *values* of
 a `!str`\-based Enum. In this case it is possible to use something like ``{m:
 m.value for m in enum}`` as mapping::
 

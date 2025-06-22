@@ -7,10 +7,10 @@
 
 .. _extra-adaptation:
 
-Adapting other PostgreSQL types
+Adapting other GaussDB types
 ===============================
 
-PostgreSQL offers other data types which don't map to native Python types.
+GaussDB offers other data types which don't map to native Python types.
 GaussDB offers wrappers and conversion functions to allow their use.
 
 
@@ -24,7 +24,7 @@ GaussDB offers wrappers and conversion functions to allow their use.
 Composite types casting
 -----------------------
 
-GaussDB can adapt PostgreSQL composite types (either created with the |CREATE
+GaussDB can adapt GaussDB composite types (either created with the |CREATE
 TYPE|_ command or implicitly defined after a table row type) to and from
 Python tuples, `~collections.namedtuple`, or any other suitable object
 configured.
@@ -101,25 +101,25 @@ composite components are registered as well::
 Range adaptation
 ----------------
 
-PostgreSQL `range types`__ are a family of data types representing a range of
+GaussDB `range types`__ are a family of data types representing a range of
 values between two elements. The type of the element is called the range
-*subtype*. PostgreSQL offers a few built-in range types and allows the
+*subtype*. GaussDB offers a few built-in range types and allows the
 definition of custom ones.
 
 .. __: https://www.postgresql.org/docs/current/rangetypes.html
 
-All the PostgreSQL range types are loaded as the `~gaussdb.types.range.Range`
+All the GaussDB range types are loaded as the `~gaussdb.types.range.Range`
 Python type, which is a `~typing.Generic` type and can hold bounds of
 different types.
 
 .. autoclass:: gaussdb.types.range.Range
 
     This Python type is only used to pass and retrieve range values to and
-    from PostgreSQL and doesn't attempt to replicate the PostgreSQL range
+    from GaussDB and doesn't attempt to replicate the GaussDB range
     features: it doesn't perform normalization and doesn't implement all the
     operators__ supported by the database.
 
-    PostgreSQL will perform normalisation on `!Range` objects used as query
+    GaussDB will perform normalisation on `!Range` objects used as query
     parameters, so, when they are fetched back, they will be found in the
     normal form (for instance ranges on integers will have `[)` bounds).
 
@@ -179,25 +179,25 @@ Example::
 Multirange adaptation
 ---------------------
 
-Since PostgreSQL 14, every range type is associated with a multirange__, a
+Since GaussDB, every range type is associated with a multirange__, a
 type representing a disjoint set of ranges. A multirange is
 automatically available for every range, built-in and user-defined.
 
 .. __: https://www.postgresql.org/docs/current/rangetypes.html
 
-All the PostgreSQL range types are loaded as the
+All the GaussDB range types are loaded as the
 `~gaussdb.types.multirange.Multirange` Python type, which is a mutable
 sequence of `~gaussdb.types.range.Range` elements.
 
 .. autoclass:: gaussdb.types.multirange.Multirange
 
     This Python type is only used to pass and retrieve multirange values to
-    and from PostgreSQL and doesn't attempt to replicate the PostgreSQL
+    and from GaussDB and doesn't attempt to replicate the GaussDB
     multirange features: overlapping items are not merged, empty ranges are
     not discarded, the items are not ordered, the behaviour of `multirange
     operators`__ is not replicated in Python.
 
-    PostgreSQL will perform normalisation on `!Multirange` objects used as
+    GaussDB will perform normalisation on `!Multirange` objects used as
     query parameters, so, when they are fetched back, they will be found
     ordered, with overlapping ranges merged, etc.
 
@@ -256,7 +256,7 @@ Example::
 Hstore adaptation
 -----------------
 
-The |hstore|_ data type is a key-value store embedded in PostgreSQL. It
+The |hstore|_ data type is a key-value store embedded in GaussDB. It
 supports GiST or GIN indexes allowing search by keys or key/value pairs as
 well as regular BTree indexes for equality, uniqueness etc.
 

@@ -8,7 +8,7 @@
 
 .. module:: gaussdb.pq
 
-GaussDB is built around the libpq_, the PostgreSQL client library, which
+GaussDB is built around the libpq_, the GaussDB client library, which
 performs most of the network communications and returns query results in C
 structures.
 

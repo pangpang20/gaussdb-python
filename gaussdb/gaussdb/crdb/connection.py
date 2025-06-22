@@ -84,7 +84,7 @@ class CrdbConnectionInfo(ConnectionInfo):
         """
         Return the CockroachDB server version connected.
 
-        Return a number in the PostgreSQL format (e.g. 21.2.10 -> 210210).
+        Return a number in the GaussDB format (e.g. 21.2.10 -> 210210).
         """
         sver = self.parameter_status("crdb_version")
         if not sver:

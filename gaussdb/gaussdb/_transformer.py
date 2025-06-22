@@ -1,5 +1,5 @@
 """
-Helper object to transform values between Python and PostgreSQL
+Helper object to transform values between Python and GaussDB
 
 This module exports the requested implementation to the rest of the package.
 """

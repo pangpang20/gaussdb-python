@@ -6,13 +6,13 @@ Data adaptation configuration
 =============================
 
 The adaptation system is at the core of GaussDB and allows to customise the
-way Python objects are converted to PostgreSQL when a query is performed and
-how PostgreSQL values are converted to Python objects when query results are
+way Python objects are converted to GaussDB when a query is performed and
+how GaussDB values are converted to Python objects when query results are
 returned.
 
 .. note::
     For a high-level view of the conversion of types between Python and
-    PostgreSQL please look at :ref:`query-parameters`. Using the objects
+    GaussDB please look at :ref:`query-parameters`. Using the objects
     described in this page is useful if you intend to *customise* the
     adaptation rules.
 
@@ -36,14 +36,14 @@ returned.
 
 - The `!adapters` attributes are `AdaptersMap` instances, and contain the
   mapping from Python types and `~gaussdb.abc.Dumper` classes, and from
-  PostgreSQL OIDs to `~gaussdb.abc.Loader` classes. Changing this mapping
+  GaussDB OIDs to `~gaussdb.abc.Loader` classes. Changing this mapping
   (e.g. writing and registering your own adapters, or using a different
   configuration of builtin adapters) affects how types are converted between
-  Python and PostgreSQL.
+  Python and GaussDB.
 
   - Dumpers (objects implementing the `~gaussdb.abc.Dumper` protocol) are
     the objects used to perform the conversion from a Python object to a bytes
-    sequence in a format understood by PostgreSQL. The string returned
+    sequence in a format understood by GaussDB. The string returned
     *shouldn't be quoted*: the value will be passed to the database using
     functions such as :pq:`PQexecParams()` so quoting and quotes escaping is
     not necessary. The dumper usually also suggests to the server what type to
@@ -51,7 +51,7 @@ returned.
 
   - Loaders (objects implementing the `~gaussdb.abc.Loader` protocol) are
     the objects used to perform the opposite operation: reading a bytes
-    sequence from PostgreSQL and creating a Python object out of it.
+    sequence from GaussDB and creating a Python object out of it.
 
   - Dumpers and loaders are instantiated on demand by a `~Transformer` object
     when a query is executed.
@@ -93,7 +93,7 @@ Postgres and back.
     `~AdaptersMap.register_dumper()` will be used.
 
   - Sometimes, just looking at the Python type is not enough to decide the
-    best PostgreSQL type to use (for instance the PostgreSQL type of a Python
+    best GaussDB type to use (for instance the GaussDB type of a Python
     list depends on the objects it contains, whether to use an :sql:`integer`
     or :sql:`bigint` depends on the number size...) In these cases the
     mechanism provided by `~gaussdb.abc.Dumper.get_key()` and
@@ -110,7 +110,7 @@ Postgres and back.
     GaussDB will select either text loaders or binary loaders (identified by
     their `~gaussdb.abc.Loader.format` attribute).
 
-- Recursive types (e.g. Python lists, PostgreSQL arrays and composite types)
+- Recursive types (e.g. Python lists, GaussDB arrays and composite types)
   will use the same adaptation rules.
 
 As a consequence it is possible to perform certain choices only once per query
@@ -130,7 +130,7 @@ Writing a custom adapter: XML
 
 GaussDB doesn't provide adapters for the XML data type, because there are just
 too many ways of handling XML in Python. Creating a loader to parse the
-`PostgreSQL xml type`__ to `~xml.etree.ElementTree` is very simple, using the
+`GaussDB xml type`__ to `~xml.etree.ElementTree` is very simple, using the
 `gaussdb.adapt.Loader` base class and implementing the
 `~gaussdb.abc.Loader.load()` method:
 
@@ -159,7 +159,7 @@ too many ways of handling XML in Python. Creating a loader to parse the
     >>> elem
     <Element 'book' at 0x7ffb55142ef0>
 
-The opposite operation, converting Python objects to PostgreSQL, is performed
+The opposite operation, converting Python objects to GaussDB, is performed
 by dumpers. The `gaussdb.adapt.Dumper` base class makes it easy to implement one:
 you only need to implement the `~gaussdb.abc.Dumper.dump()` method::
 
@@ -236,10 +236,10 @@ to return `!None` upon empty or whitespace-only strings::
 
 .. _adapt-example-float:
 
-Example: PostgreSQL numeric to Python float
+Example: GaussDB numeric to Python float
 -------------------------------------------
 
-Normally PostgreSQL :sql:`numeric` values are converted to Python
+Normally GaussDB :sql:`numeric` values are converted to Python
 `~decimal.Decimal` instances, because both the types allow fixed-precision
 arithmetic and are not subject to rounding.
 
@@ -251,7 +251,7 @@ errors).
 If you are fine with the potential loss of precision and you simply want to
 receive :sql:`numeric` values as Python `!float`, you can register on
 :sql:`numeric` the same `Loader` class used to load
-:sql:`float4`\/:sql:`float8` values. Because the PostgreSQL textual
+:sql:`float4`\/:sql:`float8` values. Because the GaussDB textual
 representation of both floats and decimal is the same, the two loaders are
 compatible.
 
@@ -277,7 +277,7 @@ Example: handling infinity date
 -------------------------------
 
 Suppose you want to work with the "infinity" date which is available in
-PostgreSQL but not handled by Python:
+GaussDB but not handled by Python:
 
 .. code:: python
 
@@ -286,7 +286,7 @@ PostgreSQL but not handled by Python:
        ...
     DataError: date too large (after year 10K): 'infinity'
 
-One possibility would be to store Python's `datetime.date.max` as PostgreSQL
+One possibility would be to store Python's `datetime.date.max` as GaussDB
 infinity. For this, let's create a subclass for the dumper and the loader and
 register them in the working scope (globally or just on a connection or
 cursor):

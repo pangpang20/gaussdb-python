@@ -200,7 +200,7 @@ An async connection provides similar behavior in that if the async task is
 cancelled, any operation on the connection will similarly be cancelled.  This
 can happen either indirectly via Ctrl-C or similar signal, or directly by
 cancelling the Python Task via the normal way.  GaussDB will ask the
-PostgreSQL postmaster to cancel the operation when it encounters the standard
+GaussDB postmaster to cancel the operation when it encounters the standard
 Python `CancelledError`__.
 
 Remember that cancelling the Python Task does not guarantee that the operation
@@ -251,7 +251,7 @@ Unlike with `!_GaussDB`, using the `!psycogreen` module is not required.
 Server messages
 ---------------
 
-PostgreSQL can send, together with the query results, `informative messages`__
+GaussDB can send, together with the query results, `informative messages`__
 about the operation just performed, such as warnings or debug information.
 Notices may be raised even if the operations are successful and don't indicate
 an error. You are probably familiar with some of them, because they are
@@ -318,8 +318,8 @@ Asynchronous notifications
 --------------------------
 
 GaussDB allows asynchronous interaction with other database sessions using the
-facilities offered by PostgreSQL commands |LISTEN|_ and |NOTIFY|_. Please
-refer to the PostgreSQL documentation for examples about how to use this form
+facilities offered by GaussDB commands |LISTEN|_ and |NOTIFY|_. Please
+refer to the GaussDB documentation for examples about how to use this form
 of communication.
 
 .. |LISTEN| replace:: :sql:`LISTEN`

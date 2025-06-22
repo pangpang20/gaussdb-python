@@ -1,21 +1,7 @@
-gaussdb -- PostgreSQL database adapter for Python
+gaussdb -- GaussDB database adapter for Python
 ===================================================
 
-gaussdb is a modern implementation of a PostgreSQL adapter for Python.
-
-
-Installation
-------------
-
-Quick version::
-
-    pip install --upgrade pip               # upgrade pip to at least 20.3
-    pip install "gaussdb[binary,pool]"      # install binary dependencies
-
-For further information about installation please check `the documentation`__.
-
-.. __: https://www.gaussdb.org/gaussdb/docs/basic/install.html
-
+**gaussdb** is a modern implementation of a GaussDB adapter for Python, based on a fork of `psycopg` with enhancements and renaming.
 
 .. _Hacking:
 
@@ -23,52 +9,90 @@ Hacking
 -------
 
 In order to work on the GaussDB source code, you must have the
-``libpq`` PostgreSQL client library installed on the system. For instance, on
-Debian systems, you can obtain it by running::
+``libpq`` GaussDB client library installed on the system. For instance, on
+EulerOS x86_64 systems, you can obtain it by running::
 
-    sudo apt install libpq5
+    # Update the system package index
+    sudo apt update
 
-On macOS, run::
+    # Install required tools
+    sudo apt install -y wget unzip
 
-    brew install libpq
+    # Download the GaussDB driver package
+    wget -O /tmp/GaussDB_driver.zip https://dbs-download.obs.cn-north-1.myhuaweicloud.com/GaussDB/1730887196055/GaussDB_driver.zip
 
-On Windows you can use EnterpriseDB's `installers`__ to obtain ``libpq``
-which is included in the Command Line Tools.
+    # Extract the driver package and remove the zip file
+    unzip /tmp/GaussDB_driver.zip -d /tmp/
+    rm -rf /tmp/GaussDB_driver.zip
 
-.. __: https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+    # Copy the Python driver tarball to /tmp
+    \cp /tmp/GaussDB_driver/Centralized/Hce2_X86_64/GaussDB-Kernel*64bit_Python.tar.gz /tmp/
+
+    # Extract the driver tarball and clean up
+    tar -zxvf /tmp/GaussDB-Kernel*64bit_Python.tar.gz -C /tmp/
+    rm -rf /tmp/GaussDB-Kernel*64bit_Python.tar.gz
+    rm -rf /tmp/_GaussDB
+    rm -rf /tmp/GaussDB_driver
+
+    # Register /tmp/lib in the dynamic linker configuration
+    echo /tmp/lib | sudo tee /etc/ld.so.conf.d/gauss-libpq.conf
+    sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
+
+    # Refresh the dynamic linker cache
+    sudo ldconfig
+
+    # Verify libpq is registered, the first line should show the path: 
+    # libpq.so.5.5 (libc6,x86-64) => /tmp/lib/libpq.so.5.5
+    ldconfig -p | grep pq
+
+
 
 You can then clone this repository to develop GaussDB::
 
-    git clone https://github.com/gaussdb/gaussdb.git
-    cd gaussdb
+    # Create a new Python virtual environment in the .venv directory
+    python -m venv .venv
+
+    # Activate the virtual environment
+    source .venv/bin/activate
+
+    # Clone the GaussDB Python repository from GitHub
+    # This will create a new directory named gaussdb-python in the current directory
+    git clone https://github.com/HuaweiCloudDeveloper/gaussdb-python.git
+    
+    # Change into the cloned repository directory
+    cd gaussdb-python
 
 Please note that the repository contains the source code of several Python
 packages, which may have different requirements:
 
 - The ``gaussdb`` directory contains the pure python implementation of
-  ``gaussdb``. The package has only a runtime dependency on the ``libpq``, the
-  PostgreSQL client library, which should be installed in your system.
+    ``gaussdb``. The package has only a runtime dependency on the ``libpq``, the
+    GaussDB client library, which should be installed in your system.
 
-- The ``gaussdb_c`` directory contains an optimization module written in
-  C/Cython. In order to build it you will need a few development tools: please
-  look at `Local installation`__ in the docs for the details.
-
-- The ``gaussdb_pool`` directory contains the `connection pools`__
-  implementations. This is kept as a separate package to allow a different
-  release cycle.
-
-.. __: https://www.gaussdb.org/gaussdb/docs/basic/install.html#local-installation
-.. __: https://www.gaussdb.org/gaussdb/docs/advanced/pool.html
+- The ``gaussdb_pool`` directory contains the `connection pools`
+    implementations. This is kept as a separate package to allow a different
+    release cycle.
 
 You can create a local virtualenv and install the packages `in
 development mode`__, together with their development and testing
 requirements::
 
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -e "./gaussdb[dev,test]"    # for the base Python package
-    pip install -e ./gaussdb_pool           # for the connection pool
-    pip install ./gaussdb_c                 # for the C speedup module
+    # Upgrade pip to the latest version to ensure compatibility with modern packages
+    pip install --upgrade pip
+
+    # Install all required dependencies listed in the requirements.txt file
+    pip install -r requirements.txt
+
+    # Install the custom isort plugin located in the tools/isort-gaussdb directory
+    pip install ./tools/isort-gaussdb/
+
+    # Install the main gaussdb package in editable (development) mode, 
+    # along with optional 'dev' and 'test' dependencies
+    pip install -e "./gaussdb[dev,test]"
+
+    # Install the gaussdb_pool package in editable mode (for development and testing)
+    pip install -e ./gaussdb_pool
+
 
 .. __: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
 
@@ -77,27 +101,77 @@ Please add ``--config-settings editable_mode=strict`` to the ``pip install
 
 .. __: https://github.com/pypa/setuptools/issues/3557
 
-Now hack away! You can run the tests using::
+Now hack away! You can run the tests using on GaussDB::
 
-    psql -c 'create database gaussdb_test'
-    export GAUSSDB_TEST_DSN="dbname=gaussdb_test"
-    pytest
+    # Create a new database named "test" with PostgreSQL compatibility enabled
+    gsql -c 'CREATE DATABASE test DBCOMPATIBILITY 'PG' ;'
+
+    # Set the Python import path to include your local GaussDB Python project
+    # Replace your_path with actual values
+    export PYTHONPATH=/your_path/gaussdb-python
+
+    # Select the pure-Python implementation of the GaussDB adapter
+    export PSYCOPG_IMPL=python
+
+    # Set the test DSN (Data Source Name) as an environment variable
+    # Replace db_username, your_password, db_address with actual values
+    export GAUSSDB_TEST_DSN="dbname=test user=db_username password=your_password host=db_address port=8000"
+
+    # Run all tests using pytest, showing verbose output and test durations
+    pytest --durations=0 -s -v
+
+Recommended Steps to Run OpenGauss with Python GaussDB Driver Testing (Assuming Docker is Installed)::
+
+    # Pull the latest OpenGauss server image from Docker Hub
+    docker pull opengauss/opengauss-server:latest
+
+    # Run a new OpenGauss container in the background with:
+    # - custom container name "opengauss-custom"
+    # - privileged mode enabled
+    # - root user credentials set via environment variables
+    # - port 5432 exposed
+    docker run --name opengauss-custom --privileged=true -d \
+    -e GS_USERNAME=root \
+    -e GS_USER_PASSWORD=Passwd@123 \
+    -e GS_PASSWORD=Passwd@123 \
+    -p 5432:5432 \
+    opengauss/opengauss-server:latest
+
+    # Enter the running container with an interactive bash shell
+    docker exec -it opengauss-custom bash
+
+    # Switch to the default OpenGauss database user "omm"
+    su - omm
+
+    # Connect to the OpenGauss database using the gsql client
+    gsql -d postgres -p 5432 -U omm
+
+    -- Create a new database named "test" with PostgreSQL compatibility enabled
+    CREATE DATABASE test DBCOMPATIBILITY 'PG';
+
+
+    # Set the Python import path to include your local GaussDB Python project
+    # Replace your_path with actual values
+    export PYTHONPATH=/your_path/gaussdb-python
+
+    # Select the pure-Python implementation of the GaussDB adapter
+    export PSYCOPG_IMPL=python
+
+    # Set the test DSN (Data Source Name) as an environment variable
+    export GAUSSDB_TEST_DSN="dbname=test user=root password=Passwd@123 host=localhost port=5432"
+
+    # Run all tests using pytest, showing verbose output and test durations
+    pytest --durations=0 -s -v
+
 
 The library includes some pre-commit hooks to check that the code is valid
 according to the project coding convention. Please make sure to install them
 by running::
 
     pre-commit install
+    pre-commit install-hooks
+    pre-commit run --all-files
 
 This will allow to check lint errors before submitting merge requests, which
 will save you time and frustrations.
 
-
-Cross-compiling
----------------
-
-To use cross-platform zipapps created with `shiv`__ that include GaussDB
-as a dependency you must also have ``libpq`` installed. See
-`the section above <Hacking_>`_ for install instructions.
-
-.. __: https://github.com/linkedin/shiv

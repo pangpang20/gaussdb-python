@@ -17,9 +17,29 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger docs build
-        uses: peter-evans/repository-dispatch@v3
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
         with:
-          repository: psycopg/psycopg-website
-          event-type: psycopg3-commit
-          token: ${{ secrets.ACCESS_TOKEN }}
+          python-version: "3.9"
+
+      - name: Install requirements to generate docs
+        run: sudo apt-get install -y libgeos-dev
+
+      - name: Install Python packages to generate docs
+        run: |
+          pip install furo
+          pip install ./tools/isort-gaussdb/
+          pip install ./gaussdb[dev,test]
+          pip install ./gaussdb_pool
+          pip install types-polib
+
+      - name: Check documentation
+        run: sphinx-build -W -T -b html docs docs/_build/html
+
+      - name: Upload built documentation as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gaussdb-docs-html
+          path: docs/_build/html

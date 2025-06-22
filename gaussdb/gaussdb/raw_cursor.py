@@ -13,7 +13,7 @@ from .sql import Composable
 from .rows import Row
 from ._enums import PyFormat
 from .cursor import Cursor
-from ._queries import PostgresQuery
+from ._queries import GaussDBQuery
 from ._cursor_base import BaseCursor
 from .cursor_async import AsyncCursor
 from .server_cursor import AsyncServerCursor, ServerCursor
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from .connection_async import AsyncConnection  # noqa: F401
 
 
-class PostgresRawQuery(PostgresQuery):
+class GaussDBRawQuery(GaussDBQuery):
     def convert(self, query: Query, vars: Params | None) -> None:
         if isinstance(query, str):
             bquery = query.encode(self._encoding)
@@ -40,7 +40,7 @@ class PostgresRawQuery(PostgresQuery):
 
     def dump(self, vars: Params | None) -> None:
         if vars is not None:
-            if not PostgresQuery.is_params_sequence(vars):
+            if not GaussDBQuery.is_params_sequence(vars):
                 raise TypeError("raw queries require a sequence of parameters")
             self._want_formats = [PyFormat.AUTO] * len(vars)
 
@@ -54,7 +54,7 @@ class PostgresRawQuery(PostgresQuery):
 
 
 class RawCursorMixin(BaseCursor[ConnectionType, Row]):
-    _query_cls = PostgresRawQuery
+    _query_cls = GaussDBRawQuery
 
 
 class RawCursor(RawCursorMixin["Connection[Any]", Row], Cursor[Row]):

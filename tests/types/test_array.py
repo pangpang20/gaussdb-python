@@ -12,7 +12,7 @@ import gaussdb.types.numeric
 from gaussdb import pq, sql
 from gaussdb.adapt import Dumper, PyFormat, Transformer
 from gaussdb.types import TypeInfo
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 from gaussdb.types.array import register_array
 
 from ..test_adapt import StrNoneBinaryDumper, StrNoneDumper
@@ -281,7 +281,7 @@ def test_dump_list_no_comma_separator(conn):
 
     class BoxDumper(Dumper):
         format = pq.Format.TEXT
-        oid = gaussdb.postgres.types["box"].oid
+        oid = gaussdb.gaussdb_.types["box"].oid
 
         def dump(self, box):
             return ("(%s,%s),(%s,%s)" % box.coords).encode()

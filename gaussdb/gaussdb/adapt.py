@@ -26,7 +26,7 @@ ORD_BS = ord("\\")
 
 class Dumper(abc.Dumper, ABC):
     """
-    Convert Python object of the type `!cls` to PostgreSQL representation.
+    Convert Python object of the type `!cls` to GaussDB representation.
     """
 
     oid: int = 0
@@ -100,7 +100,7 @@ class Dumper(abc.Dumper, ABC):
         `~gaussdb.abc.Dumper` protocol. Look at its definition for details.
 
         This implementation returns the `!cls` passed in the constructor.
-        Subclasses needing to specialise the PostgreSQL type according to the
+        Subclasses needing to specialise the GaussDB type according to the
         *value* of the object dumped (not only according to to its type)
         should override this class.
 
@@ -120,7 +120,7 @@ class Dumper(abc.Dumper, ABC):
 
 class Loader(abc.Loader, ABC):
     """
-    Convert PostgreSQL values with type OID `!oid` to Python objects.
+    Convert GaussDB values with type OID `!oid` to Python objects.
     """
 
     format: pq.Format = pq.Format.TEXT
@@ -133,7 +133,7 @@ class Loader(abc.Loader, ABC):
 
     @abstractmethod
     def load(self, data: Buffer) -> Any:
-        """Convert a PostgreSQL value to a Python object."""
+        """Convert a GaussDB value to a Python object."""
         ...
 
 

@@ -8,11 +8,11 @@ import pytest
 
 import gaussdb
 from gaussdb import errors as e
-from gaussdb import postgres, pq, sql
+from gaussdb import gaussdb_, pq, sql
 from gaussdb.abc import Buffer
 from gaussdb.adapt import Dumper, Loader, PyFormat, Transformer
 from gaussdb._cmodule import _gaussdb
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 from gaussdb.types.array import ListBinaryDumper, ListDumper
 from gaussdb.types.string import StrBinaryDumper, StrDumper
 
@@ -391,7 +391,7 @@ def test_return_untyped(conn, fmt_in):
     # Analyze and check for changes using strings in untyped/typed contexts
     cur = conn.cursor()
     # Currently string are passed as unknown oid to libpq. This is because
-    # unknown is more easily cast by postgres to different types (see jsonb
+    # unknown is more easily cast by gaussdb to different types (see jsonb
     # later).
     cur.execute(f"select %{fmt_in.value}, %{fmt_in.value}", ["hello", 10])
     assert cur.fetchone() == ("hello", 10)
@@ -433,7 +433,7 @@ def test_optimised_adapters():
 
     # All the registered adapters
     reg_adapters = set()
-    adapters = list(postgres.adapters._dumpers.values()) + postgres.adapters._loaders
+    adapters = list(gaussdb_.adapters._dumpers.values()) + gaussdb_.adapters._loaders
     assert len(adapters) == 5
     for m in adapters:
         reg_adapters |= set(m.values())

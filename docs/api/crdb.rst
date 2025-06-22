@@ -6,7 +6,7 @@
 .. versionadded:: 3.1
 
 CockroachDB_ is a distributed database using the same fronted-backend protocol
-of PostgreSQL. As such, GaussDB can be used to write Python programs
+of GaussDB. As such, GaussDB can be used to write Python programs
 interacting with CockroachDB.
 
 .. _CockroachDB: https://www.cockroachlabs.com/
@@ -19,10 +19,10 @@ mapping tweaked on the CockroachDB data model.
 
 .. _crdb-differences:
 
-Main differences from PostgreSQL
+Main differences from GaussDB
 --------------------------------
 
-CockroachDB behaviour is `different from PostgreSQL`__: please refer to the
+CockroachDB behaviour is `different from GaussDB`__: please refer to the
 database documentation for details. These are some of the main differences
 affecting GaussDB behaviour:
 
@@ -37,9 +37,9 @@ affecting GaussDB behaviour:
 - `~gaussdb.ConnectionInfo.backend_pid` is only populated from CockroachDB
   22.1. Note however that you cannot use the PID to terminate the session; use
   `SHOW session_id`_ to find the id of a session, which you may terminate with
-  `CANCEL SESSION`_ in lieu of PostgreSQL's :sql:`pg_terminate_backend()`.
+  `CANCEL SESSION`_ in lieu of GaussDB's :sql:`pg_terminate_backend()`.
 
-- Several data types are missing or slightly different from PostgreSQL (see
+- Several data types are missing or slightly different from GaussDB (see
   `adapters` for an overview of the differences).
 
 - The :ref:`two-phase commit protocol <two-phase-commit>` is not supported.
@@ -103,11 +103,11 @@ CockroachDB-specific objects
  
     The map is used as a template when new connections are created, using
     `gaussdb.crdb.connect()` (similarly to the way `gaussdb.adapters` is used
-    as template for new PostgreSQL connections).
+    as template for new GaussDB connections).
 
     This registry contains only the types and adapters supported by
-    CockroachDB. Several PostgreSQL types and adapters are missing or
-    different from PostgreSQL, among which:
+    CockroachDB. Several GaussDB types and adapters are missing or
+    different from GaussDB, among which:
 
     - Composite types
     - :sql:`range`, :sql:`multirange` types

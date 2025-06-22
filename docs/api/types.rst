@@ -9,13 +9,13 @@
 
 The `!gaussdb.types` package exposes:
 
-- objects to describe PostgreSQL types, such as `TypeInfo`, `TypesRegistry`,
+- objects to describe GaussDB types, such as `TypeInfo`, `TypesRegistry`,
   to help or :ref:`customise the types conversion <adaptation>`;
 
 - concrete implementations of `~gaussdb.abc.Loader` and `~gaussdb.abc.Dumper`
   protocols to :ref:`handle builtin data types <types-adaptation>`;
 
-- helper objects to represent PostgreSQL data types which :ref:`don't have a
+- helper objects to represent GaussDB data types which :ref:`don't have a
   straightforward Python representation <extra-adaptation>`, such as
   `~range.Range`.
 
@@ -23,7 +23,7 @@ The `!gaussdb.types` package exposes:
 Types information
 -----------------
 
-The `TypeInfo` object describes simple information about a PostgreSQL data
+The `TypeInfo` object describes simple information about a GaussDB data
 type, such as its name, oid and array oid. `!TypeInfo` subclasses may hold more
 information, for instance the components of a composite type.
 
@@ -32,7 +32,7 @@ which is then used by helper functions, such as
 `~gaussdb.types.hstore.register_hstore()`, to register adapters on types whose
 OID is not known upfront or to create more specialised adapters.
 
-The `!TypeInfo` object doesn't instruct GaussDB to convert a PostgreSQL type
+The `!TypeInfo` object doesn't instruct GaussDB to convert a GaussDB type
 into a Python type: this is the role of a `~gaussdb.abc.Loader`. However it
 can extend the behaviour of other adapters: if you create a loader for
 `!MyType`, using the `TypeInfo` information, GaussDB will be able to manage
@@ -40,7 +40,7 @@ seamlessly arrays of `!MyType` or ranges and composite types using `!MyType`
 as a subtype.
 
 .. seealso:: :ref:`adaptation` describes how to convert from Python objects to
-    PostgreSQL types and back.
+    GaussDB types and back.
 
 .. code:: python
 
@@ -101,7 +101,7 @@ as a subtype.
         database as a list of the base type.
 
 
-In order to get information about dynamic PostgreSQL types, GaussDB offers a
+In order to get information about dynamic GaussDB types, GaussDB offers a
 few `!TypeInfo` subclasses, whose `!fetch()` method can extract more complete
 information about the type, such as `~gaussdb.types.composite.CompositeInfo`,
 `~gaussdb.types.range.RangeInfo`, `~gaussdb.types.multirange.MultirangeInfo`,
@@ -156,7 +156,7 @@ See :ref:`adapt-json` for details.
 .. autoclass:: Json
 .. autoclass:: Jsonb
 
-Wrappers to signal to convert `!obj` to a json or jsonb PostgreSQL value.
+Wrappers to signal to convert `!obj` to a json or jsonb GaussDB value.
 
 Any object supported by the underlying `!dumps()` function can be wrapped.
 

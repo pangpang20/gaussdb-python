@@ -24,11 +24,11 @@ RV = TypeVar("RV")
 
 class AdaptersMap:
     r"""
-    Establish how types should be converted between Python and PostgreSQL in
+    Establish how types should be converted between Python and GaussDB in
     an `~gaussdb.abc.AdaptContext`.
 
     `!AdaptersMap` maps Python types to `~gaussdb.adapt.Dumper` classes to
-    define how Python types are converted to PostgreSQL, and maps OIDs to
+    define how Python types are converted to GaussDB, and maps OIDs to
     `~gaussdb.adapt.Loader` classes to establish how query results are
     converted to Python.
 
@@ -127,7 +127,7 @@ class AdaptersMap:
         ``"uuid.UUID"``).
 
         If `!cls` is None, only use the dumper when looking up using
-        `get_dumper_by_oid()`, which happens when we know the Postgres type to
+        `get_dumper_by_oid()`, which happens when we know the GaussDB type to
         adapt to, but not the Python type that will be adapted (e.g. in COPY
         after using `~gaussdb.Copy.set_types()`).
 
@@ -164,7 +164,7 @@ class AdaptersMap:
         """
         Configure the context to use `!loader` to convert data of oid `!oid`.
 
-        :param oid: The PostgreSQL OID or type name to manage.
+        :param oid: The GaussDB OID or type name to manage.
         :param loader: The loar to register for `!oid`.
 
         If `oid` is specified as string, it refers to a type name, which is
