@@ -190,16 +190,18 @@ def test_registry_invalid_oid(oid, aoid):
 
 
 def test_registry_copy():
-    r = gaussdb.types.TypesRegistry(gaussdb.postgres.types)
+    r = gaussdb.types.TypesRegistry(gaussdb.gaussdb_.types)
     assert r.get("text") is r["text"] is r[25]
     assert r["text"].oid == 25
 
 
 def test_registry_isolated():
-    orig = gaussdb.postgres.types
+    orig = gaussdb.gaussdb_.types
+    print(f"orig._registry={orig._registry}")
     tinfo = orig["text"]
     r = gaussdb.types.TypesRegistry(orig)
     tdummy = gaussdb.types.TypeInfo("dummy", tinfo.oid, tinfo.array_oid)
     r.add(tdummy)
+    print(f"orig={orig},tinfo={tinfo},r={r},tdummy={tdummy}")
     assert r[25] is r["dummy"] is tdummy
     assert orig[25] is r["text"] is tinfo
