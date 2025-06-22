@@ -73,10 +73,10 @@ results in the following two groups of messages:
     |               |   :ref:`the statement is prepared <prepared-statements>`) |
     | |>|           | - Bind ``'hello'``                                        |
     |               | - Describe                                                |
-    | GaussDB    | - Execute                                                 |
+    | GaussDB       | - Execute                                                 |
     |               | - Sync                                                    |
     +---------------+-----------------------------------------------------------+
-    | GaussDB    | - ParseComplete                                           |
+    | GaussDB       | - ParseComplete                                           |
     |               | - BindComplete                                            |
     | |<|           | - NoData                                                  |
     |               | - CommandComplete ``INSERT 0 1``                          |
