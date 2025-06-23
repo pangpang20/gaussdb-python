@@ -1,11 +1,11 @@
 """
-PostgreSQL type modifiers.
+GaussDB type modifiers.
 
 The type modifiers parse catalog information to obtain the type modifier
 of a column - the numeric part of varchar(10) or decimal(6,2).
 """
 
-# Copyright (C) 2024 The GaussDB Team
+# Copyright (C) 2024 The Psycopg Team
 
 from __future__ import annotations
 

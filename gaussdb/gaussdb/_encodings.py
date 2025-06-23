@@ -1,8 +1,8 @@
 """
-Mappings between PostgreSQL and Python encodings.
+Mappings between GaussDB and Python encodings.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ _py_codecs = {
     # "MULE_INTERNAL": not available in Python
     "SHIFT_JIS_2004": "shift_jis_2004",
     "SJIS": "shift_jis",
-    # this actually means no encoding, see PostgreSQL docs
+    # this actually means no encoding, see GaussDB docs
     # it is special-cased by the text loader.
     "SQL_ASCII": "ascii",
     "UHC": "cp949",
@@ -110,7 +110,7 @@ def conninfo_encoding(conninfo: str) -> str:
 
 @cache
 def py2pgenc(name: str) -> bytes:
-    """Convert a Python encoding name to PostgreSQL encoding name.
+    """Convert a Python encoding name to GaussDB encoding name.
 
     Raise LookupError if the Python encoding is unknown.
     """
@@ -119,9 +119,9 @@ def py2pgenc(name: str) -> bytes:
 
 @cache
 def pg2pyenc(name: bytes) -> str:
-    """Convert a PostgreSQL encoding name to Python encoding name.
+    """Convert a GaussDB encoding name to Python encoding name.
 
-    Raise NotSupportedError if the PostgreSQL encoding is not supported by
+    Raise NotSupportedError if the GaussDB encoding is not supported by
     Python.
     """
     try:

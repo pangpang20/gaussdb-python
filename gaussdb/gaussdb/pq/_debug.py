@@ -26,7 +26,7 @@ Suggested usage::
 
 """
 
-# Copyright (C) 2022 The GaussDB Team
+# Copyright (C) 2022 The Psycopg Team
 
 import inspect
 import logging

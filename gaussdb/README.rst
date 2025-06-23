@@ -1,7 +1,7 @@
-gaussdb: PostgreSQL database adapter for Python
+gaussdb: GaussDB database adapter for Python
 =================================================
 
-gaussdb is a modern implementation of a PostgreSQL adapter for Python.
+gaussdb is a modern implementation of a GaussDB adapter for Python.
 
 This distribution contains the pure Python package ``gaussdb``.
 
@@ -14,7 +14,6 @@ This distribution contains the pure Python package ``gaussdb``.
     using _GaussDB as a dependency. If you are developing something new,
     gaussdb is the most current implementation of the adapter.
 
-    .. _psycopg2: https://pypi.org/project/_GaussDB/
 
 
 Installation
@@ -23,20 +22,16 @@ Installation
 In short, run the following::
 
     pip install --upgrade pip           # to upgrade pip
-    pip install "gaussdb[binary,pool]"  # to install package and dependencies
+    pip install "gaussdb[dev,pool]"  # to install package and dependencies
 
 If something goes wrong, and for more information about installation, please
-check out the `Installation documentation`__.
-
-.. __: https://www.gaussdb.org/gaussdb/docs/basic/install.html#
+check out the `Installation documentation`.
 
 
 Hacking
 -------
 
-For development information check out `the project readme`__.
-
-.. __: https://github.com/gaussdb/gaussdb#readme
+For development information check out `the project readme`.
 
 
-Copyright (C) 2020 The GaussDB Team
+Copyright (C) 2020 The Psycopg Team

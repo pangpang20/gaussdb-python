@@ -2,7 +2,7 @@
 Support for range types adaptation.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from functools import cache
 
 from .. import _oids
 from .. import errors as e
-from .. import postgres, sql
+from .. import gaussdb_, sql
 from ..pq import Format
 from ..abc import AdaptContext, Buffer, Dumper, DumperKey, DumpFunc, LoadFunc, Query
 from .._oids import INVALID_OID, TEXT_OID
@@ -71,7 +71,7 @@ WHERE t.oid = {regtype}
 
 
 class Range(Generic[T]):
-    """Python representation for a PostgreSQL range type.
+    """Python representation for a GaussDB range type.
 
     :param lower: lower bound for the range. `!None` means unbound
     :param upper: upper bound for the range. `!None` means unbound
@@ -215,7 +215,7 @@ class Range(Generic[T]):
     def __hash__(self) -> int:
         return hash((self._lower, self._upper, self._bounds))
 
-    # as the postgres docs describe for the server-side stuff,
+    # as the gaussdb docs describe for the server-side stuff,
     # ordering is rather arbitrary, but will remain stable
     # and consistent.
 
@@ -314,7 +314,7 @@ class BaseRangeDumper(RecursiveDumper):
 
         dumper: BaseRangeDumper
         if type(item) is int:
-            # postgres won't cast int4range -> int8range so we must use
+            # gaussdb won't cast int4range -> int8range so we must use
             # text format and unknown oid here
             sd = self._tx.get_dumper(item, PyFormat.TEXT)
             dumper = RangeDumper(self.cls, self._tx)
@@ -583,7 +583,7 @@ def register_range(info: RangeInfo, context: AdaptContext | None = None) -> None
     # Register arrays and type info
     info.register(context)
 
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     # generate and register a customized text loader
     loader: type[BaseRangeLoader[Any]]

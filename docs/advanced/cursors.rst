@@ -8,7 +8,7 @@
 Cursor types
 ============
 
-Cursors are objects used to send commands to a PostgreSQL connection and to
+Cursors are objects used to send commands to a GaussDB connection and to
 manage the results returned by it. They are normally created by the
 connection's `~Connection.cursor()` method.
 
@@ -27,7 +27,7 @@ aspects such as:
   performance in everyday usage.
 
 - Are queries manipulated by Python (to handle placeholders in ``%s`` and
-  ``%(name)s`` Python-style) or sent as they are to the PostgreSQL server
+  ``%(name)s`` Python-style) or sent as they are to the GaussDB server
   (which only supports ``$1``, ``$2`` parameters)?
 
 GaussDB exposes the following classes to implement the different strategies.
@@ -94,7 +94,7 @@ server-side; in particular no Data Definition Language query can. See
 
 The `ClientCursor` (and its `AsyncClientCursor` async counterpart) merge the
 query on the client and send the query and the parameters merged together to
-the server. This allows to parametrize any type of PostgreSQL statement, not
+the server. This allows to parametrize any type of GaussDB statement, not
 only queries (:sql:`SELECT`) and Data Manipulation statements (:sql:`INSERT`,
 :sql:`UPDATE`, :sql:`DELETE`).
 
@@ -156,7 +156,7 @@ Simple query protocol
 
 Using the `!ClientCursor` should ensure that gaussdb will always use the
 `simple query protocol`__ for querying. In most cases, the choice of the
-fronted/backend protocol used is transparent on PostgreSQL. However, in some
+fronted/backend protocol used is transparent on GaussDB. However, in some
 case using the simple query protocol is mandatory. This is the case querying
 the `PgBouncer admin console`__ for instance, which doesn't support the
 extended query protocol.
@@ -199,7 +199,7 @@ extended query protocol.
 Server-side cursors
 -------------------
 
-PostgreSQL has its own concept of *cursor* too (sometimes also called
+GaussDB has its own concept of *cursor* too (sometimes also called
 *portal*). When a database cursor is created, the query is not necessarily
 completely processed: the server might be able to produce results only as they
 are needed. Only the results requested are transmitted to the client: if the
@@ -227,7 +227,7 @@ result is needed.
 .. seealso::
 
     Server-side cursors are created and managed by `ServerCursor` using SQL
-    commands such as DECLARE_, FETCH_, MOVE_. The PostgreSQL documentation
+    commands such as DECLARE_, FETCH_, MOVE_. The GaussDB documentation
     gives a good idea of what is possible to do with them.
 
     .. _DECLARE: https://www.postgresql.org/docs/current/sql-declare.html
@@ -282,10 +282,10 @@ Raw query cursors
 
 .. versionadded:: 3.2
 
-The `RawCursor` and `AsyncRawCursor` classes allow users to use PostgreSQL
+The `RawCursor` and `AsyncRawCursor` classes allow users to use GaussDB
 native placeholders (``$1``, ``$2``, etc.) in their queries instead of the
 standard ``%s`` placeholder. This can be useful when it's desirable to pass
-the query unmodified to PostgreSQL and rely on PostgreSQL's placeholder
+the query unmodified to GaussDB and rely on GaussDB's placeholder
 functionality, such as when dealing with a very complex query containing
 ``%s`` inside strings, dollar-quoted strings or elsewhere.
 
@@ -295,7 +295,7 @@ in the form of a list or tuple. This means you cannot use named arguments
 
 `!RawCursor` behaves like `Cursor`, in returning the complete result from the
 server to the client. The `RawServerCursor` and `AsyncRawServerCursor`
-implement :ref:`server-side-cursors` with raw PostgreSQL placeholders.
+implement :ref:`server-side-cursors` with raw GaussDB placeholders.
 
 There are two ways to use raw query cursors:
 

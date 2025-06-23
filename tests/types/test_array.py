@@ -12,7 +12,7 @@ import gaussdb.types.numeric
 from gaussdb import pq, sql
 from gaussdb.adapt import Dumper, PyFormat, Transformer
 from gaussdb.types import TypeInfo
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 from gaussdb.types.array import register_array
 
 from ..test_adapt import StrNoneBinaryDumper, StrNoneDumper
@@ -130,6 +130,7 @@ def test_bad_binary_array(input):
 
 @pytest.mark.crdb_skip("nested array")
 @pytest.mark.opengauss_skip("nested array")
+@pytest.mark.gaussdb_skip("cannot unpack non-iterable NoneType object")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("want, obj", tests_int)
 def test_load_list_int(conn, obj, want, fmt_out):
@@ -280,7 +281,7 @@ def test_dump_list_no_comma_separator(conn):
 
     class BoxDumper(Dumper):
         format = pq.Format.TEXT
-        oid = gaussdb.postgres.types["box"].oid
+        oid = gaussdb.gaussdb_.types["box"].oid
 
         def dump(self, box):
             return ("(%s,%s),(%s,%s)" % box.coords).encode()

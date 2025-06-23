@@ -2,7 +2,7 @@
 dict to hstore adaptation
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import re
 from functools import cache
 
 from .. import errors as e
-from .. import postgres
+from .. import gaussdb_
 from ..abc import AdaptContext, Buffer
 from .._oids import TEXT_OID
 from ..adapt import PyFormat, RecursiveDumper, RecursiveLoader
@@ -120,7 +120,7 @@ def register_hstore(info: TypeInfo, context: AdaptContext | None = None) -> None
     # Register arrays and type info
     info.register(context)
 
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     # Generate and register a customized text dumper
     adapters.register_dumper(dict, _make_hstore_dumper(info.oid))

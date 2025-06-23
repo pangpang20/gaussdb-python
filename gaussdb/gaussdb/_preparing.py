@@ -2,7 +2,7 @@
 Support for prepared statements
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from collections.abc import Sequence
 from . import pq
 from .abc import PQGen
 from ._compat import TypeAlias
-from ._queries import PostgresQuery
+from ._queries import GaussDBQuery
 
 if TYPE_CHECKING:
     from .pq.abc import PGresult
@@ -52,11 +52,11 @@ class PrepareManager:
         self._to_flush = deque["bytes | None"]()
 
     @staticmethod
-    def key(query: PostgresQuery) -> Key:
+    def key(query: GaussDBQuery) -> Key:
         return (query.query, query.types)
 
     def get(
-        self, query: PostgresQuery, prepare: bool | None = None
+        self, query: GaussDBQuery, prepare: bool | None = None
     ) -> tuple[Prepare, bytes]:
         """
         Check if a query is prepared, tell back whether to prepare it.
@@ -84,7 +84,7 @@ class PrepareManager:
     def _should_discard(self, prep: Prepare, results: Sequence[PGresult]) -> bool:
         """Check if we need to discard our entire state: it should happen on
         rollback or on dropping objects, because the same object may get
-        recreated and postgres would fail internal lookups.
+        recreated and gaussdb would fail internal lookups.
         """
         if self._names or prep == Prepare.SHOULD:
             for result in results:
@@ -123,7 +123,7 @@ class PrepareManager:
             self._to_flush.append(name)
 
     def maybe_add_to_cache(
-        self, query: PostgresQuery, prep: Prepare, name: bytes
+        self, query: GaussDBQuery, prep: Prepare, name: bytes
     ) -> Key | None:
         """Handle 'query' for possible addition to the cache.
 

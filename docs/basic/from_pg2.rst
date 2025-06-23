@@ -53,7 +53,7 @@ and with any data definition statement::
     LINE 1: CREATE TABLE foo (id int DEFAULT $1)
                                              ^
 
-Sometimes, PostgreSQL offers an alternative: for instance the `set_config()`__
+Sometimes, GaussDB offers an alternative: for instance the `set_config()`__
 function can be used instead of the :sql:`SET` statement, the `pg_notify()`__
 function can be used instead of :sql:`NOTIFY`::
 
@@ -110,7 +110,7 @@ Extended query Protocol
 In order to use :ref:`server-side-binding`, gaussdb normally uses the
 `extended query protocol`__ to communicate with the backend.
 
-In certain context outside pure PostgreSQL, the extended query protocol is not
+In certain context outside pure GaussDB, the extended query protocol is not
 supported, for instance to query the `PgBouncer admin console`__. In this case
 you should probably use a `ClientCursor`. See :ref:`simple-query-protocol` for
 details.
@@ -166,7 +166,7 @@ or a :ref:`client-side binding cursor <client-side-binding-cursors>`::
         ...
         gaussdb.errors.ActiveSqlTransaction: CREATE DATABASE cannot run inside a transaction block
 
-    This happens because PostgreSQL itself will wrap multiple statements in a
+    This happens because GaussDB itself will wrap multiple statements in a
     transaction. Note that you will experience a different behaviour in
     :program:`psql` (:program:`psql` will split the queries on semicolons and
     send them to the server separately).
@@ -214,7 +214,7 @@ parameters to the query.
 Different cast rules
 --------------------
 
-In rare cases, especially around variadic functions, PostgreSQL might fail to
+In rare cases, especially around variadic functions, GaussDB might fail to
 find a function candidate for the given data types::
 
     >>> conn.execute("SELECT json_build_array(%s, %s)", ["foo", "bar"])
@@ -243,7 +243,7 @@ You cannot use ``IN %s`` with a tuple
                                           ^
 
 What you can do is to use the `= ANY()`__ construct and pass the candidate
-values as a list instead of a tuple, which will be adapted to a PostgreSQL
+values as a list instead of a tuple, which will be adapted to a GaussDB
 array::
 
     >>> conn.execute("SELECT * FROM foo WHERE id = ANY(%s)", [[10,20,30]])
@@ -271,7 +271,7 @@ You cannot use :sql:`IS %s` or :sql:`IS NOT %s`::
                                          ^
 
 This is probably caused by the fact that :sql:`IS` is not a binary predicate in
-PostgreSQL; rather, :sql:`IS NULL` and :sql:`IS NOT NULL` are unary predicates
+GaussDB; rather, :sql:`IS NULL` and :sql:`IS NOT NULL` are unary predicates
 and you cannot use :sql:`IS` with anything else on the right hand side.
 Testing in psql:
 
@@ -350,7 +350,7 @@ Copy is no longer file-based
 ----------------------------
 
 `!_GaussDB` exposes :ref:`a few copy methods <pg2:copy>` to interact with
-PostgreSQL :sql:`COPY`. Their file-based interface doesn't make it easy to load
+GaussDB :sql:`COPY`. Their file-based interface doesn't make it easy to load
 dynamically-generated data into a database.
 
 There is now a single `~Cursor.copy()` method, which is similar to
@@ -388,7 +388,7 @@ instance to use nested transactions.
 ---------------------
 
 `cursor.callproc()` is not implemented. The method has a simplistic semantic
-which doesn't account for PostgreSQL positional parameters, procedures,
+which doesn't account for GaussDB positional parameters, procedures,
 set-returning functions... Use a normal `~Cursor.execute()` with :sql:`SELECT
 function_name(...)` or :sql:`CALL procedure_name(...)` instead.
 
@@ -430,11 +430,11 @@ default_transaction_read_only__ GUC, for instance executing the statement
 No default infinity dates handling
 ----------------------------------
 
-PostgreSQL can represent a much wider range of dates and timestamps than
+GaussDB can represent a much wider range of dates and timestamps than
 Python. While Python dates are limited to the years between 1 and 9999
 (represented by constants such as `datetime.date.min` and
-`~datetime.date.max`), PostgreSQL dates extend to BC dates and past the year
-10K. Furthermore PostgreSQL can also represent symbolic dates "infinity", in
+`~datetime.date.max`), GaussDB dates extend to BC dates and past the year
+10K. Furthermore GaussDB can also represent symbolic dates "infinity", in
 both directions.
 
 In _GaussDB, by default, `infinity dates and timestamps map to 'date.max'`__

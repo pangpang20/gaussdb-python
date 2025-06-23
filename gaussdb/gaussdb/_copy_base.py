@@ -2,7 +2,7 @@
 gaussdb copy support
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -120,10 +120,10 @@ class BaseCopy(Generic[ConnectionType]):
         """
         Set the types expected in a COPY operation.
 
-        The types must be specified as a sequence of oid or PostgreSQL type
+        The types must be specified as a sequence of oid or GaussDB type
         names (e.g. ``int4``, ``timestamptz[]``).
 
-        This operation overcomes the lack of metadata returned by PostgreSQL
+        This operation overcomes the lack of metadata returned by GaussDB
         when a COPY operation begins:
 
         - On :sql:`COPY TO`, `!set_types()` allows to specify what types the
@@ -132,7 +132,7 @@ class BaseCopy(Generic[ConnectionType]):
 
         - On :sql:`COPY FROM`, `!set_types()` allows to choose what type the
           database expects. This is especially useful in binary copy, because
-          PostgreSQL will apply no cast rule.
+          GaussDB will apply no cast rule.
 
         """
         registry = self.cursor.adapters.types

@@ -4,7 +4,7 @@ Cursor classes
 ==============
 
 The `Cursor` and `AsyncCursor` classes are the main objects to send commands
-to a PostgreSQL database session. They are normally created by the
+to a GaussDB database session. They are normally created by the
 connection's `~Connection.cursor()` method.
 
 Using the `!name` parameter on `!cursor()` will create a `ServerCursor` or
@@ -115,7 +115,7 @@ The `!Cursor` class
 
             A typical use case for `!executemany(returning=True)` might be to
             insert a bunch of records and to retrieve the primary keys
-            inserted, taken from a PostgreSQL sequence. In order to do so, you
+            inserted, taken from a GaussDB sequence. In order to do so, you
             may execute a query such as :sql:`INSERT INTO table VALUES (...)
             RETURNING id`. Because every :sql:`INSERT` is guaranteed to insert
             exactly a single record, you can obtain the list of the new ids
@@ -170,7 +170,7 @@ The `!Cursor` class
     .. automethod:: stream
 
         This command is similar to execute + iter; however it supports endless
-        data streams. The feature is not available in PostgreSQL, but some
+        data streams. The feature is not available in GaussDB, but some
         implementations exist: Materialize `SUBSCRIBE`__ and CockroachDB
         `CHANGEFEED`__ for instance.
 
@@ -289,11 +289,11 @@ The `!Cursor` class
     .. attribute:: _query
 
         An helper object used to convert queries and parameters before sending
-        them to PostgreSQL.
+        them to GaussDB.
 
         .. note::
             This attribute is exposed because it might be helpful to debug
-            problems when the communication between Python and PostgreSQL
+            problems when the communication between Python and GaussDB
             doesn't work as expected. For this reason, the attribute is
             available when a query fails too.
 
@@ -309,15 +309,15 @@ The `!Cursor` class
 
         Among the properties currently exposed by this object:
 
-        - `!query` (`!bytes`): the query effectively sent to PostgreSQL. It
+        - `!query` (`!bytes`): the query effectively sent to GaussDB. It
           will have Python placeholders (``%s``\-style) replaced with
-          PostgreSQL ones (``$1``, ``$2``\-style).
+          GaussDB ones (``$1``, ``$2``\-style).
 
         - `!params` (sequence of `!bytes`): the parameters passed to
-          PostgreSQL, adapted to the database format.
+          GaussDB, adapted to the database format.
 
         - `!types` (sequence of `!int`): the OID of the parameters passed to
-          PostgreSQL.
+          GaussDB.
 
         - `!formats` (sequence of `pq.Format`): whether the parameter format
           is text or binary.
@@ -355,7 +355,7 @@ The `!ServerCursor` class
 
     This class also implements a `DBAPI-compliant interface`__. It is created
     by `Connection.cursor()` specifying the `!name` parameter. Using this
-    object results in the creation of an equivalent PostgreSQL cursor in the
+    object results in the creation of an equivalent GaussDB cursor in the
     server. DBAPI-extension methods (such as `~Cursor.copy()` or
     `~Cursor.stream()`) are not implemented on this object: use a normal
     `Cursor` instead.
@@ -368,12 +368,12 @@ The `!ServerCursor` class
     .. autoattribute:: name
     .. autoattribute:: scrollable
 
-       .. seealso:: The PostgreSQL DECLARE_ statement documentation
+       .. seealso:: The GaussDB DECLARE_ statement documentation
           for the description of :sql:`[NO] SCROLL`.
 
     .. autoattribute:: withhold
 
-       .. seealso:: The PostgreSQL DECLARE_ statement documentation
+       .. seealso:: The GaussDB DECLARE_ statement documentation
           for the description of :sql:`{WITH|WITHOUT} HOLD`.
 
     .. _DECLARE: https://www.postgresql.org/docs/current/sql-declare.html
@@ -446,7 +446,7 @@ The `!ServerCursor` class
         operations. If you need to scroll backwards you should probably
         call `~Connection.cursor()` using `scrollable=True`.
 
-        Note that PostgreSQL doesn't provide a reliable way to report when a
+        Note that GaussDB doesn't provide a reliable way to report when a
         cursor moves out of bound, so the method might not raise `!IndexError`
         when it happens, but it might rather stop at the cursor boundary.
 
@@ -461,7 +461,7 @@ The `!RawCursor` and `!RawServerCursor` class
 .. autoclass:: RawCursor
 
     This `Cursor` subclass has the same interface of the parent class but
-    supports placeholders in PostgreSQL format (``$1``, ``$2``...) rather than
+    supports placeholders in GaussDB format (``$1``, ``$2``...) rather than
     in Python format (``%s``). Only positional parameters are supported.
 
     .. versionadded:: 3.2
@@ -470,7 +470,7 @@ The `!RawCursor` and `!RawServerCursor` class
 .. autoclass:: RawServerCursor
 
     This `ServerCursor` subclass has the same interface of the parent class but
-    supports placeholders in PostgreSQL format (``$1``, ``$2``...) rather than
+    supports placeholders in GaussDB format (``$1``, ``$2``...) rather than
     in Python format (``%s``). Only positional parameters are supported.
 
     .. versionadded:: 3.2

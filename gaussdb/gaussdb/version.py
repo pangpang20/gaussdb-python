@@ -2,7 +2,7 @@
 gaussdb distribution version file.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from importlib import metadata
 

@@ -5,7 +5,7 @@
 
 The `!gaussdb.adapt` module exposes a set of objects useful for the
 configuration of *data adaptation*, which is the conversion of Python objects
-to PostgreSQL data types and back.
+to GaussDB data types and back.
 
 These objects are useful if you need to configure data adaptation, i.e.
 if you need to change the default way that GaussDB converts between types or

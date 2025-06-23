@@ -7,7 +7,7 @@ Pipeline mode support
 
 .. versionadded:: 3.1
 
-The *pipeline mode* allows PostgreSQL client applications to send a query
+The *pipeline mode* allows GaussDB client applications to send a query
 without having to read the result of the previously sent query. Taking
 advantage of the pipeline mode, a client will wait less for the server, since
 multiple queries/results can be sent/received in a single network roundtrip.
@@ -30,7 +30,7 @@ buffered on the server side; the server flushes that buffer when a
 
 .. seealso::
 
-    The PostgreSQL documentation about:
+    The GaussDB documentation about:
 
     - `pipeline mode`__
     - `extended query message flow`__
@@ -46,7 +46,7 @@ Client-server messages flow
 ---------------------------
 
 In order to understand better how the pipeline mode works, we should take a
-closer look at the `PostgreSQL client-server message flow`__.
+closer look at the `GaussDB client-server message flow`__.
 
 During normal querying, each statement is transmitted by the client to the
 server as a stream of request messages, terminating with a **Sync** message to
@@ -73,10 +73,10 @@ results in the following two groups of messages:
     |               |   :ref:`the statement is prepared <prepared-statements>`) |
     | |>|           | - Bind ``'hello'``                                        |
     |               | - Describe                                                |
-    | PostgreSQL    | - Execute                                                 |
+    | GaussDB       | - Execute                                                 |
     |               | - Sync                                                    |
     +---------------+-----------------------------------------------------------+
-    | PostgreSQL    | - ParseComplete                                           |
+    | GaussDB       | - ParseComplete                                           |
     |               | - BindComplete                                            |
     | |<|           | - NoData                                                  |
     |               | - CommandComplete ``INSERT 0 1``                          |
@@ -101,9 +101,9 @@ results in the two groups of messages:
     |               | - Bind ``1``                                              |
     | |>|           | - Describe                                                |
     |               | - Execute                                                 |
-    | PostgreSQL    | - Sync                                                    |
+    | GaussDB       | - Sync                                                    |
     +---------------+-----------------------------------------------------------+
-    | PostgreSQL    | - ParseComplete                                           |
+    | GaussDB       | - ParseComplete                                           |
     |               | - BindComplete                                            |
     | |<|           | - RowDescription    ``data``                              |
     |               | - DataRow           ``hello``                             |
@@ -136,13 +136,13 @@ they will result in a single roundtrip between the client and the server:
     |               | - Bind ``'hello'``                                        |
     | |>|           | - Describe                                                |
     |               | - Execute                                                 |
-    | PostgreSQL    | - Parse ``SELECT data FROM mytable WHERE id = $1``        |
+    | GaussDB       | - Parse ``SELECT data FROM mytable WHERE id = $1``        |
     |               | - Bind ``1``                                              |
     |               | - Describe                                                |
     |               | - Execute                                                 |
     |               | - Sync (sent only once)                                   |
     +---------------+-----------------------------------------------------------+
-    | PostgreSQL    | - ParseComplete                                           |
+    | GaussDB       | - ParseComplete                                           |
     |               | - BindComplete                                            |
     | |<|           | - NoData                                                  |
     |               | - CommandComplete ``INSERT 0 1``                          |
@@ -198,7 +198,7 @@ synchronization point.
 
     Certain features are not available in pipeline mode, including:
 
-    - COPY is not supported in pipeline mode by PostgreSQL.
+    - COPY is not supported in pipeline mode by GaussDB.
     - `Cursor.stream()` doesn't make sense in pipeline mode (its job is the
       opposite of batching!)
     - `ServerCursor` are currently not implemented in pipeline mode.
@@ -300,7 +300,7 @@ The fine prints
     bugs and shortcomings forcing us to change the current interface or
     behaviour.
 
-The pipeline mode is available on any currently supported PostgreSQL version,
-but, in order to make use of it, the client must use a libpq from PostgreSQL
+The pipeline mode is available on any currently supported GaussDB version,
+but, in order to make use of it, the client must use a libpq from GaussDB
 14 or higher. You can use the `~Capabilities.has_pipeline` capability to make
 sure your client has the right library.

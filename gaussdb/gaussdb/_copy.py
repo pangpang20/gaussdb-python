@@ -5,7 +5,7 @@
 Objects to support the COPY protocol (sync version).
 """
 
-# Copyright (C) 2023 The GaussDB Team
+# Copyright (C) 2023 The Psycopg Team
 
 from __future__ import annotations
 
@@ -185,7 +185,7 @@ class Writer(ABC):
 
 class LibpqWriter(Writer):
     """
-    An `Writer` to write copy data to a Postgres database.
+    An `Writer` to write copy data to a GaussDB database.
     """
 
     __module__ = "gaussdb.copy"

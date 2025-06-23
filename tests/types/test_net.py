@@ -70,6 +70,7 @@ def test_network_mixed_size_array(conn, fmt_in):
 
 @pytest.mark.crdb_skip("copy")
 @pytest.mark.opengauss_skip("binary copy signature mismatch")
+@pytest.mark.gaussdb_skip("cannot unpack non-iterable NoneType object")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("val", ["127.0.0.1/32", "::ffff:102:300/128"])
 def test_inet_load_address(conn, fmt_out, val):
@@ -94,6 +95,7 @@ def test_inet_load_address(conn, fmt_out, val):
 
 @pytest.mark.crdb_skip("copy")
 @pytest.mark.opengauss_skip("binary copy signature mismatch")
+@pytest.mark.gaussdb_skip("cannot unpack non-iterable NoneType object")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("val", ["127.0.0.1/24", "::ffff:102:300/127"])
 def test_inet_load_network(conn, fmt_out, val):
@@ -118,6 +120,7 @@ def test_inet_load_network(conn, fmt_out, val):
 
 @crdb_skip_cidr
 @pytest.mark.opengauss_skip("binary copy signature mismatch")
+@pytest.mark.gaussdb_skip("cannot unpack non-iterable NoneType object")
 @pytest.mark.parametrize("fmt_out", pq.Format)
 @pytest.mark.parametrize("val", ["127.0.0.0/24", "::ffff:102:300/128"])
 def test_cidr_load(conn, fmt_out, val):

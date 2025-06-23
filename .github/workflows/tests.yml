@@ -1,423 +1,105 @@
 name: Tests
 
 on:
-  # push:
-  #   # This should disable running the workflow on tags, according to the
-  #   # on.<push|pull_request>.<branches|tags> GitHub Actions docs.
-  #   branches:
-  #     - "*"
-  #   pull_request:
-  # schedule:
-  #   - cron: '48 6 * * *'
-    workflow_dispatch:
+  push:
+    branches:
+        - "*"
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
-  # Cancel older requests of the same workflow in the same branch.
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
-
+    
 jobs:
+  test:
+    runs-on: ubuntu-22.04
 
-  linux:  # {{{
-    runs-on: ubuntu-latest
-    if: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Test different combinations of Python, Postgres, libpq.
-          - {impl: python, python: "3.9", postgres: "postgres:17", libpq: oldest}
-          - {impl: python, python: "3.10", postgres: "postgres:16", libpq: master}
-          - {impl: python, python: "3.11", postgres: "postgres:15"}
-          - {impl: python, python: "3.12", postgres: "postgres:14", libpq: newest}
-          - {impl: python, python: "3.13", postgres: "postgres:12"}
-
-          - {impl: c, python: "3.9", postgres: "postgres:12", libpq: master}
-          - {impl: c, python: "3.10", postgres: "postgres:13"}
-          - {impl: c, python: "3.11", postgres: "postgres:15", libpq: oldest}
-          - {impl: c, python: "3.12", postgres: "postgres:16", libpq: newest}
-          - {impl: c, python: "3.13", postgres: "postgres:17"}
-
-          - {impl: python, python: "3.9", ext: gevent, postgres: "postgres:17"}
-          - {impl: python, python: "3.9", ext: dns, postgres: "postgres:14"}
-          - {impl: python, python: "3.12", ext: postgis, postgres: "postgis/postgis"}
-          - {impl: python, python: "3.10", ext: numpy, postgres: "postgres:14"}
-          - {impl: c, python: "3.11", ext: numpy, postgres: "postgres:15"}
-          - {impl: c, python: "3.12", ext: gevent, postgres: "postgres:14"}
-
-          # Test with minimum dependencies versions
-          # WARNING: when bumping min version, make sure that the dependencies
-          # # in tests/constraints.txt are updated and that binary packages
-          # are available for such version.
-          - {impl: c, python: "3.9", ext: min, postgres: "postgres:15"}
-
-          # Test memory alignment
-          - {impl: c, python: "3.12", ext: align, postgres: "postgres:16"}
-
-          # Test with PyPy.
-          - {impl: python, python: "pypy3.9", postgres: "postgres:13"}
-          - {impl: python, python: "pypy3.10", postgres: "postgres:14"}
-
-    env:
-      GAUSSDB_IMPL: ${{ matrix.impl }}
-      DEPS: ./gaussdb[test] ./gaussdb_pool
-      GAUSSDB_TEST_DSN: "host=127.0.0.1 user=postgres password=password"
-      MARKERS: ""
+    services:
+      opengauss:
+        image: opengauss/opengauss-server:latest
+        ports:
+          - 5432:5432
+        env:
+          GS_USERNAME: root
+          GS_USER_PASSWORD: Passwd@123
+          GS_PASSWORD: Passwd@123
+        options: >-
+          --privileged=true
+          --name opengauss-custom
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-          allow-prereleases: true
+          python-version: "3.9"
+          cache: pip
 
-      - name: Start PostgreSQL service
-        # Note: this would love to be a service, but I don't see a way to pass
-        # the args to the docker run command line.
+      - name: Create and activate virtual environment
         run: |
-          docker pull ${{ matrix.postgres }}
-          docker run --rm -d --name postgres -p 5432:5432 \
-            -e POSTGRES_PASSWORD=password ${{ matrix.postgres }} \
-            -c max_prepared_transactions=10
+          python -m venv venv
+          echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
+          source venv/bin/activate
 
-      - name: Install the wanted libpq version
-        run: sudo ./tools/ci/ci_install_libpq.sh ${{ matrix.libpq }}
-
-      - name: Include gaussdb-c to the packages to install
-        if: ${{ matrix.impl == 'c' }}
+      - name: Install gaussdb libpq driver
         run: |
-          echo "DEPS=$DEPS ./gaussdb_c" >> $GITHUB_ENV
+          sudo apt update
+          sudo apt install -y wget unzip
+          wget -O /tmp/GaussDB_driver.zip https://dbs-download.obs.cn-north-1.myhuaweicloud.com/GaussDB/1730887196055/GaussDB_driver.zip
+          unzip /tmp/GaussDB_driver.zip -d /tmp/ && rm -rf /tmp/GaussDB_driver.zip
+          \cp /tmp/GaussDB_driver/Centralized/Hce2_X86_64/GaussDB-Kernel*64bit_Python.tar.gz /tmp/
+          tar -zxvf /tmp/GaussDB-Kernel*64bit_Python.tar.gz -C /tmp/ && rm -rf /tmp/GaussDB-Kernel*64bit_Python.tar.gz && rm -rf /tmp/_GaussDB && rm -rf /tmp/GaussDB_driver
+          echo /tmp/lib | sudo tee /etc/ld.so.conf.d/gauss-libpq.conf
+          sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
+          sudo ldconfig
+          ldconfig -p | grep pq
 
-      - name: Include gevent to the packages to install
-        if: ${{ matrix.ext == 'gevent' }}
+      - name: Install dependencies
         run: |
-          echo "DEPS=$DEPS gevent" >> $GITHUB_ENV
-          echo "MARKERS=$MARKERS gevent" >> $GITHUB_ENV
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ./tools/isort-gaussdb/
+          pip install "./gaussdb[dev,test]"
+          pip install ./gaussdb_pool
 
-      - name: Include dnspython to the packages to install
-        if: ${{ matrix.ext == 'dns' }}
+          
+      - name: Wait for openGauss to be ready
+        env:
+          GSQL_PASSWORD: Passwd@123
         run: |
-          echo "DEPS=$DEPS dnspython" >> $GITHUB_ENV
-          echo "MARKERS=$MARKERS dns" >> $GITHUB_ENV
+          source venv/bin/activate
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U root && break
+            sleep 10
+          done
+          if ! pg_isready -h localhost -p 5432 -U root; then
+            echo "openGauss is not ready"
+            exit 1
+          fi
 
-      - name: Include shapely to the packages to install
-        if: ${{ matrix.ext == 'postgis' }}
+      - name: Create test database
         run: |
-          echo "DEPS=$DEPS shapely" >> $GITHUB_ENV
-          echo "MARKERS=$MARKERS postgis" >> $GITHUB_ENV
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"CREATE DATABASE test DBCOMPATIBILITY '\''PG'\'';\"'"
 
-      - if: ${{ matrix.ext == 'numpy' }}
+      - name: Create report directory
         run: |
-          echo "DEPS=$DEPS numpy" >> $GITHUB_ENV
-          echo "MARKERS=$MARKERS numpy" >> $GITHUB_ENV
-
-      - name: Exclude certain tests from pypy
-        if: ${{ startsWith(matrix.python, 'pypy') }}
-        run: |
-          echo "NOT_MARKERS=$NOT_MARKERS timing" >> $GITHUB_ENV
-
-      - name: Configure to use the oldest dependencies
-        if: ${{ matrix.ext == 'min' }}
-        run: |
-          echo "DEPS=$DEPS dnspython shapely numpy gevent" >> $GITHUB_ENV
-          echo "PIP_CONSTRAINT=${{ github.workspace }}/tests/constraints.txt" \
-            >> $GITHUB_ENV
-
-      - name: Configure memory alignment tests
-        if: ${{ matrix.ext == 'align' }}
-        run: |
-          echo "CFLAGS=-fsanitize=undefined -Werror=strict-aliasing -Werror=odr -Werror=lto-type-mismatch"
-            >> $GITHUB_ENV
-          echo "UBSAN_OPTIONS=halt_on_error=1" >> $GITHUB_ENV
-          echo "PYTEST_ADDOPTS=-v" >> $GITHUB_ENV
-
-      - name: Install Python packages
-        run: pip install $DEPS
+          mkdir -p reports
 
       - name: Run tests
-        run: ./tools/ci/ci_test.sh
-
-
-  # }}}
-
-  macos-14:  # {{{
-    runs-on: macos-14
-    if: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {impl: python, python: "3.10"}
-          - {impl: python, python: "3.11"}
-          - {impl: python, python: "3.12"}
-          - {impl: python, python: "3.13"}
-          - {impl: c, python: "3.10"}
-          - {impl: c, python: "3.11"}
-          - {impl: c, python: "3.12"}
-          - {impl: c, python: "3.13"}
-
-    env:
-      GAUSSDB_IMPL: ${{ matrix.impl }}
-      DEPS: ./gaussdb[test] ./gaussdb_pool
-      GAUSSDB_TEST_DSN: "host=127.0.0.1 user=runner dbname=postgres"
-      # MacOS on GitHub Actions seems particularly slow.
-      # Don't run timing-based tests as they regularly fail.
-      # pproxy-based tests fail too, with the proxy not coming up in 2s.
-      NOT_MARKERS: "timing proxy mypy"
-      PG_VERSION: "17"
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-          allow-prereleases: true
-
-      - name: Install PostgreSQL on the runner
-        # On 2024-09-28 postgresql@17 installation failed but the package is
-        # available. So, in a few days, we might be able to drop "brew update".
+        env:
+          PYTHONPATH: ./gaussdb:./gaussdb_pool
+          GAUSSDB_IMPL: python
+          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 "
         run: |
-          brew update
-          brew install postgresql@${PG_VERSION}
+          source venv/bin/activate
+          pytest -s -v
 
-      - name: Start PostgreSQL service
-        run: brew services start postgresql@${PG_VERSION}
-
-      - name: Find the libpq
-        if: ${{ matrix.impl == 'python' }}
-        # NOTE: the libpq was found in:
-        # /opt/homebrew/opt/postgresql@${PG_VERSION}/lib before PG 17
-        # /opt/homebrew/opt/postgresql@${PG_VERSION}/lib/postgresql on PG 17
+      - name: Cleanup
+        if: always()
         run: |
-          echo "DYLD_LIBRARY_PATH=/opt/homebrew/opt/postgresql@${PG_VERSION}/lib/postgresql:/opt/homebrew/opt/postgresql@${PG_VERSION}/lib:$DYLD_LIBRARY_PATH" \
-              >> $GITHUB_ENV
-
-      - name: Include gaussdb-c to the packages to install
-        if: ${{ matrix.impl == 'c' }}
-        run: |
-          echo "DEPS=$DEPS ./gaussdb_c" >> $GITHUB_ENV
-          echo "PATH=/opt/homebrew/opt/postgresql@${PG_VERSION}/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Install Python packages
-        run: pip install $DEPS
-
-      - name: Run tests
-        run: ./tools/ci/ci_test.sh
-
-
-  # }}}
-
-  macos-13:  # {{{
-    runs-on: macos-13
-    if: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {impl: python, python: "3.9"}
-          - {impl: c, python: "3.9"}
-
-    env:
-      GAUSSDB_IMPL: ${{ matrix.impl }}
-      DEPS: ./gaussdb[test] ./gaussdb_pool
-      GAUSSDB_TEST_DSN: "host=127.0.0.1 user=runner dbname=postgres"
-      # MacOS on GitHub Actions seems particularly slow.
-      # Don't run timing-based tests as they regularly fail.
-      # pproxy-based tests fail too, with the proxy not coming up in 2s.
-      NOT_MARKERS: "timing proxy mypy"
-      PG_VERSION: "17"
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install PostgreSQL on the runner
-        # On 2024-09-28 postgresql@17 installation failed but the package is
-        # available. So, in a few days, we might be able to drop "brew update".
-        run: |
-          brew update
-          brew install gnu-sed postgresql@${PG_VERSION}
-
-      - name: Start PostgreSQL service
-        run: brew services start postgresql@${PG_VERSION}
-
-      - name: Find the libpq
-        if: ${{ matrix.impl == 'python' }}
-        run: |
-          echo "DYLD_LIBRARY_PATH=/usr/local/opt/postgresql@${PG_VERSION}/lib/postgresql:$DYLD_LIBRARY_PATH" \
-              >> $GITHUB_ENV
-
-      - name: Include gaussdb-c to the packages to install
-        if: ${{ matrix.impl == 'c' }}
-        run: |
-          echo "DEPS=$DEPS ./gaussdb_c" >> $GITHUB_ENV
-          echo "PATH=/usr/local/opt/postgresql@${PG_VERSION}/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Install Python packages
-        run: pip install $DEPS
-
-      - name: Run tests
-        run: ./tools/ci/ci_test.sh
-
-
-  # }}}
-
-  windows:  # {{{
-    runs-on: windows-latest
-    if: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - {impl: python, python: "3.9"}
-          - {impl: python, python: "3.10"}
-          - {impl: python, python: "3.11"}
-          - {impl: python, python: "3.12"}
-          - {impl: python, python: "3.13"}
-          - {impl: c, python: "3.9"}
-          - {impl: c, python: "3.10"}
-          - {impl: c, python: "3.11"}
-          - {impl: c, python: "3.12"}
-          - {impl: c, python: "3.13"}
-
-    env:
-      GAUSSDB_IMPL: ${{ matrix.impl }}
-      DEPS: ./gaussdb[test] ./gaussdb_pool
-      GAUSSDB_TEST_DSN: "host=127.0.0.1 dbname=postgres"
-      # On windows pproxy doesn't seem very happy. Also a few timing test fail.
-      NOT_MARKERS: "timing proxy mypy"
-      PG_VERSION: "17.4"
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      # there are some extra libpq.dll in PATH
-      - run: rm -rf c:/tools/php C:/Strawberry/c/bin
-
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-          allow-prereleases: true
-
-      - name: Start PostgreSQL service
-        run: |
-          $PgSvc = Get-Service "postgresql*"
-          Set-Service $PgSvc.Name -StartupType manual
-          $PgSvc.Start()
-        shell: powershell
-
-      # Refcount tests are flakey on windows, often they fail with the likes of:
-      #
-      #   AssertionError: objects leaked: 0, -2
-      #
-      # Avoid the morning bother of a failed workflow.
-      - name: Exclude refcount tests in daily tests
-        if: ${{ github.event_name == 'schedule' }}
-        run: echo "NOT_MARKERS=$NOT_MARKERS refcount" >> $GITHUB_ENV
-
-      - uses: prefix-dev/setup-pixi@v0.8.4
-        with:
-          run-install: false
-
-      - run: pixi global install libpq=${{ env.PG_VERSION }}
-
-      - name: 'add libpq.dll to path'
-        run: echo "$(pg_config.exe --bindir)" >> $GITHUB_PATH
-
-      - name: Install delvewheel
-        run: .\tools\ci\wheel_win32_before_build.bat
-        shell: powershell
-
-      - name: Build the C wheel
-        if: ${{ matrix.impl == 'c' }}
-        run: |
-          # If the wheel is not delocated, import fails with some dll not found
-          # (but it won't tell which one).
-          pip wheel -v -w ./gaussdb_c/dist/ ./gaussdb_c/
-          delvewheel repair --no-mangle "libiconv-2.dll;libwinpthread-1.dll" \
-            -w ./wheelhouse/ gaussdb_c/dist/gaussdb*.whl
-          echo "DEPS=$DEPS $(ls ./wheelhouse/*.whl)" >> $GITHUB_ENV
-
-      - name: Install Python packages
-        run: pip install $DEPS
-
-      - name: Run tests
-        run: ./tools/ci/ci_test.sh
-
-
-  # }}}
-
-  crdb:  # {{{
-    runs-on: ubuntu-latest
-    if: true
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Releases: https://www.cockroachlabs.com/docs/releases/
-          # Images: https://console.cloud.google.com/artifacts/docker/cockroach-cloud-images/us/cockroachdb/cockroach
-          #
-          # Also useful:
-          #
-          #   curl -fsSL -X GET \
-          #   https://us-docker.pkg.dev/v2/cockroach-cloud-images/cockroachdb/cockroach/tags/list \
-          #   | jq .tags | egrep 'latest-[^-]+-build' | sort
-          - {impl: c, crdb: "latest-master-build", python: "3.13"}
-          - {impl: c, crdb: "latest-v25.1-build", python: "3.13", libpq: newest}
-          - {impl: c, crdb: "latest-v24.3-build", python: "3.9", libpq: newest}
-          - {impl: python, crdb: "latest-v23.2-build", python: "3.12"}
-    env:
-      GAUSSDB_IMPL: ${{ matrix.impl }}
-      DEPS: ./gaussdb[test] ./gaussdb_pool
-      GAUSSDB_TEST_DSN: "host=127.0.0.1 port=26257 user=root dbname=defaultdb"
-      CRDB_REPO: us-docker.pkg.dev/cockroach-cloud-images/cockroachdb/cockroach
-      # Since CRDB 25.1, 'on' should become the default, which will break
-      # the test suite assumption.
-      # https://www.cockroachlabs.com/docs/stable/online-schema-changes#enable-automatic-commit-before-running-schema-changes-inside-transactions
-      PGOPTIONS: "-c autocommit_before_ddl=off"
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Start CockroachDB service
-        # Note: this would love to be a service, but I don't see a way to pass
-        # the args to the docker run command line.
-        run: |
-          docker pull ${CRDB_REPO}:${{ matrix.crdb }}
-          docker run --rm -d --name crdb -p 26257:26257 ${CRDB_REPO}:${{ matrix.crdb }} \
-            start-single-node --insecure
-
-      - name: Install the wanted libpq version
-        run: sudo ./tools/ci/ci_install_libpq.sh ${{ matrix.libpq }}
-
-      - name: Include gaussdb-c to the packages to install
-        if: ${{ matrix.impl == 'c' }}
-        run: |
-          echo "DEPS=$DEPS ./gaussdb_c" >> $GITHUB_ENV
-
-      - name: Install Python packages
-        run: pip install $DEPS
-
-      - name: Run tests
-        run: ./tools/ci/ci_test.sh
-
-
-  # }}}
+          docker stop opengauss-custom
+          docker rm opengauss-custom

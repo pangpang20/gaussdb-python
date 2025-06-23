@@ -2,7 +2,7 @@
 GaussDB BaseCursor object
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .abc import ConnectionType, Params, PQGen, Query
 from .rows import Row, RowMaker
 from ._column import Column
 from .pq.misc import connection_summary
-from ._queries import PostgresClientQuery, PostgresQuery
+from ._queries import GaussDBClientQuery, GaussDBQuery
 from ._preparing import Prepare
 from .generators import execute, fetch, send
 from ._capabilities import capabilities
@@ -54,7 +54,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
     _tx: Transformer
     _make_row: RowMaker[Row]
     _pgconn: PGconn
-    _query_cls: type[PostgresQuery] = PostgresQuery
+    _query_cls: type[GaussDBQuery] = GaussDBQuery
 
     def __init__(self, connection: ConnectionType):
         self._conn = connection
@@ -72,7 +72,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
         self._pos = 0
         self._iresult = 0
         self._rowcount = -1
-        self._query: PostgresQuery | None
+        self._query: GaussDBQuery | None
         # None if executemany() not executing, True/False according to returning state
         self._execmany_returning: bool | None = None
         if reset_query:
@@ -264,7 +264,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
 
     def _maybe_prepare_gen(
         self,
-        pgq: PostgresQuery,
+        pgq: GaussDBQuery,
         *,
         prepare: bool | None = None,
         binary: bool | None = None,
@@ -307,7 +307,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
         self._set_results(results)
 
     def _get_prepared(
-        self, pgq: PostgresQuery, prepare: bool | None = None
+        self, pgq: GaussDBQuery, prepare: bool | None = None
     ) -> tuple[Prepare, bytes]:
         return self._conn._prepared.get(pgq, prepare)
 
@@ -389,7 +389,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
 
         # Merge the params client-side
         if params:
-            pgq = PostgresClientQuery(self._tx)
+            pgq = GaussDBClientQuery(self._tx)
             pgq.convert(statement, params)
             statement = pgq.query
 
@@ -405,7 +405,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
 
     def _execute_send(
         self,
-        query: PostgresQuery,
+        query: GaussDBQuery,
         *,
         force_extended: bool = False,
         binary: bool | None = None,
@@ -450,7 +450,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
 
     def _convert_query(
         self, query: Query, params: Params | None = None
-    ) -> PostgresQuery:
+    ) -> GaussDBQuery:
         pgq = self._query_cls(self._tx)
         pgq.convert(query, params)
         return pgq
@@ -533,7 +533,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
                 for res in results:
                     self._rowcount += res.command_tuples or 0
 
-    def _send_prepare(self, name: bytes, query: PostgresQuery) -> None:
+    def _send_prepare(self, name: bytes, query: GaussDBQuery) -> None:
         if self._conn._pipeline:
             self._conn._pipeline.command_queue.append(
                 partial(
@@ -548,7 +548,7 @@ class BaseCursor(Generic[ConnectionType, Row]):
             self._pgconn.send_prepare(name, query.query, param_types=query.types)
 
     def _send_query_prepared(
-        self, name: bytes, pgq: PostgresQuery, *, binary: bool | None = None
+        self, name: bytes, pgq: GaussDBQuery, *, binary: bool | None = None
     ) -> None:
         if binary is None:
             fmt = self.format

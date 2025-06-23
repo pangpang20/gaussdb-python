@@ -2,7 +2,7 @@
 Types configuration specific for CockroachDB.
 """
 
-# Copyright (C) 2022 The GaussDB Team
+# Copyright (C) 2022 The Psycopg Team
 
 from enum import Enum
 
@@ -17,7 +17,7 @@ from .._adapters_map import AdaptersMap
 
 types = TypesRegistry()
 
-# Global adapter maps with PostgreSQL types configuration
+# Global adapter maps with GaussDB types configuration
 adapters = AdaptersMap(types=types)
 
 
@@ -37,7 +37,7 @@ def register_crdb_adapters(context: AdaptContext) -> None:
     from .. import dbapi20
     from ..types import array
 
-    _register_postgres_adapters(context)
+    _register_gaussdb_adapters(context)
 
     # String must come after enum and none to map text oid -> string dumper
     _register_crdb_none_adapters(context)
@@ -51,8 +51,8 @@ def register_crdb_adapters(context: AdaptContext) -> None:
     array.register_all_arrays(adapters)
 
 
-def _register_postgres_adapters(context: AdaptContext) -> None:
-    # Same adapters used by PostgreSQL, or a good starting point for customization
+def _register_gaussdb_adapters(context: AdaptContext) -> None:
+    # Same adapters used by GaussDB, or a good starting point for customization
 
     from ..types import array, bool, composite, datetime, numeric, numpy, string, uuid
 
@@ -76,7 +76,7 @@ def _register_crdb_string_adapters(context: AdaptContext) -> None:
     from ..types import string
 
     # Dump strings with text oid instead of unknown.
-    # Unlike PostgreSQL, CRDB seems able to cast text to most types.
+    # Unlike GaussDB, CRDB seems able to cast text to most types.
     context.adapters.register_dumper(str, string.StrDumper)
     context.adapters.register_dumper(str, string.StrBinaryDumper)
 

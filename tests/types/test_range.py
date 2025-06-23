@@ -544,7 +544,7 @@ class TestRangeObject:
     def test_eq_wrong_type(self):
         assert Range(10, 20) != ()
 
-    # as the postgres docs describe for the server-side stuff,
+    # as the gaussdb docs describe for the server-side stuff,
     # ordering is rather arbitrary, but will remain stable
     # and consistent.
 

@@ -602,7 +602,7 @@ def test_repr_wrapper(conn, wrapper, fmt_in):
     wrapper = getattr(gaussdb.types.numeric, wrapper)
     cur = conn.execute(f"select pg_typeof(%{fmt_in.value})::oid", [wrapper(0)])
     oid = cur.fetchone()[0]
-    assert oid == gaussdb.postgres.types[wrapper.__name__.lower()].oid
+    assert oid == gaussdb.gaussdb_.types[wrapper.__name__.lower()].oid
 
 
 @pytest.mark.parametrize("fmt_out", pq.Format)

@@ -9,7 +9,7 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source /etc/os-release
 
-# Install PostgreSQL development files.
+# Install GaussDB development files.
 case "$ID" in
     alpine)
         # tzdata is required for datetime tests.

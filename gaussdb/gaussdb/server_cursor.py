@@ -2,7 +2,7 @@
 gaussdb server-side cursor objects.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -341,7 +341,7 @@ class ServerCursor(ServerCursorMixin["Connection[Any]", Row], Cursor[Row]):
     def scroll(self, value: int, mode: str = "relative") -> None:
         with self._conn.lock:
             self._conn.wait(self._scroll_gen(value, mode))
-        # Postgres doesn't have a reliable way to report a cursor out of bound
+        # GaussDB doesn't have a reliable way to report a cursor out of bound
         if mode == "relative":
             self._pos += value
         else:

@@ -7,11 +7,11 @@ from a database catalog.
 
 Hint: use docker to upgrade types from a new version in isolation. Run:
 
-    docker run --rm -p 11111:5432 --name pg -e POSTGRES_PASSWORD=password postgres:TAG
+    docker run --rm -p 11111:5432 --name pg -e GAUSSDB_PASSWORD=password gaussdb:TAG
 
 with a specified version tag, and then query it using:
 
-    %(prog)s "host=localhost port=11111 user=postgres password=password"
+    %(prog)s "host=localhost port=11111 user=root password=password"
 """
 
 from __future__ import annotations
@@ -42,17 +42,15 @@ def main() -> None:
     else:
         update_python_oids(conn)
         update_python_types(conn)
-        update_cython_oids(conn)
 
 
 def update_python_types(conn: Connection) -> None:
-    fn = ROOT / "gaussdb/gaussdb/postgres.py"
+    fn = ROOT / "gaussdb/gaussdb/gaussdb.py"
 
     lines = []
     lines.extend(get_version_comment(conn))
     lines.extend(get_py_types(conn))
     lines.extend(get_py_ranges(conn))
-    lines.extend(get_py_multiranges(conn))
 
     update_file(fn, lines)
     sp.check_call(["black", "-q", fn])
@@ -69,16 +67,6 @@ def update_python_oids(conn: Connection) -> None:
     sp.check_call(["black", "-q", fn])
 
 
-def update_cython_oids(conn: Connection) -> None:
-    fn = ROOT / "gaussdb_c/gaussdb_c/_gaussdb/oids.pxd"
-
-    lines = []
-    lines.extend(get_version_comment(conn))
-    lines.extend(get_cython_oids(conn))
-
-    update_file(fn, lines)
-
-
 def update_crdb_python_oids(conn: Connection) -> None:
     fn = ROOT / "gaussdb/gaussdb/crdb/_types.py"
 
@@ -92,7 +80,22 @@ def update_crdb_python_oids(conn: Connection) -> None:
 
 def get_version_comment(conn: Connection) -> list[str]:
     if conn.info.vendor == "PostgreSQL":
-        version = version_pretty(conn.info.server_version)
+        # version = version_pretty(conn.info.server_version)
+        raw_version = conn.info.server_version
+
+        if isinstance(raw_version, str):
+            # such as '505.2.0' → [505, 2, 0]
+            parts = [int(x) for x in re.findall(r"\d+", raw_version)]
+            if len(parts) >= 2:
+                major, minor = parts[0], parts[1]
+                patch = parts[2] if len(parts) >= 3 else 0
+                version_int = major * 10000 + minor * 100 + patch
+            else:
+                version_int = 0  # fallback
+        else:
+            version_int = raw_version
+
+        version = version_pretty(version_int)
     elif conn.info.vendor == "CockroachDB":
         assert isinstance(conn, CrdbConnection)
         version = version_pretty(conn.info.server_version)
@@ -143,7 +146,7 @@ def get_py_types(conn: Connection) -> list[str]:
         """
 select typname, oid, typarray,
     -- CRDB might have quotes in the regtype representation
-    replace(typname::regtype::text, '''', '') as regtype,
+    replace(CAST(typname AS TEXT), '''', '') as regtype,
     typdelim
 from pg_type t
 where
@@ -156,7 +159,7 @@ order by typname
     ):
         typemod = typemods.get(typname)
 
-        # Weird legacy type in postgres catalog
+        # Weird legacy type in gaussdb catalog
         if typname == "char":
             typname = regtype = '"char"'
 
@@ -180,60 +183,18 @@ def get_py_ranges(conn: Connection) -> list[str]:
     lines = []
     for typname, oid, typarray, rngsubtype in conn.execute(
         """
-select typname, oid, typarray, rngsubtype
+select t.typname, t.oid, t.typarray, r.rngsubtype
 from
     pg_type t
-    join pg_range r on t.oid = rngtypid
+    join pg_range r on t.oid = r.rngtypid
 where
-    oid < 10000
-    and typtype = 'r'
-order by typname
+    t.oid < 10000
+    and t.typtype = 'r'
+order by t.typname
 """
     ):
         params = [f"{typname!r}, {oid}, {typarray}, subtype_oid={rngsubtype}"]
         lines.append(f"RangeInfo({','.join(params)}),")
-
-    return lines
-
-
-def get_py_multiranges(conn: Connection) -> list[str]:
-    lines = []
-    for typname, oid, typarray, rngtypid, rngsubtype in conn.execute(
-        """
-select typname, oid, typarray, rngtypid, rngsubtype
-from
-    pg_type t
-    join pg_range r on t.oid = rngmultitypid
-where
-    oid < 10000
-    and typtype = 'm'
-order by typname
-"""
-    ):
-        params = [
-            f"{typname!r}, {oid}, {typarray},"
-            f" range_oid={rngtypid}, subtype_oid={rngsubtype}"
-        ]
-        lines.append(f"MultirangeInfo({','.join(params)}),")
-
-    return lines
-
-
-def get_cython_oids(conn: Connection) -> list[str]:
-    lines = []
-    for typname, oid in conn.execute(
-        """
-select typname, oid
-from pg_type
-where
-    oid < 10000
-    and (typtype = any('{b,r,m}') or typname = 'record')
-    and (typname !~ '^(_|pg_)' or typname = 'pg_lsn')
-order by typname
-"""
-    ):
-        const_name = typname.upper() + "_OID"
-        lines.append(f"    {const_name} = {oid}")
 
     return lines
 

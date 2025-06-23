@@ -6,7 +6,7 @@ script async_to_sync.py will replace the async names with the sync names
 when generating the sync version.
 """
 
-# Copyright (C) 2023 The GaussDB Team
+# Copyright (C) 2023 The Psycopg Team
 
 from __future__ import annotations
 

@@ -7,7 +7,7 @@
 .. module:: gaussdb_pool
 
 A connection pool is an object used to create and maintain a limited amount of
-PostgreSQL connections, reducing the time requested by the program to obtain a
+GaussDB connections, reducing the time requested by the program to obtain a
 working connection and allowing an arbitrary large number of concurrent
 threads or tasks to use a controlled amount of resources on the server. See
 :ref:`connection-pools` for more details and usage pattern.

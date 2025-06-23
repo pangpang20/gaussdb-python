@@ -2,7 +2,7 @@
 commands pipeline management
 """
 
-# Copyright (C) 2021 The GaussDB Team
+# Copyright (C) 2021 The Psycopg Team
 
 from __future__ import annotations
 

@@ -2,7 +2,7 @@
 Objects to support the COPY protocol (async version).
 """
 
-# Copyright (C) 2023 The GaussDB Team
+# Copyright (C) 2023 The Psycopg Team
 
 from __future__ import annotations
 
@@ -184,7 +184,7 @@ class AsyncWriter(ABC):
 
 class AsyncLibpqWriter(AsyncWriter):
     """
-    An `AsyncWriter` to write copy data to a Postgres database.
+    An `AsyncWriter` to write copy data to a GaussDB database.
     """
 
     __module__ = "gaussdb.copy"

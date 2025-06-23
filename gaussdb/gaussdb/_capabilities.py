@@ -2,7 +2,7 @@
 gaussdb capabilities objects
 """
 
-# Copyright (C) 2024 The GaussDB Team
+# Copyright (C) 2024 The Psycopg Team
 
 from __future__ import annotations
 

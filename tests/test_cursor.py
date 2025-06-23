@@ -31,7 +31,7 @@ def test_str(conn):
 
 def test_execute_many_results_param(conn):
     cur = conn.cursor()
-    # Postgres raises SyntaxError, CRDB raises InvalidPreparedStatementDefinition
+    # GaussDB raises SyntaxError, CRDB raises InvalidPreparedStatementDefinition
     with pytest.raises((e.SyntaxError, e.InvalidPreparedStatementDefinition)):
         cur.execute("select %s; select generate_series(1, %s)", ("foo", 3))
 

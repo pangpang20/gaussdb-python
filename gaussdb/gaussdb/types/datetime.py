@@ -2,7 +2,7 @@
 Adapters for date/time types.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ class DateDumper(Dumper):
     oid = _oids.DATE_OID
 
     def dump(self, obj: date) -> Buffer | None:
-        # NOTE: whatever the PostgreSQL DateStyle input format (DMY, MDY, YMD)
+        # NOTE: whatever the GaussDB DateStyle input format (DMY, MDY, YMD)
         # the YYYY-MM-DD is always understood correctly.
         return str(obj).encode()
 
@@ -145,7 +145,7 @@ class _BaseDatetimeDumper(Dumper):
 
 class _BaseDatetimeTextDumper(_BaseDatetimeDumper):
     def dump(self, obj: datetime) -> Buffer | None:
-        # NOTE: whatever the PostgreSQL DateStyle input format (DMY, MDY, YMD)
+        # NOTE: whatever the GaussDB DateStyle input format (DMY, MDY, YMD)
         # the YYYY-MM-DD is always understood correctly.
         return str(obj).encode()
 
@@ -205,7 +205,7 @@ class TimedeltaDumper(Dumper):
 
     @staticmethod
     def _dump_any(self: TimedeltaDumper, obj: timedelta) -> bytes:
-        # The comma is parsed ok by PostgreSQL but it's not documented
+        # The comma is parsed ok by GaussDB but it's not documented
         # and it seems brittle to rely on it. CRDB doesn't consume it well.
         return str(obj).encode().replace(b",", b"")
 
@@ -241,7 +241,7 @@ class DateLoader(Loader):
             self._order = self._ORDER_YMD
         elif ds.startswith(b"G"):  # German
             self._order = self._ORDER_DMY
-        elif ds.startswith(b"S") or ds.startswith(b"P"):  # SQL or Postgres
+        elif ds.startswith(b"S") or ds.startswith(b"P"):  # SQL or GaussDB
             self._order = self._ORDER_DMY if ds.endswith(b"DMY") else self._ORDER_MDY
         else:
             raise InterfaceError(f"unexpected DateStyle: {ds.decode('ascii')}")
@@ -423,7 +423,7 @@ class TimestampLoader(Loader):
             self._order = self._ORDER_DMY
         elif ds.startswith(b"S"):  # SQL
             self._order = self._ORDER_DMY if ds.endswith(b"DMY") else self._ORDER_MDY
-        elif ds.startswith(b"P"):  # Postgres
+        elif ds.startswith(b"P"):  # GaussDB
             self._order = self._ORDER_PGDM if ds.endswith(b"DMY") else self._ORDER_PGMD
             self._re_format = self._re_format_pg
         else:
@@ -615,7 +615,7 @@ class IntervalLoader(Loader):
     def __init__(self, oid: int, context: AdaptContext | None = None):
         super().__init__(oid, context)
         if _get_intervalstyle(self.connection) == b"postgres":
-            self._load_method = self._load_postgres
+            self._load_method = self._load_gaussdb
         else:
             self._load_method = self._load_notimpl
 
@@ -623,7 +623,7 @@ class IntervalLoader(Loader):
         return self._load_method(self, data)
 
     @staticmethod
-    def _load_postgres(self: IntervalLoader, data: Buffer) -> timedelta:
+    def _load_gaussdb(self: IntervalLoader, data: Buffer) -> timedelta:
         m = self._re_interval.match(data)
         if not m:
             s = bytes(data).decode("utf8", "replace")
@@ -706,7 +706,7 @@ def _get_timestamp_load_error(
             return False
 
         ds = _get_datestyle(conn)
-        if not ds.startswith(b"P"):  # Postgres
+        if not ds.startswith(b"P"):  # GaussDB
             return len(s.split()[0]) > 10  # date is first token
         else:
             return len(s.split()[-1]) > 4  # year is last token

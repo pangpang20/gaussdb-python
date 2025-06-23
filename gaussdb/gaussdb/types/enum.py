@@ -10,7 +10,7 @@ from functools import cache
 from collections.abc import Mapping, Sequence
 
 from .. import errors as e
-from .. import postgres, sql
+from .. import gaussdb_, sql
 from ..pq import Format
 from ..abc import AdaptContext, Query
 from ..adapt import Buffer, Dumper, Loader
@@ -133,7 +133,7 @@ def register_enum(
     :param info: The object with the information about the enum to register.
     :param context: The context where to register the adapters. If `!None`,
         register it globally.
-    :param enum: Python enum type matching to the PostgreSQL one. If `!None`,
+    :param enum: Python enum type matching to the GaussDB one. If `!None`,
         a new enum will be generated and exposed as `EnumInfo.enum`.
     :param mapping: Override the mapping between `!enum` members and `!info`
         labels.
@@ -146,7 +146,7 @@ def register_enum(
         enum = cast("type[E]", _make_enum(info.name, tuple(info.labels)))
 
     info.enum = enum
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
     info.register(context)
 
     load_map = _make_load_map(info, enum, mapping, context)

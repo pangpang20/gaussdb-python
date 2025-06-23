@@ -335,7 +335,7 @@ def test_remap_more_python(conn):
         assert cur.fetchone()[0] is enum[member]
 
 
-def test_remap_more_postgres(conn):
+def test_remap_more_gaussdb(conn):
     SmallerEnum = Enum("SmallerEnum", "FOO")
     enum = SmallerEnum
     info = EnumInfo.fetch(conn, "puretestenum")

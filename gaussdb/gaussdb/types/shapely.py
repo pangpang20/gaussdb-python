@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from functools import cache
 
-from .. import postgres
+from .. import gaussdb_
 from ..pq import Format
 from ..abc import AdaptContext, Buffer
 from ..adapt import Dumper, Loader
@@ -66,7 +66,7 @@ def register_shapely(info: TypeInfo, context: AdaptContext | None = None) -> Non
         raise TypeError("no info passed. Is the 'postgis' extension loaded?")
 
     info.register(context)
-    adapters = context.adapters if context else postgres.adapters
+    adapters = context.adapters if context else gaussdb_.adapters
 
     adapters.register_loader(info.oid, GeometryBinaryLoader)
     adapters.register_loader(info.oid, GeometryLoader)

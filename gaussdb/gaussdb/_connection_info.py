@@ -1,8 +1,8 @@
 """
-Objects to return information about a PostgreSQL connection.
+Objects to return information about a GaussDB connection.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

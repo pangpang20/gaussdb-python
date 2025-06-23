@@ -2,7 +2,7 @@
 Compatibility objects with DBAPI 2.0
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

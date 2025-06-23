@@ -18,7 +18,7 @@ function timed out without any file descriptor becoming ready; in this case the
 generator should probably yield the same value again in order to wait more.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 

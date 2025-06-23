@@ -2,7 +2,7 @@
 Functions to manipulate conninfo strings
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -27,9 +27,9 @@ def make_conninfo(conninfo: str = "", **kwargs: ConnParam) -> str:
     """
     Merge a string and keyword params into a single conninfo string.
 
-    :param conninfo: A `connection string`__ as accepted by PostgreSQL.
+    :param conninfo: A `connection string`__ as accepted by GaussDB.
     :param kwargs: Parameters overriding the ones specified in `!conninfo`.
-    :return: A connection string valid for PostgreSQL, with the `!kwargs`
+    :return: A connection string valid for GaussDB, with the `!kwargs`
         parameters merged.
 
     Raise `~gaussdb.ProgrammingError` if the input doesn't make a valid
@@ -68,7 +68,7 @@ def conninfo_to_dict(conninfo: str = "", **kwargs: ConnParam) -> ConnDict:
     """
     Convert the `!conninfo` string into a dictionary of parameters.
 
-    :param conninfo: A `connection string`__ as accepted by PostgreSQL.
+    :param conninfo: A `connection string`__ as accepted by GaussDB.
     :param kwargs: Parameters overriding the ones specified in `!conninfo`.
     :return: Dictionary with the parameters parsed from `!conninfo` and
         `!kwargs`.

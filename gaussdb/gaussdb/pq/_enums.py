@@ -2,7 +2,7 @@
 libpq enum definitions for gaussdb
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from enum import IntEnum, IntFlag, auto
 
@@ -206,8 +206,6 @@ class DiagnosticField(IntEnum):
     """
 
     __module__ = "gaussdb.pq"
-
-    # from src/include/postgres_ext.h
 
     SEVERITY = ord("S")
     SEVERITY_NONLOCALIZED = ord("V")

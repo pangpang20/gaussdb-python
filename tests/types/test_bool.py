@@ -2,7 +2,7 @@ import pytest
 
 from gaussdb import pq, sql
 from gaussdb.adapt import PyFormat, Transformer
-from gaussdb.postgres import types as builtins
+from gaussdb.gaussdb_ import types as builtins
 
 
 @pytest.mark.parametrize("fmt_in", PyFormat)

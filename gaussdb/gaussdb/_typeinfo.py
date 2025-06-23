@@ -1,11 +1,11 @@
 """
-Information about PostgreSQL types
+Information about GaussDB types
 
 These types allow to read information from the system catalog and provide
 information to the adapters if needed.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ RegistryKey: TypeAlias = "str | int | tuple[type, int]"
 
 class TypeInfo:
     """
-    Hold information about a PostgreSQL base type.
+    Hold information about a GaussDB base type.
     """
 
     __module__ = "gaussdb.types"
@@ -145,9 +145,9 @@ class TypeInfo:
         if context:
             types = context.adapters.types
         else:
-            from . import postgres
+            from . import gaussdb_
 
-            types = postgres.types
+            types = gaussdb_.types
 
         types.add(self)
 
@@ -299,7 +299,7 @@ class TypesRegistry:
 
     def get_oid(self, name: str) -> int:
         """
-        Return the oid of a PostgreSQL type by name.
+        Return the oid of a GaussDB type by name.
 
         :param key: the name of the type to look for.
 

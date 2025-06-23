@@ -63,13 +63,13 @@ exceptions, mapping to the database error states (see
 
 .. data:: adapters
 
-   The default adapters map establishing how Python and PostgreSQL types are
+   The default adapters map establishing how Python and GaussDB types are
    converted into each other.
 
    This map is used as a template when new connections are created, using
    `gaussdb.connect()`. Its `~gaussdb.adapt.AdaptersMap.types` attribute is a
    `~gaussdb.types.TypesRegistry` containing information about every
-   PostgreSQL builtin type, useful for adaptation customisation (see
+   GaussDB builtin type, useful for adaptation customisation (see
    :ref:`adaptation`)::
 
        >>> gaussdb.adapters.types["int4"]

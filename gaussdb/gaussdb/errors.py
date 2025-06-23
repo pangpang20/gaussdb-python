@@ -16,7 +16,7 @@ DBAPI-defined Exceptions are defined in the following hierarchy::
           |__NotSupportedError
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -605,7 +605,7 @@ _base_exc_map = {
     "54": OperationalError,  # Program Limit Exceeded
     "55": OperationalError,  # Object Not In Prerequisite State
     "57": OperationalError,  # Operator Intervention
-    "58": OperationalError,  # System Error (errors external to PostgreSQL itself)
+    "58": OperationalError,  # System Error (errors external to GaussDB itself)
     "F": OperationalError,  # Configuration File Error
     "H": OperationalError,  # Foreign Data Wrapper Error (SQL/MED)
     "P": ProgrammingError,  # PL/pgSQL Error
@@ -1564,7 +1564,7 @@ class IdleSessionTimeout(OperationalError,
     pass
 
 
-# Class 58 - System Error (errors external to PostgreSQL itself)
+# Class 58 - System Error (errors external to GaussDB itself)
 
 class SystemError(OperationalError,
     code='58000', name='SYSTEM_ERROR'):

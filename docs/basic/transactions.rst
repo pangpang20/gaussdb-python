@@ -336,7 +336,7 @@ connection.
 
    Applications running at `~IsolationLevel.REPEATABLE_READ` or
    `~IsolationLevel.SERIALIZABLE` isolation level are exposed to serialization
-   failures. `In certain concurrent update cases`__, PostgreSQL will raise an
+   failures. `In certain concurrent update cases`__, GaussDB will raise an
    exception looking like::
 
         _GaussDB.errors.SerializationFailure: could not serialize access
@@ -359,7 +359,7 @@ Two-Phase Commit protocol support
 
 .. versionadded:: 3.1
 
-GaussDB exposes the two-phase commit features available in PostgreSQL
+GaussDB exposes the two-phase commit features available in GaussDB
 implementing the `two-phase commit extensions`__ proposed by the DBAPI.
 
 The DBAPI model of two-phase commit is inspired by the `XA specification`__,
@@ -381,14 +381,14 @@ transaction can be started with `Connection.tpc_begin()`, prepared using
 database using `~Connection.tpc_recover()` and completed using the above
 `!tpc_commit()` and `!tpc_rollback()`.
 
-PostgreSQL doesn't follow the XA standard though, and the ID for a PostgreSQL
+GaussDB doesn't follow the XA standard though, and the ID for a GaussDB
 prepared transaction can be any string up to 200 characters long. GaussDB's
 `Xid` objects can represent both XA-style transactions IDs (such as the ones
-created by the `!xid()` method) and PostgreSQL transaction IDs identified by
+created by the `!xid()` method) and GaussDB transaction IDs identified by
 an unparsed string.
 
 The format in which the Xids are converted into strings passed to the
-database is the same employed by the `PostgreSQL JDBC driver`__: this should
+database is the same employed by the `GaussDB JDBC driver`__: this should
 allow interoperation between tools written in Python and in Java. For example
 a recovery tool written in Python would be able to recognize the components of
 transactions produced by a Java program.

@@ -544,7 +544,7 @@ def role(pgconn: PGconn) -> Iterator[tuple[bytes, bytes]]:
     user, passwd = "ashesh", "_GaussDB"
     r = pgconn.exec_(f"CREATE USER {user} LOGIN PASSWORD '{passwd}'".encode())
     if r.status != pq.ExecStatus.COMMAND_OK:
-        pytest.skip(f"cannot create a PostgreSQL role: {r.get_error_message()}")
+        pytest.skip(f"cannot create a GaussDB role: {r.get_error_message()}")
     yield user.encode(), passwd.encode()
     r = pgconn.exec_(f"DROP USER {user}".encode())
     if r.status != pq.ExecStatus.COMMAND_OK:

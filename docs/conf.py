@@ -26,7 +26,7 @@ sys.path.append(str(docs_dir / "lib"))
 # -- Project information -----------------------------------------------------
 
 project = "gaussdb"
-copyright = "2020, Daniele Varrazzo and The GaussDB Team"
+copyright = "2020, Daniele Varrazzo and The Psycopg Team"
 author = "Daniele Varrazzo"
 release = gaussdb.__version__
 
@@ -105,7 +105,7 @@ intersphinx_mapping = {
 
 autodoc_member_order = "bysource"
 
-# PostgreSQL docs version to link libpq functions to
+# GaussDB docs version to link libpq functions to
 libpq_docs_version = "17"
 
 # Where to point on :ticket: role

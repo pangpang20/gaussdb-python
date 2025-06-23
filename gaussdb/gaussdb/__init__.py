@@ -1,13 +1,13 @@
 """
-gaussdb -- PostgreSQL database adapter for Python
+gaussdb -- GaussDB database adapter for Python
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 import logging
 
 from . import pq  # noqa: F401 import early to stabilize side effects
-from . import dbapi20, postgres, types
+from . import dbapi20, gaussdb_, types
 from ._tpc import Xid
 from .copy import AsyncCopy, Copy
 from ._enums import IsolationLevel
@@ -42,10 +42,10 @@ apilevel = "2.0"
 threadsafety = 2
 paramstyle = "pyformat"
 
-# register default adapters for PostgreSQL
-adapters = postgres.adapters  # exposed by the package
-postgres.register_default_types(adapters.types)
-postgres.register_default_adapters(adapters)
+# register default adapters for GaussDB
+adapters = gaussdb_.adapters  # exposed by the package
+gaussdb_.register_default_types(adapters.types)
+gaussdb_.register_default_adapters(adapters)
 
 # After the default ones, because these can deal with the bytea oid better
 dbapi20.register_dbapi20_adapters(adapters)

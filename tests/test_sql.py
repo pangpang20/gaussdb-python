@@ -1,6 +1,6 @@
 # test_sql.py - tests for the _GaussDB.sql module
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 import re
 import datetime as dt

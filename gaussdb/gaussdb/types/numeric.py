@@ -2,7 +2,7 @@
 Adapters for numeric types.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -275,7 +275,7 @@ class NumericLoader(Loader):
         return Decimal(data.decode())
 
 
-DEC_DIGITS = 4  # decimal digits per Postgres "digit"
+DEC_DIGITS = 4  # decimal digits per GaussDB "digit"
 NUMERIC_POS = 0x0000
 NUMERIC_NEG = 0x4000
 NUMERIC_NAN = 0xC000
@@ -359,7 +359,7 @@ class DecimalBinaryDumper(Dumper):
 
 
 class _MixedNumericDumper(Dumper, ABC):
-    """Base for dumper to dump int, decimal, numpy.integer to Postgres numeric
+    """Base for dumper to dump int, decimal, numpy.integer to GaussDB numeric
 
     Only used when looking up by oid.
     """

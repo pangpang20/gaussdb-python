@@ -32,9 +32,9 @@ The GaussDB version documented here has *official and tested* support for:
 
   - **Note:** Only the pure Python version is supported.
 
-- PostgreSQL: from version 10 to 17
+- GaussDB: from version 10 to 17
 
-  - **Note:** PostgreSQL `currently supported release`__ are actively tested
+  - **Note:** GaussDB `currently supported release`__ are actively tested
     in the CI. Out-of-support releases are supported on a best-effort basis.
 
 - OS: Linux, macOS, Windows
@@ -47,11 +47,11 @@ anything that is not tested there is not officially supported. This includes:
 .. __: https://github.com/gaussdb/gaussdb/actions
 
 - Unofficial Python distributions such as Conda;
-- Alternative PostgreSQL implementation;
+- Alternative GaussDB implementation;
 - Other platforms such as BSD or Solaris.
 
 If you use an unsupported system, things might work (because, for instance, the
-database may use the same wire protocol as PostgreSQL) but we cannot guarantee
+database may use the same wire protocol as GaussDB) but we cannot guarantee
 the correct working or a smooth ride.
 
 
@@ -130,7 +130,7 @@ In order to perform a local installation you need some prerequisites:
 
 - a C compiler,
 - Python development headers (e.g. the ``python3-dev`` package).
-- PostgreSQL client development headers (e.g. the ``libpq-dev`` package).
+- GaussDB client development headers (e.g. the ``libpq-dev`` package).
 - The :program:`pg_config` program available in the :envvar:`PATH`.
 
 You **must be able** to troubleshoot an extension build, for instance you must
@@ -169,7 +169,7 @@ need::
 .. note::
 
     The ``libpq`` is the client library used by :program:`psql`, the
-    PostgreSQL command line client, to connect to the database.  On most
+    GaussDB command line client, to connect to the database.  On most
     systems, installing :program:`psql` will install the ``libpq`` too as a
     dependency.
 

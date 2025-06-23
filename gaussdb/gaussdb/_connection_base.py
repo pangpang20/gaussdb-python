@@ -2,7 +2,7 @@
 gaussdb connection objects
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from functools import partial
 from collections import deque
 
 from . import errors as e
-from . import generators, postgres, pq
+from . import gaussdb_, generators, pq
 from .abc import PQGen, PQGenConn, Query
 from .sql import SQL, Composable
 from ._tpc import Xid
@@ -273,7 +273,7 @@ class BaseConnection(Generic[Row]):
     @property
     def adapters(self) -> AdaptersMap:
         if not self._adapters:
-            self._adapters = AdaptersMap(postgres.adapters)
+            self._adapters = AdaptersMap(gaussdb_.adapters)
 
         return self._adapters
 
@@ -695,5 +695,5 @@ class BaseConnection(Generic[Row]):
 
     def _check_tpc(self) -> None:
         """Raise NotSupportedError if TPC is not supported."""
-        # TPC supported on every supported PostgreSQL version.
+        # TPC supported on every supported GaussDB version.
         pass

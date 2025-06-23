@@ -2,7 +2,7 @@
 SQL composition utility module
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -328,7 +328,7 @@ class Identifier(Composable):
     A `Composable` representing an SQL identifier or a dot-separated sequence.
 
     Identifiers usually represent names of database objects, such as tables or
-    fields. PostgreSQL identifiers follow `different rules`__ than SQL string
+    fields. GaussDB identifiers follow `different rules`__ than SQL string
     literals for escaping (e.g. they use double quotes instead of single).
 
     .. __: https://www.postgresql.org/docs/current/sql-syntax-lexical.html# \

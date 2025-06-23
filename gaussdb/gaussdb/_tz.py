@@ -2,7 +2,7 @@
 Timezone utility functions.
 """
 
-# Copyright (C) 2020 The GaussDB Team
+# Copyright (C) 2020 The Psycopg Team
 
 from __future__ import annotations
 
@@ -30,11 +30,11 @@ def get_tzinfo(pgconn: PGconn | None) -> tzinfo:
         try:
             zi: tzinfo = ZoneInfo(sname)
         except (KeyError, OSError):
-            logger.warning("unknown PostgreSQL timezone: %r; will use UTC", sname)
+            logger.warning("unknown GaussDB timezone: %r; will use UTC", sname)
             zi = timezone.utc
         except Exception as ex:
             logger.warning(
-                "error handling PostgreSQL timezone: %r; will use UTC (%s - %s)",
+                "error handling GaussDB timezone: %r; will use UTC (%s - %s)",
                 sname,
                 type(ex).__name__,
                 ex,

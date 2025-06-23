@@ -3,7 +3,7 @@ import pytest
 import gaussdb
 from gaussdb import pq
 from gaussdb.adapt import PyFormat, Transformer
-from gaussdb._queries import PostgresQuery, _split_query
+from gaussdb._queries import GaussDBQuery, _split_query
 
 
 @pytest.mark.parametrize(
@@ -89,7 +89,7 @@ def test_split_query_bad(input):
     ],
 )
 def test_pg_query_seq(query, params, want, wformats, wparams):
-    pq = PostgresQuery(Transformer())
+    pq = GaussDBQuery(Transformer())
     pq.convert(query, params)
     assert pq.query == want
     assert pq.formats == wformats
@@ -118,7 +118,7 @@ def test_pg_query_seq(query, params, want, wformats, wparams):
     ],
 )
 def test_pg_query_map(query, params, want, wformats, wparams):
-    pq = PostgresQuery(Transformer())
+    pq = GaussDBQuery(Transformer())
     pq.convert(query, params)
     assert pq.query == want
     assert pq.formats == wformats
@@ -137,7 +137,7 @@ def test_pg_query_map(query, params, want, wformats, wparams):
     ],
 )
 def test_pq_query_badtype(query, params):
-    pq = PostgresQuery(Transformer())
+    pq = GaussDBQuery(Transformer())
     with pytest.raises(TypeError):
         pq.convert(query, params)
 
@@ -157,6 +157,6 @@ def test_pq_query_badtype(query, params):
     ],
 )
 def test_pq_query_badprog(query, params):
-    pq = PostgresQuery(Transformer())
+    pq = GaussDBQuery(Transformer())
     with pytest.raises(gaussdb.ProgrammingError):
         pq.convert(query, params)
