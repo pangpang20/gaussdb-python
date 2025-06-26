@@ -38,12 +38,21 @@ jobs:
         working-directory: tools/isort-gaussdb
         run: python -m build
 
+      - name: Show dist dirs content
+        run: |
+            ls -l gaussdb/dist/
+            ls -l gaussdb_pool/dist/
+            ls -l tools/isort-gaussdb/dist/
+
       - name: Collect all artifacts
         run: |
           mkdir -p all_dist
           cp gaussdb/dist/* all_dist/
           cp gaussdb_pool/dist/* all_dist/
           cp tools/isort-gaussdb/dist/* all_dist/
+          ls -ltr all_dist/
 
       - name: Upload all dist/* to GitHub Release
         uses: softprops/action-gh-release@v1
+        with:
+          files: all_dist/*
