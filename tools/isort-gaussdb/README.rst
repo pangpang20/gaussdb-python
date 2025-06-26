@@ -26,4 +26,4 @@ Note: because this is the first day I use isort at all, there is a chance that
 this plug-in is totally useless and the same can be done using isort features.
 
 .. _isort: https://pycqa.github.io/isort/
-.. _gaussdb 3: https://www.gaussdb.org/
+.. _gaussdb: https://www.huaweicloud.com/product/gaussdb.html
