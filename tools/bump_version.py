@@ -39,11 +39,10 @@ Package(
     name="gaussdb",
     toml_files=[
         PROJECT_DIR / "gaussdb/pyproject.toml",
-        PROJECT_DIR / "gaussdb_c/pyproject.toml",
     ],
     history_file=PROJECT_DIR / "docs/news.rst",
     tag_format="{version}",
-    extras=["gaussdb-c", "gaussdb-binary"],
+    extras=[],
 )
 
 Package(
@@ -51,6 +50,14 @@ Package(
     toml_files=[PROJECT_DIR / "gaussdb_pool/pyproject.toml"],
     history_file=PROJECT_DIR / "docs/news_pool.rst",
     tag_format="pool-{version}",
+    extras=[],
+)
+
+Package(
+    name="isort_gaussdb",
+    toml_files=[PROJECT_DIR / "tools/isort-gaussdb/pyproject.toml"],
+    history_file=Path("/dev/null"),
+    tag_format="isort-{version}",
     extras=[],
 )
 
