@@ -41,7 +41,7 @@ Package(
         PROJECT_DIR / "gaussdb/pyproject.toml",
     ],
     history_file=PROJECT_DIR / "docs/news.rst",
-    tag_format="{version}",
+    tag_format="v{version}",
     extras=[],
 )
 
@@ -49,7 +49,7 @@ Package(
     name="gaussdb_pool",
     toml_files=[PROJECT_DIR / "gaussdb_pool/pyproject.toml"],
     history_file=PROJECT_DIR / "docs/news_pool.rst",
-    tag_format="pool-{version}",
+    tag_format="pool-v{version}",
     extras=[],
 )
 
@@ -57,7 +57,7 @@ Package(
     name="isort_gaussdb",
     toml_files=[PROJECT_DIR / "tools/isort-gaussdb/pyproject.toml"],
     history_file=PROJECT_DIR / "docs/news_isort.rst",
-    tag_format="isort-{version}",
+    tag_format="isort-v{version}",
     extras=[],
 )
 
@@ -166,7 +166,7 @@ chore: bump {self.package.name} package version to {self.want_version}
 
 {''.join(changes)}
 """
-        cmdline = ["git", "tag", "-a", "-m", msg, tag_name]
+        cmdline = ["git", "tag", "-a", "-f", "-m", msg, tag_name]
         sp.check_call(cmdline)
 
     def _parse_version_from_file(self, fp: Path) -> Version:
@@ -275,17 +275,18 @@ def main() -> int | None:
         bump_level = opt.level
     else:
         bump_level = None
-    bumper = Bumper(packages[opt.package], bump_level=bump_level)
-    logger.info("current version: %s", bumper.current_version)
-    logger.info("bumping to version: %s", bumper.want_version)
+    for pkg_name in opt.package:
+        bumper = Bumper(packages[pkg_name], bump_level=bump_level)
+        logger.info("current version: %s", bumper.current_version)
+        logger.info("bumping to version: %s", bumper.want_version)
 
-    if opt.actions is None or Action.UPDATE in opt.actions:
-        bumper.update_files()
-    if opt.actions is None or Action.COMMIT in opt.actions:
-        bumper.commit()
-    if opt.actions is None or Action.TAG in opt.actions:
-        if opt.level != BumpLevel.DEV:
-            bumper.create_tag()
+        if opt.actions is None or Action.UPDATE in opt.actions:
+            bumper.update_files()
+        if opt.actions is None or Action.COMMIT in opt.actions:
+            bumper.commit()
+        if opt.actions is None or Action.TAG in opt.actions:
+            if opt.level != BumpLevel.DEV:
+                bumper.create_tag()
 
     return 0
 
@@ -319,8 +320,9 @@ def parse_cmdline() -> Namespace:
         "-p",
         "--package",
         choices=list(packages.keys()),
-        default="gaussdb",
-        help="the package to bump version [default: %(default)s]",
+        default=list(packages.keys()),
+        nargs="*",
+        help="the package to bump version [default: all]",
     )
 
     parser.add_argument(
