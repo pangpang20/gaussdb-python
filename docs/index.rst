@@ -42,6 +42,7 @@ Release notes
 
     news
     news_pool
+    news_isort
 
 
 Indices and tables
