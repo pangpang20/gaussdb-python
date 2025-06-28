@@ -45,9 +45,17 @@ EulerOS x86_64 systems, you can obtain it by running::
     # libpq.so.5.5 (libc6,x86-64) => /tmp/lib/libpq.so.5.5
     ldconfig -p | grep pq
 
+Installation from PyPI:
 
+    python3 -m venv test_env
+    source test_env/bin/activate
+    pip install --upgrade pip
+    pip install isort-gaussdb
+    pip install gaussdb
+    pip install gaussdb-pool
+    python -c "import gaussdb; print(gaussdb.__version__)"  # Outputs: 1.0.0.dev2
 
-You can then clone this repository to develop GaussDB::
+You can also clone this repository to develop GaussDB::
 
     # Create a new Python virtual environment in the .venv directory
     python -m venv .venv

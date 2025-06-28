@@ -29,7 +29,6 @@ exclude_lines = [
 files = [
     "gaussdb/gaussdb",
     "gaussdb_pool/gaussdb_pool",
-    "gaussdb_c/gaussdb_c",
     "tests",
 ]
 warn_unused_ignores = true
@@ -57,7 +56,7 @@ disallow_untyped_calls = false
 
 [tool.codespell]
 ignore-words-list = "alot,ans,ba,fo,te,erro,varning"
-skip = "build,_build,.tox,.mypy_cache,.venv,pq.c,_gaussdb.c,*.html"
+skip = "build,_build,.tox,.mypy_cache,.venv,*.html"
 
 [tool.isort]
 profile = "black"

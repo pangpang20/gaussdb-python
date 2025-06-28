@@ -48,11 +48,10 @@ email = "daniele.varrazzo@gmail.com"
 text = "GNU Lesser General Public License v3 (LGPLv3)"
 
 [project.urls]
-Homepage = "https://psycopg.org/"
-Documentation = "https://psycopg.org/psycopg3/docs/"
-Changes = "https://psycopg.org/psycopg3/docs/news.html"
-Code = "https://github.com/psycopg/psycopg"
-"Issue Tracker" = "https://github.com/psycopg/psycopg/issues"
+Homepage = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Documentation = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Code = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+"Issue Tracker" = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/issues"
 
 [project.readme]
 file = "README.rst"
