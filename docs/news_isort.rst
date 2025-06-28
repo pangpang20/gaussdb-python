@@ -1,13 +1,12 @@
-.. currentmodule:: gaussdb_pool
+.. currentmodule:: isort_gaussdb
 
 .. index::
     single: Release notes
     single: News
 
-``gaussdb_pool`` release notes
+``isort_gaussdb`` release notes
 ==============================
 
 Current release
 ---------------
-
 - First release on PyPI.

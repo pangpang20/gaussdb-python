@@ -56,7 +56,7 @@ Package(
 Package(
     name="isort_gaussdb",
     toml_files=[PROJECT_DIR / "tools/isort-gaussdb/pyproject.toml"],
-    history_file=Path("/dev/null"),
+    history_file=PROJECT_DIR / "docs/news_isort.rst",
     tag_format="isort-{version}",
     extras=[],
 )
