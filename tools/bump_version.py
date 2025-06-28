@@ -166,7 +166,7 @@ chore: bump {self.package.name} package version to {self.want_version}
 
 {''.join(changes)}
 """
-        cmdline = ["git", "tag", "-a", "-s", "-m", msg, tag_name]
+        cmdline = ["git", "tag", "-a", "-m", msg, tag_name]
         sp.check_call(cmdline)
 
     def _parse_version_from_file(self, fp: Path) -> Version:
