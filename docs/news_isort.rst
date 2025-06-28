@@ -5,7 +5,7 @@
     single: News
 
 ``isort_gaussdb`` release notes
-==============================
+===================================
 
 Current release
 ---------------
