@@ -4,14 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gaussdb"
-description = "PostgreSQL database adapter for Python"
+description = "GaussDB database adapter for Python"
 
 # STOP AND READ! if you change:
-version = "1.0.0.dev1"
+version = "1.0.0.dev2"
 # also change:
 # - `docs/news.rst` to declare this as the current version or an unreleased one;
 # - `gaussdb_c/pyproject.toml` to the same version;
-# - the `c ` and `binary` "optional-dependencies" below to the same version.
 #
 # NOTE: you can use `tools/bump_version.py` to maintain versions.
 
@@ -49,23 +48,17 @@ email = "daniele.varrazzo@gmail.com"
 text = "GNU Lesser General Public License v3 (LGPLv3)"
 
 [project.urls]
-Homepage = "https://gaussdb.org/"
-Documentation = "https://gaussdb.org/gaussdb/docs/"
-Changes = "https://gaussdb.org/gaussdb/docs/news.html"
-Code = "https://github.com/gaussdb/gaussdb"
-"Issue Tracker" = "https://github.com/gaussdb/gaussdb/issues"
+Homepage = "https://psycopg.org/"
+Documentation = "https://psycopg.org/psycopg3/docs/"
+Changes = "https://psycopg.org/psycopg3/docs/news.html"
+Code = "https://github.com/psycopg/psycopg"
+"Issue Tracker" = "https://github.com/psycopg/psycopg/issues"
 
 [project.readme]
 file = "README.rst"
 content-type = "text/x-rst"
 
 [project.optional-dependencies]
-c = [
-    "gaussdb-c == 1.0.0.dev1; implementation_name != \"pypy\"",
-]
-binary = [
-    "gaussdb-binary == 1.0.0.dev1; implementation_name != \"pypy\"",
-]
 pool = [
     "gaussdb-pool",
 ]

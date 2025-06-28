@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install build tools
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade setuptools wheel build
+
+      - name: Build gaussdb
+        working-directory: gaussdb
+        run: python -m build
+
+      - name: Build gaussdb_pool
+        working-directory: gaussdb_pool
+        run: python -m build
+
+      - name: Build isort_gaussdb
+        working-directory: tools/isort-gaussdb
+        run: python -m build
+
+      - name: Show dist dirs content
+        run: |
+            ls -l gaussdb/dist/
+            ls -l gaussdb_pool/dist/
+            ls -l tools/isort-gaussdb/dist/
+
+      - name: Collect all artifacts
+        run: |
+          mkdir -p all_dist
+          cp gaussdb/dist/* all_dist/
+          cp gaussdb_pool/dist/* all_dist/
+          cp tools/isort-gaussdb/dist/* all_dist/
+          ls -ltr all_dist/
+
+      - name: Upload all dist/* to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: all_dist/*

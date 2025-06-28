@@ -8,7 +8,7 @@ This distribution contains the pure Python package ``gaussdb``.
 .. Note::
 
     Despite the lack of number in the package name, this package is the
-    successor of psycopg2_.
+    successor of psycopg2.
 
     Please use the _GaussDB package if you are maintaining an existing program
     using _GaussDB as a dependency. If you are developing something new,
