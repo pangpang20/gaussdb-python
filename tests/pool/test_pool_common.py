@@ -161,6 +161,7 @@ def test_configure_broken(pool_cls, dsn, caplog):
 @pytest.mark.slow
 @pytest.mark.timing
 @pytest.mark.crdb_skip("backend pid")
+@pytest.mark.gaussdb_skip("backend pid")
 def test_queue(pool_cls, dsn):
 
     def worker(n):
@@ -285,8 +286,8 @@ def test_dead_client(pool_cls, dsn):
 
 @pytest.mark.slow
 @pytest.mark.timing
-@pytest.mark.crdb_skip("backend pid")
 @pytest.mark.gaussdb_skip("backend pid")
+@pytest.mark.crdb_skip("backend pid")
 def test_queue_timeout_override(pool_cls, dsn):
 
     def worker(n):
@@ -601,8 +602,8 @@ def test_debug_deadlock(pool_cls, dsn):
         logger.setLevel(old_level)
 
 
-@pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.gaussdb_skip("pg_terminate_backend")
+@pytest.mark.crdb_skip("pg_terminate_backend")
 @pytest.mark.parametrize("autocommit", [True, False])
 def test_check_connection(pool_cls, conn_cls, dsn, autocommit):
     conn = conn_cls.connect(dsn)
