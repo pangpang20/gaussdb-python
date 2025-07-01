@@ -246,6 +246,7 @@ def test_empty_list_mix(conn, fmt_in):
 @pytest.mark.parametrize("fmt_in", PyFormat)
 def test_empty_list(conn, fmt_in):
     cur = conn.cursor()
+    cur.execute("drop table if exists test")
     cur.execute("create table test (id serial primary key, data date[])")
     with conn.transaction():
         cur.execute(
@@ -265,6 +266,7 @@ def test_empty_list(conn, fmt_in):
 @pytest.mark.parametrize("fmt_in", PyFormat)
 def test_empty_list_after_choice(conn, fmt_in):
     cur = conn.cursor()
+    cur.execute("drop table if exists test")
     cur.execute("create table test (id serial primary key, data float[])")
     cur.executemany(
         f"insert into test (data) values (%{fmt_in.value})", [([1.0],), ([],)]

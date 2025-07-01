@@ -7,7 +7,7 @@ name = "gaussdb-pool"
 description = "Connection Pool for GaussDB"
 
 # STOP AND READ! if you change:
-version = "1.0.0.dev1"
+version = "1.0.1"
 # also change:
 # - `docs/news_pool.rst` to declare this version current or unreleased
 
@@ -44,11 +44,10 @@ email = "daniele.varrazzo@gmail.com"
 text = "GNU Lesser General Public License v3 (LGPLv3)"
 
 [project.urls]
-Homepage = "https://psycopg.org/"
-Documentation = "https://www.psycopg.org/psycopg3/docs/advanced/pool.html"
-Changes = "https://psycopg.org/psycopg3/docs/news_pool.html"
-Code = "https://github.com/psycopg/psycopg"
-"Issue Tracker" = "https://github.com/psycopg/psycopg/issues"
+Homepage = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Documentation = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Code = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+"Issue Tracker" = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/issues"
 
 [project.readme]
 file = "README.rst"

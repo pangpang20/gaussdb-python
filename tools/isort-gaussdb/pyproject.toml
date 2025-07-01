@@ -8,10 +8,13 @@ description = "isort plug-in to sort imports by module length first"
 # Note: to release a new version:
 # python -m build -o dist --wheel .
 # twine upload dist/isort_gaussdb-*-py3-none-any.whl
-version = "0.0.1"
+version = "0.0.3"
 
 [project.urls]
-Code = "https://github.com/gaussdb/gaussdb/tree/master/tools/isort-gaussdb"
+Homepage = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Documentation = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+Code = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/"
+"Issue Tracker" = "https://github.com/HuaweiCloudDeveloper/gaussdb-python/issues"
 
 [project.readme]
 file = "README.rst"

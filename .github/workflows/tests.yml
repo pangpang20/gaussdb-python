@@ -83,7 +83,7 @@ jobs:
 
       - name: Create test database
         run: |
-          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"CREATE DATABASE test DBCOMPATIBILITY '\''PG'\'';\"'"
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"CREATE DATABASE test ;\"'"
 
       - name: Create report directory
         run: |

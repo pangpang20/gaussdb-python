@@ -7,9 +7,6 @@
 ``gaussdb`` release notes
 =========================
 
-Future releases
----------------
-
 gaussdb.0b1
 ^^^^^^^^^^^^^
 
