@@ -55,6 +55,9 @@ Installation from PyPI:
     pip install gaussdb-pool
     python -c "import gaussdb; print(gaussdb.__version__)"  # Outputs: 1.0.0.dev2
 
+    # Run demo
+    python ./example/demo.py
+
 You can also clone this repository to develop GaussDB::
 
     # Create a new Python virtual environment in the .venv directory
@@ -111,8 +114,8 @@ Please add ``--config-settings editable_mode=strict`` to the ``pip install
 
 Now hack away! You can run the tests using on GaussDB::
 
-    # Create a new database named "test" with PostgreSQL compatibility enabled
-    gsql -c 'CREATE DATABASE test DBCOMPATIBILITY 'PG' ;'
+    # Create a new database named "test" with Default compatibility with Oracle enabled
+    gsql -c 'CREATE DATABASE test;'
 
     # Set the Python import path to include your local GaussDB Python project
     # Replace your_path with actual values
@@ -154,8 +157,8 @@ Recommended Steps to Run OpenGauss with Python GaussDB Driver Testing (Assuming 
     # Connect to the OpenGauss database using the gsql client
     gsql -d postgres -p 5432 -U omm
 
-    -- Create a new database named "test" with PostgreSQL compatibility enabled
-    CREATE DATABASE test DBCOMPATIBILITY 'PG';
+    -- Create a new database named "test" with Default compatibility with Oracle enabled
+    CREATE DATABASE test;
 
 
     # Set the Python import path to include your local GaussDB Python project
