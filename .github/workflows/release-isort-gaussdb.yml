@@ -1,9 +1,10 @@
-name: Build and Release
+---
+name: Build and Release isort-gaussdb
 
 on:
   push:
     tags:
-      - "*"
+      - "isort-v*.*.*"
 
 permissions:
   contents: write
@@ -26,30 +27,18 @@ jobs:
           pip install --upgrade pip
           pip install --upgrade setuptools wheel build
 
-      - name: Build gaussdb
-        working-directory: gaussdb
-        run: python -m build
-
-      - name: Build gaussdb_pool
-        working-directory: gaussdb_pool
-        run: python -m build
-
-      - name: Build isort_gaussdb
-        working-directory: tools/isort-gaussdb
+      - name: Build isort-gaussdb
+        working-directory: isort-gaussdb
         run: python -m build
 
       - name: Show dist dirs content
         run: |
-            ls -l gaussdb/dist/
-            ls -l gaussdb_pool/dist/
-            ls -l tools/isort-gaussdb/dist/
+            ls -l isort-gaussdb/dist/
 
       - name: Collect all artifacts
         run: |
           mkdir -p all_dist
-          cp gaussdb/dist/* all_dist/
-          cp gaussdb_pool/dist/* all_dist/
-          cp tools/isort-gaussdb/dist/* all_dist/
+          cp isort-gaussdb/dist/* all_dist/
           ls -ltr all_dist/
 
       - name: Upload all dist/* to GitHub Release
