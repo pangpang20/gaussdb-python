@@ -108,9 +108,14 @@ def skip_neg_scale(*args):
     ],
 )
 def test_details(conn, type, precision, scale, dsize, isize):
-    cur = conn.cursor()
-    cur.execute(f"select null::{type}")
-    col = cur.description[0]
+    with conn.cursor() as cur:
+        cur.execute(f"select null::{type}")
+        col = cur.description[0]
+    try:
+        conn.rollback()
+    except Exception:
+        pass
+
     assert type == col.type_display
     assert f" {type} " in (repr(col))
     assert col.precision == precision
