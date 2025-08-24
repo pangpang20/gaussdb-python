@@ -59,7 +59,7 @@ def _create_slot(cur):
 
 def _read_changes(cur):
     cur.execute(
-        "SELECT data FROM pg_logical_slot_peek_changes(%s, NULL, %s);",
+        "SELECT data FROM pg_logical_slot_get_changes(%s, NULL, %s);",
         (SLOT_NAME, 4096),
     )
     rows = cur.fetchall()
