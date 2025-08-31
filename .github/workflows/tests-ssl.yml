@@ -52,7 +52,7 @@ jobs:
           wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz
           tar -xzvf openssl-1.1.1f.tar.gz
           cd openssl-1.1.1f
-          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared
+          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared enable-mdc2
           make -j$(nproc)
           make install
           echo "PATH=/home/runner/openssl-1.1.1f/bin:$PATH" >> $GITHUB_ENV
