@@ -48,12 +48,19 @@ EulerOS x86_64 systems, you can obtain it by running::
 Installation from PyPI:
 
     python3 -m venv test_env
+
     source test_env/bin/activate
+
     pip install --upgrade pip
+
     pip install isort-gaussdb
+
     pip install gaussdb
+
     pip install gaussdb-pool
-    python -c "import gaussdb; print(gaussdb.__version__)"  # Outputs: 1.0.0.dev2
+
+    python -c "import gaussdb; print(gaussdb.__version__)"
+    # Outputs: 1.0.0.dev2
 
     # Run demo
     python ./example/demo.py
@@ -180,6 +187,7 @@ Recommended Steps to Run OpenGauss with Python GaussDB Driver Testing (Assuming 
     pytest --durations=0 -s -v
 
 Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker is Installed)::
+    
     # Create certificate directory
     mkdir -p /opengauss8889/certs
     cd /opengauss8889/certs
