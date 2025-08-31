@@ -187,7 +187,7 @@ Recommended Steps to Run OpenGauss with Python GaussDB Driver Testing (Assuming 
     pytest --durations=0 -s -v
 
 Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker is Installed)::
-    
+
     # Create certificate directory
     mkdir -p /opengauss8889/certs
     cd /opengauss8889/certs
@@ -195,29 +195,29 @@ Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker 
     # Generate CA certificate
     openssl genrsa -out ca.key 4096
     openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 \
--subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
--out ca.crt
+    -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
+    -out ca.crt
 
     # Generate server certificate
     openssl genrsa -out server.key 2048
     openssl req -new -key server.key \
--subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
--out server.csr
+    -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
+    -out server.csr
 
     # SAN config (replace IP/DNS with the address you will use to connect,
     # for example 127.0.0.1 or the host IP)
     cat > san.cnf <<EOF
-[ req ]
-default_bits = 2048
-distinguished_name = req_distinguished_name
-req_extensions = req_ext
-[ req_distinguished_name ]
-[ req_ext ]
-subjectAltName = @alt_names
-[ alt_names ]
-DNS.1 = opengauss.local
-IP.1 = 127.0.0.1
-EOF
+    [ req ]
+    default_bits = 2048
+    distinguished_name = req_distinguished_name
+    req_extensions = req_ext
+    [ req_distinguished_name ]
+    [ req_ext ]
+    subjectAltName = @alt_names
+    [ alt_names ]
+    DNS.1 = opengauss.local
+    IP.1 = 127.0.0.1
+    EOF
 
     # Sign the server certificate with the CA, including SAN
     openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
@@ -232,69 +232,69 @@ EOF
     # Create configuration directory
     mkdir -p /opengauss8889/conf
     cat > /opengauss8889/conf/postgresql.conf <<EOF
-max_connections = 200			# (change requires restart)
-session_timeout = 10min			# allowed duration of any unused session, 0s-86400s(1 day), 0 is disabled
-bulk_write_ring_size = 2GB		# for bulkload, max shared_buffers
-max_prepared_transactions = 200		# zero disables the feature
-cstore_buffers = 512MB         #min 16MB
-enable_incremental_checkpoint = on	# enable incremental checkpoint
-incremental_checkpoint_timeout = 60s	# range 1s-1h
-enable_double_write = on		# enable double write
-wal_keep_segments = 16		# in logfile segments, 16MB each normal, 1GB each in share storage mode; 0 disables
-enable_slot_log = off
-synchronous_standby_names = '*'	# standby servers that provide sync rep
-walsender_max_send_size = 8MB  # Size of walsender max send size
-hot_standby = on			# "on" allows queries during recovery
-enable_kill_query = off			# optional: [on, off], default: off
-logging_collector = on   		# Enable capturing of stderr and csvlog
-log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
-log_file_mode = 0600			# creation mode for log files,
-log_rotation_size = 20MB		# Automatic rotation of logfiles will
-log_min_duration_statement = 1800000	# -1 is disabled, 0 logs all statements
-log_connections = off			# log connection requirement from client
-log_disconnections = off		# log disconnection from client
-log_duration = off			# log the execution time of each query
-log_hostname = off			# log hostname
-log_line_prefix = '%m %u %d %h %p %S '	# special values:
-log_timezone = 'UCT'
-enable_alarm = on
-connection_alarm_rate = 0.9
-alarm_report_interval = 10
-alarm_component = '/opt/snas/bin/snas_cm_cmd'
-use_workload_manager = on		# Enables workload manager in the system.
-datestyle = 'iso, mdy'
-timezone = 'UCT'
-lc_messages = 'en_US.utf8'			# locale for system error message
-lc_monetary = 'en_US.utf8'			# locale for monetary formatting
-lc_numeric = 'en_US.utf8'			# locale for number formatting
-lc_time = 'en_US.utf8'				# locale for time formatting
-default_text_search_config = 'pg_catalog.english'
-lockwait_timeout = 1200s		# Max of lockwait_timeout and deadlock_timeout +1s
-pgxc_node_name = 'gaussdb'			# Coordinator or Datanode name
-audit_enabled = on
-job_queue_processes = 10        # Number of concurrent jobs, optional: [0..1000], default: 10.
-dolphin.nulls_minimal_policy = on # the inverse of the default configuration value ! do not change !
-password_encryption_type = 0
-wal_level = logical
-application_name = ''
-listen_addresses = '*'
-max_replication_slots = 10
-max_wal_senders = 10
-shared_buffers = 512MB
-ssl = on
-ssl_cert_file = '/var/lib/opengauss/certs/server.crt'
-ssl_key_file = '/var/lib/opengauss/certs/server.key'
-ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
-EOF
+    max_connections = 200			# (change requires restart)
+    session_timeout = 10min			# allowed duration of any unused session, 0s-86400s(1 day), 0 is disabled
+    bulk_write_ring_size = 2GB		# for bulkload, max shared_buffers
+    max_prepared_transactions = 200		# zero disables the feature
+    cstore_buffers = 512MB         #min 16MB
+    enable_incremental_checkpoint = on	# enable incremental checkpoint
+    incremental_checkpoint_timeout = 60s	# range 1s-1h
+    enable_double_write = on		# enable double write
+    wal_keep_segments = 16		# in logfile segments, 16MB each normal, 1GB each in share storage mode; 0 disables
+    enable_slot_log = off
+    synchronous_standby_names = '*'	# standby servers that provide sync rep
+    walsender_max_send_size = 8MB  # Size of walsender max send size
+    hot_standby = on			# "on" allows queries during recovery
+    enable_kill_query = off			# optional: [on, off], default: off
+    logging_collector = on   		# Enable capturing of stderr and csvlog
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
+    log_file_mode = 0600			# creation mode for log files,
+    log_rotation_size = 20MB		# Automatic rotation of logfiles will
+    log_min_duration_statement = 1800000	# -1 is disabled, 0 logs all statements
+    log_connections = off			# log connection requirement from client
+    log_disconnections = off		# log disconnection from client
+    log_duration = off			# log the execution time of each query
+    log_hostname = off			# log hostname
+    log_line_prefix = '%m %u %d %h %p %S '	# special values:
+    log_timezone = 'UCT'
+    enable_alarm = on
+    connection_alarm_rate = 0.9
+    alarm_report_interval = 10
+    alarm_component = '/opt/snas/bin/snas_cm_cmd'
+    use_workload_manager = on		# Enables workload manager in the system.
+    datestyle = 'iso, mdy'
+    timezone = 'UCT'
+    lc_messages = 'en_US.utf8'			# locale for system error message
+    lc_monetary = 'en_US.utf8'			# locale for monetary formatting
+    lc_numeric = 'en_US.utf8'			# locale for number formatting
+    lc_time = 'en_US.utf8'				# locale for time formatting
+    default_text_search_config = 'pg_catalog.english'
+    lockwait_timeout = 1200s		# Max of lockwait_timeout and deadlock_timeout +1s
+    pgxc_node_name = 'gaussdb'			# Coordinator or Datanode name
+    audit_enabled = on
+    job_queue_processes = 10        # Number of concurrent jobs, optional: [0..1000], default: 10.
+    dolphin.nulls_minimal_policy = on # the inverse of the default configuration value ! do not change !
+    password_encryption_type = 0
+    wal_level = logical
+    application_name = ''
+    listen_addresses = '*'
+    max_replication_slots = 10
+    max_wal_senders = 10
+    shared_buffers = 512MB
+    ssl = on
+    ssl_cert_file = '/var/lib/opengauss/certs/server.crt'
+    ssl_key_file = '/var/lib/opengauss/certs/server.key'
+    ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
+    EOF
 
     cat > /opengauss8889/conf/postgresql.conf <<EOF
-local   all             all                                     trust
-host    all             all             127.0.0.1/32            trust
-host    all             all             ::1/128                 trust
-host all all 0.0.0.0/0 md5
-hostssl all all 0.0.0.0/0 cert
-host replication gaussdb 0.0.0.0/0 md5
-EOF
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            trust
+    host    all             all             ::1/128                 trust
+    host all all 0.0.0.0/0 md5
+    hostssl all all 0.0.0.0/0 cert
+    host replication gaussdb 0.0.0.0/0 md5
+    EOF
 
 
     # Pull the latest OpenGauss server image from Docker Hub
