@@ -63,7 +63,7 @@ jobs:
         run: |
           mkdir -p opengauss/certs opengauss/conf
           sudo chown omm:omm opengauss/certs opengauss/conf
-          chmod 755 opengauss/certs opengauss/conf
+          sudo chmod 755 opengauss/certs opengauss/conf
 
       - name: Generate CA certificate
         run: |
