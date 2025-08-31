@@ -52,15 +52,17 @@ jobs:
           wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz
           tar -xzvf openssl-1.1.1f.tar.gz
           cd openssl-1.1.1f
-          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared enable-mdc2
+          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared enable-mdc2 enable-weak-ssl-ciphers
           make -j$(nproc)
           make install
           echo "PATH=/home/runner/openssl-1.1.1f/bin:$PATH" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-          /home/runner/openssl-1.1.1f/bin/openssl version
-          ldd /home/runner/openssl-1.1.1f/bin/openssl
-          ls -l /home/runner/openssl-1.1.1f/lib
+
+          export LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH
+          grep -i mdc2 configdata.pm || echo "MDC2 not enabled!"
+          /home/runner/openssl-1.1.1f/bin/openssl version -a
+          ldd /home/runner/openssl-1.1.1f/bin/openssl | grep ssl || true
           nm -D /home/runner/openssl-1.1.1f/lib/libcrypto.so | grep EVP_mdc2 || echo "EVP_mdc2 not found"
 
       - name: Create and activate virtual environment
