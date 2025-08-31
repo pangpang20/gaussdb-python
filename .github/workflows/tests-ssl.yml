@@ -55,11 +55,13 @@ jobs:
           ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared enable-mdc2 enable-weak-ssl-ciphers
           make -j$(nproc)
           make install
+
           echo "PATH=/home/runner/openssl-1.1.1f/bin:$PATH" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
-          export LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH
+          echo "CFLAGS=-I/home/runner/openssl-1.1.1f/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/home/runner/openssl-1.1.1f/lib" >> $GITHUB_ENV
+
           grep -i mdc2 configdata.pm || echo "MDC2 not enabled!"
           /home/runner/openssl-1.1.1f/bin/openssl version -a
           ldd /home/runner/openssl-1.1.1f/bin/openssl | grep ssl || true
@@ -70,7 +72,6 @@ jobs:
           python -m venv venv
           echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
           source venv/bin/activate
-          echo "LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "LDFLAGS=-L/home/runner/openssl-1.1.1f/lib" >> $GITHUB_ENV
           echo "CFLAGS=-I/home/runner/openssl-1.1.1f/include" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
