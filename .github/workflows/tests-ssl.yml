@@ -47,11 +47,18 @@ jobs:
           python-version: "3.9"
           cache: pip
 
-      - name: Update OpenSSL
+      - name: Install OpenSSL 1.1.1f
         run: |
-          sudo apt update
-          sudo apt install -y openssl
-          openssl version       
+          wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz
+          tar -xzvf openssl-1.1.1f.tar.gz
+          cd openssl-1.1.1f
+          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f
+          make
+          make install
+          echo "PATH=/home/runner/openssl-1.1.1f/bin:$PATH" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=/home/runner/openssl-1.1.1f/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          /home/runner/openssl-1.1.1f/bin/openssl version
 
       - name: Create and activate virtual environment
         run: |
