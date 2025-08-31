@@ -31,8 +31,16 @@ jobs:
           --volume ${{ github.workspace }}/opengauss/conf:/var/lib/opengauss/conf
 
     steps:
+      - name: Reset permissions for checkout
+        run: |
+          sudo chown -R runner:runner opengauss || true
+          sudo chmod -R u+rwX opengauss || true
+        if: always()
+
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
