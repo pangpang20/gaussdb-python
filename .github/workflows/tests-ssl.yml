@@ -54,9 +54,15 @@ jobs:
           echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
           source venv/bin/activate
 
+      - name: Create omm user
+        run: |
+          sudo useradd -m -s /bin/bash omm || true
+          sudo usermod -aG docker omm || true
+
       - name: Create certificate and configuration directories
         run: |
           mkdir -p opengauss/certs opengauss/conf
+          sudo chown omm:omm opengauss/certs opengauss/conf
           chmod 755 opengauss/certs opengauss/conf
 
       - name: Generate CA certificate
@@ -65,6 +71,8 @@ jobs:
           openssl req -x509 -new -nodes -key opengauss/certs/ca.key -sha256 -days 3650 \
             -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
             -out opengauss/certs/ca.crt
+          sudo chown omm:omm opengauss/certs/ca.*
+          sudo chmod 600 opengauss/certs/ca.*
 
       - name: Generate server certificate
         run: |
@@ -85,6 +93,8 @@ jobs:
           openssl x509 -req -in opengauss/certs/server.csr -CA opengauss/certs/ca.crt \
             -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/server.crt \
             -days 730 -sha256 -extfile opengauss/certs/san.cnf -extensions req_ext
+          sudo chown omm:omm opengauss/certs/server.* opengauss/certs/san.cnf
+          sudo chmod 600 opengauss/certs/server.* opengauss/certs/san.cnf
 
       - name: Generate client certificate
         run: |
@@ -94,6 +104,8 @@ jobs:
           openssl x509 -req -in opengauss/certs/client.csr -CA opengauss/certs/ca.crt \
             -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/client.crt \
             -days 730 -sha256
+          sudo chown omm:omm opengauss/certs/client.*
+          sudo chmod 600 opengauss/certs/client.*
 
       - name: Create postgresql.conf with SSL
         run: |
@@ -152,6 +164,8 @@ jobs:
           ssl_key_file = '/var/lib/opengauss/certs/server.key'
           ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
           EOF
+          sudo chown omm:omm opengauss/conf/postgresql.conf
+          sudo chmod 600 opengauss/conf/postgresql.conf
 
       - name: Create pg_hba.conf with SSL
         run: |
@@ -163,6 +177,8 @@ jobs:
           hostssl all all 0.0.0.0/0 cert
           host replication gaussdb 0.0.0.0/0 md5
           EOF
+          sudo chown omm:omm opengauss/conf/pg_hba.conf
+          sudo chmod 600 opengauss/conf/pg_hba.conf
 
       - name: Set certificate permissions
         run: |
