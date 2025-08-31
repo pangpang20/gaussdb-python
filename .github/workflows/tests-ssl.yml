@@ -67,8 +67,8 @@ jobs:
 
       - name: Generate CA certificate
         run: |
-          openssl genrsa -out opengauss/certs/ca.key 4096
-          openssl req -x509 -new -nodes -key opengauss/certs/ca.key -sha256 -days 3650 \
+          sudo -u omm openssl genrsa -out opengauss/certs/ca.key 4096
+          sudo -u omm openssl req -x509 -new -nodes -key opengauss/certs/ca.key -sha256 -days 3650 \
             -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
             -out opengauss/certs/ca.crt
           sudo chown omm:omm opengauss/certs/ca.*
@@ -76,8 +76,8 @@ jobs:
 
       - name: Generate server certificate
         run: |
-          openssl genrsa -out opengauss/certs/server.key 2048
-          openssl req -new -key opengauss/certs/server.key \
+          sudo -u omm openssl genrsa -out opengauss/certs/server.key 2048
+          sudo -u omm openssl req -new -key opengauss/certs/server.key \
             -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
             -out opengauss/certs/server.csr
           echo "[ req ]" > opengauss/certs/san.cnf
@@ -90,7 +90,7 @@ jobs:
           echo "[ alt_names ]" >> opengauss/certs/san.cnf
           echo "DNS.1 = opengauss.local" >> opengauss/certs/san.cnf
           echo "IP.1 = 127.0.0.1" >> opengauss/certs/san.cnf
-          openssl x509 -req -in opengauss/certs/server.csr -CA opengauss/certs/ca.crt \
+          sudo -u omm openssl x509 -req -in opengauss/certs/server.csr -CA opengauss/certs/ca.crt \
             -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/server.crt \
             -days 730 -sha256 -extfile opengauss/certs/san.cnf -extensions req_ext
           sudo chown omm:omm opengauss/certs/server.* opengauss/certs/san.cnf
@@ -98,10 +98,10 @@ jobs:
 
       - name: Generate client certificate
         run: |
-          openssl genrsa -out opengauss/certs/client.key 2048
-          openssl req -new -key opengauss/certs/client.key -subj "/CN=dbclient" \
+          sudo -u omm openssl genrsa -out opengauss/certs/client.key 2048
+          sudo -u omm openssl req -new -key opengauss/certs/client.key -subj "/CN=dbclient" \
             -out opengauss/certs/client.csr
-          openssl x509 -req -in opengauss/certs/client.csr -CA opengauss/certs/ca.crt \
+          sudo -u omm openssl x509 -req -in opengauss/certs/client.csr -CA opengauss/certs/ca.crt \
             -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/client.crt \
             -days 730 -sha256
           sudo chown omm:omm opengauss/certs/client.*
