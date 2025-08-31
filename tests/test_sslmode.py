@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 from gaussdb import connect
 
 SCHEMA = "test_schema"
