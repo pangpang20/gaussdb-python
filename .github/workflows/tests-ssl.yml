@@ -61,52 +61,52 @@ jobs:
 
       - name: Create certificate and configuration directories
         run: |
-          mkdir -p opengauss/certs opengauss/conf
-          sudo chown omm:omm opengauss/certs opengauss/conf
-          sudo chmod 755 opengauss/certs opengauss/conf
+          mkdir -p ${{ github.workspace }}/opengauss/certs ${{ github.workspace }}/opengauss/conf
+          sudo chown omm:omm ${{ github.workspace }}/opengauss/certs ${{ github.workspace }}/opengauss/conf
+          sudo chmod 755 ${{ github.workspace }}/opengauss/certs ${{ github.workspace }}/opengauss/conf
 
       - name: Generate CA certificate
         run: |
-          sudo -u omm openssl genrsa -out opengauss/certs/ca.key 4096
-          sudo -u omm openssl req -x509 -new -nodes -key opengauss/certs/ca.key -sha256 -days 3650 \
+          sudo -u omm openssl genrsa -out ${{ github.workspace }}/opengauss/certs/ca.key 4096
+          sudo -u omm openssl req -x509 -new -nodes -key ${{ github.workspace }}/opengauss/certs/ca.key -sha256 -days 3650 \
             -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
-            -out opengauss/certs/ca.crt
-          sudo chmod 600 opengauss/certs/ca.*
+            -out ${{ github.workspace }}/opengauss/certs/ca.crt
+          sudo chmod 600 ${{ github.workspace }}/opengauss/certs/ca.*
 
       - name: Generate server certificate
         run: |
-          sudo -u omm openssl genrsa -out opengauss/certs/server.key 2048
-          sudo -u omm openssl req -new -key opengauss/certs/server.key \
+          sudo -u omm openssl genrsa -out ${{ github.workspace }}/opengauss/certs/server.key 2048
+          sudo -u omm openssl req -new -key ${{ github.workspace }}/opengauss/certs/server.key \
             -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
-            -out opengauss/certs/server.csr
-          sudo -u omm bash -c 'echo "[ req ]" > opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "default_bits = 2048" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "distinguished_name = req_distinguished_name" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "req_extensions = req_ext" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "[ req_distinguished_name ]" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "[ req_ext ]" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "subjectAltName = @alt_names" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "[ alt_names ]" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "DNS.1 = opengauss.local" >> opengauss/certs/san.cnf'
-          sudo -u omm bash -c 'echo "IP.1 = 127.0.0.1" >> opengauss/certs/san.cnf'
-          sudo -u omm openssl x509 -req -in opengauss/certs/server.csr -CA opengauss/certs/ca.crt \
-            -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/server.crt \
-            -days 730 -sha256 -extfile opengauss/certs/san.cnf -extensions req_ext
-          sudo chmod 600 opengauss/certs/server.* opengauss/certs/san.cnf
+            -out ${{ github.workspace }}/opengauss/certs/server.csr
+          sudo -u omm bash -c 'echo "[ req ]" > ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "default_bits = 2048" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "distinguished_name = req_distinguished_name" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "req_extensions = req_ext" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "[ req_distinguished_name ]" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "[ req_ext ]" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "subjectAltName = @alt_names" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "[ alt_names ]" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "DNS.1 = opengauss.local" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm bash -c 'echo "IP.1 = 127.0.0.1" >> ${{ github.workspace }}/opengauss/certs/san.cnf'
+          sudo -u omm openssl x509 -req -in ${{ github.workspace }}/opengauss/certs/server.csr -CA ${{ github.workspace }}/opengauss/certs/ca.crt \
+            -CAkey ${{ github.workspace }}/opengauss/certs/ca.key -CAcreateserial -out ${{ github.workspace }}/opengauss/certs/server.crt \
+            -days 730 -sha256 -extfile ${{ github.workspace }}/opengauss/certs/san.cnf -extensions req_ext
+          sudo chmod 600 ${{ github.workspace }}/opengauss/certs/server.* ${{ github.workspace }}/opengauss/certs/san.cnf
 
       - name: Generate client certificate
         run: |
-          sudo -u omm openssl genrsa -out opengauss/certs/client.key 2048
-          sudo -u omm openssl req -new -key opengauss/certs/client.key -subj "/CN=dbclient" \
-            -out opengauss/certs/client.csr
-          sudo -u omm openssl x509 -req -in opengauss/certs/client.csr -CA opengauss/certs/ca.crt \
-            -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/client.crt \
+          sudo -u omm openssl genrsa -out ${{ github.workspace }}/opengauss/certs/client.key 2048
+          sudo -u omm openssl req -new -key ${{ github.workspace }}/opengauss/certs/client.key -subj "/CN=dbclient" \
+            -out ${{ github.workspace }}/opengauss/certs/client.csr
+          sudo -u omm openssl x509 -req -in ${{ github.workspace }}/opengauss/certs/client.csr -CA ${{ github.workspace }}/opengauss/certs/ca.crt \
+            -CAkey ${{ github.workspace }}/opengauss/certs/ca.key -CAcreateserial -out ${{ github.workspace }}/opengauss/certs/client.crt \
             -days 730 -sha256
-          sudo chmod 600 opengauss/certs/client.*
+          sudo chmod 600 ${{ github.workspace }}/opengauss/certs/client.*
 
       - name: Create postgresql.conf with SSL
         run: |
-          sudo -u omm bash -c 'cat > opengauss/conf/postgresql.conf <<EOF
+          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/postgresql.conf <<EOF
           max_connections = 200
           session_timeout = 10min
           bulk_write_ring_size = 2GB
@@ -161,11 +161,11 @@ jobs:
           ssl_key_file = '"'"'/var/lib/opengauss/certs/server.key'"'"'
           ssl_ca_file = '"'"'/var/lib/opengauss/certs/ca.crt'"'"'
           EOF'
-          sudo chmod 600 opengauss/conf/postgresql.conf
+          sudo chmod 600 ${{ github.workspace }}/opengauss/conf/postgresql.conf
 
       - name: Create pg_hba.conf with SSL
         run: |
-          sudo -u omm bash -c 'cat > opengauss/conf/pg_hba.conf <<EOF
+          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/pg_hba.conf <<EOF
           local   all             all                                     trust
           host    all             all             127.0.0.1/32            trust
           host    all             all             ::1/128                 trust
@@ -173,12 +173,12 @@ jobs:
           hostssl all all 0.0.0.0/0 cert
           host replication gaussdb 0.0.0.0/0 md5
           EOF'
-          sudo chmod 600 opengauss/conf/pg_hba.conf
+          sudo chmod 600 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
 
       - name: Set certificate permissions
         run: |
-          sudo chown -R $(stat -c '%U' /var/lib/opengauss 2>/dev/null || echo omm) opengauss/certs/*
-          sudo chmod 600 opengauss/certs/*
+          sudo chown -R $(stat -c '%U' /var/lib/opengauss 2>/dev/null || echo omm) ${{ github.workspace }}/opengauss/certs/*
+          sudo chmod 600 ${{ github.workspace }}/opengauss/certs/*
 
       - name: Install GaussDB libpq driver
         run: |
@@ -216,6 +216,14 @@ jobs:
             echo "openGauss is not ready"
             exit 1
           fi
+
+      - name: Verify SSL configuration
+        run: |
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl;\"'" | grep -q "on" || { echo "ERROR: ssl is not set to 'on'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_cert_file;\"'" | grep -q "/var/lib/opengauss/certs/server.crt" || { echo "ERROR: ssl_cert_file is not set to '/var/lib/opengauss/certs/server.crt'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_key_file;\"'" | grep -q "/var/lib/opengauss/certs/server.key" || { echo "ERROR: ssl_key_file is not set to '/var/lib/opengauss/certs/server.key'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_ca_file;\"'" | grep -q "/var/lib/opengauss/certs/ca.crt" || { echo "ERROR: ssl_ca_file is not set to '/var/lib/opengauss/certs/ca.crt'"; exit 1; }
+          echo "SSL configuration verified successfully"
 
       - name: Create test database
         run: |
