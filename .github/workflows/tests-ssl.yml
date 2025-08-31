@@ -1,0 +1,222 @@
+name: Tests with SSL
+
+on:
+  push:
+    branches:
+        - "*"
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+    
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    services:
+      opengauss:
+        image: opengauss/opengauss-server:latest
+        ports:
+          - 5432:5432
+        env:
+          GS_USERNAME: root
+          GS_USER_PASSWORD: Passwd@123
+          GS_PASSWORD: Passwd@123
+        options: >-
+          --privileged=true
+          --name opengauss-custom
+          --volume ${{ github.workspace }}/opengauss/certs:/var/lib/opengauss/certs
+          --volume ${{ github.workspace }}/opengauss/conf:/var/lib/opengauss/conf
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - name: Create and activate virtual environment
+        run: |
+          python -m venv venv
+          echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
+          source venv/bin/activate
+
+      - name: Create certificate and configuration directories
+        run: |
+          mkdir -p opengauss/certs opengauss/conf
+          chmod 755 opengauss/certs opengauss/conf
+
+      - name: Generate CA certificate
+        run: |
+          openssl genrsa -out opengauss/certs/ca.key 4096
+          openssl req -x509 -new -nodes -key opengauss/certs/ca.key -sha256 -days 3650 \
+            -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
+            -out opengauss/certs/ca.crt
+
+      - name: Generate server certificate
+        run: |
+          openssl genrsa -out opengauss/certs/server.key 2048
+          openssl req -new -key opengauss/certs/server.key \
+            -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
+            -out opengauss/certs/server.csr
+          echo "[ req ]" > opengauss/certs/san.cnf
+          echo "default_bits = 2048" >> opengauss/certs/san.cnf
+          echo "distinguished_name = req_distinguished_name" >> opengauss/certs/san.cnf
+          echo "req_extensions = req_ext" >> opengauss/certs/san.cnf
+          echo "[ req_distinguished_name ]" >> opengauss/certs/san.cnf
+          echo "[ req_ext ]" >> opengauss/certs/san.cnf
+          echo "subjectAltName = @alt_names" >> opengauss/certs/san.cnf
+          echo "[ alt_names ]" >> opengauss/certs/san.cnf
+          echo "DNS.1 = opengauss.local" >> opengauss/certs/san.cnf
+          echo "IP.1 = 127.0.0.1" >> opengauss/certs/san.cnf
+          openssl x509 -req -in opengauss/certs/server.csr -CA opengauss/certs/ca.crt \
+            -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/server.crt \
+            -days 730 -sha256 -extfile opengauss/certs/san.cnf -extensions req_ext
+
+      - name: Generate client certificate
+        run: |
+          openssl genrsa -out opengauss/certs/client.key 2048
+          openssl req -new -key opengauss/certs/client.key -subj "/CN=dbclient" \
+            -out opengauss/certs/client.csr
+          openssl x509 -req -in opengauss/certs/client.csr -CA opengauss/certs/ca.crt \
+            -CAkey opengauss/certs/ca.key -CAcreateserial -out opengauss/certs/client.crt \
+            -days 730 -sha256
+
+      - name: Create postgresql.conf with SSL
+        run: |
+          cat > opengauss/conf/postgresql.conf <<EOF
+          max_connections = 200
+          session_timeout = 10min
+          bulk_write_ring_size = 2GB
+          max_prepared_transactions = 200
+          cstore_buffers = 512MB
+          enable_incremental_checkpoint = on
+          incremental_checkpoint_timeout = 60s
+          enable_double_write = on
+          wal_keep_segments = 16
+          enable_slot_log = off
+          synchronous_standby_names = '*'
+          walsender_max_send_size = 8MB
+          hot_standby = on
+          enable_kill_query = off
+          logging_collector = on
+          log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+          log_file_mode = 0600
+          log_rotation_size = 20MB
+          log_min_duration_statement = 1800000
+          log_connections = off
+          log_disconnections = off
+          log_duration = off
+          log_hostname = off
+          log_line_prefix = '%m %u %d %h %p %S '
+          log_timezone = 'UTC'
+          enable_alarm = on
+          connection_alarm_rate = 0.9
+          alarm_report_interval = 10
+          alarm_component = '/opt/snas/bin/snas_cm_cmd'
+          use_workload_manager = on
+          datestyle = 'iso, mdy'
+          timezone = 'UTC'
+          lc_messages = 'en_US.utf8'
+          lc_monetary = 'en_US.utf8'
+          lc_numeric = 'en_US.utf8'
+          lc_time = 'en_US.utf8'
+          default_text_search_config = 'pg_catalog.english'
+          lockwait_timeout = 1200s
+          pgxc_node_name = 'gaussdb'
+          audit_enabled = on
+          job_queue_processes = 10
+          dolphin.nulls_minimal_policy = on
+          password_encryption_type = 0
+          wal_level = logical
+          application_name = ''
+          listen_addresses = '*'
+          max_replication_slots = 10
+          max_wal_senders = 10
+          shared_buffers = 512MB
+          ssl = on
+          ssl_cert_file = '/var/lib/opengauss/certs/server.crt'
+          ssl_key_file = '/var/lib/opengauss/certs/server.key'
+          ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
+          EOF
+
+      - name: Create pg_hba.conf with SSL
+        run: |
+          cat > opengauss/conf/pg_hba.conf <<EOF
+          local   all             all                                     trust
+          host    all             all             127.0.0.1/32            trust
+          host    all             all             ::1/128                 trust
+          host all all 0.0.0.0/0 md5
+          hostssl all all 0.0.0.0/0 cert
+          host replication gaussdb 0.0.0.0/0 md5
+          EOF
+
+      - name: Set certificate permissions
+        run: |
+          sudo chown -R $(stat -c '%U' /var/lib/opengauss 2>/dev/null || echo omm) opengauss/certs/*
+          sudo chmod 600 opengauss/certs/*
+
+      - name: Install GaussDB libpq driver
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip
+          wget -O /tmp/GaussDB_driver.zip https://dbs-download.obs.cn-north-1.myhuaweicloud.com/GaussDB/1730887196055/GaussDB_driver.zip
+          unzip /tmp/GaussDB_driver.zip -d /tmp/ && rm -rf /tmp/GaussDB_driver.zip
+          \cp /tmp/GaussDB_driver/Centralized/Hce2_X86_64/GaussDB-Kernel*64bit_Python.tar.gz /tmp/
+          tar -zxvf /tmp/GaussDB-Kernel*64bit_Python.tar.gz -C /tmp/ && rm -rf /tmp/GaussDB-Kernel*64bit_Python.tar.gz && rm -rf /tmp/_GaussDB && rm -rf /tmp/GaussDB_driver
+          echo /tmp/lib | sudo tee /etc/ld.so.conf.d/gauss-libpq.conf
+          sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
+          sudo ldconfig
+          ldconfig -p | grep pq
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ./tools/isort-gaussdb/
+          pip install "./gaussdb[dev,test]"
+          pip install ./gaussdb_pool
+
+          
+      - name: Wait for openGauss to be ready
+        env:
+          GSQL_PASSWORD: Passwd@123
+        run: |
+          source venv/bin/activate
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U root && break
+            sleep 10
+          done
+          if ! pg_isready -h localhost -p 5432 -U root; then
+            echo "openGauss is not ready"
+            exit 1
+          fi
+
+      - name: Create test database
+        run: |
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"CREATE DATABASE test ;\"'"
+
+      - name: Create report directory
+        run: |
+          mkdir -p reports
+
+      - name: Run tests
+        env:
+          PYTHONPATH: ./gaussdb:./gaussdb_pool
+          GAUSSDB_IMPL: python
+          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=verify-ca sslrootcert=${{ github.workspace }}/opengauss/certs/ca.crt"
+        run: |
+          source venv/bin/activate
+          pytest -s -v
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop opengauss-custom
+          docker rm opengauss-custom
