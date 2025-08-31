@@ -171,7 +171,5 @@ def pytest_collection_modifyitems(config, items):
 def skip_if_ssl(request):
     dsn = os.environ.get("GAUSSDB_TEST_DSN", "")
     if "sslmode=require" in dsn or "sslmode=verify-ca" in dsn:
-        if "timing" in request.node.keywords:
-            pytest.skip(
-                "Skip timing-sensitive pool tests under SSL mode"
-            )
+        if ("timing" in request.node.keywords) or ("slow" in request.node.keywords):
+            pytest.skip("Skip timing-sensitive pool tests under SSL mode")

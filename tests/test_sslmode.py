@@ -8,10 +8,10 @@ SCHEMA = "test_schema"
 TABLE = "test01"
 
 
-@pytest.fixture(params=['require', 'verify-ca'])
+@pytest.fixture(params=["require", "verify-ca"])
 def dsn(request):
     """Retrieve DSN from environment variable based on SSL mode."""
-    dsn = os.environ.get('GAUSSDB_TEST_DSN')
+    dsn = os.environ.get("GAUSSDB_TEST_DSN")
     if not dsn:
         raise ValueError("GAUSSDB_TEST_DSN environment variable not set")
 
@@ -23,7 +23,7 @@ def dsn(request):
 @pytest.fixture
 def db_conn(dsn):
     """Set up database connection."""
-    conn = connect(dsn, connect_timeout=10, application_name='test01')
+    conn = connect(dsn, connect_timeout=10, application_name="test01")
     yield conn
     conn.close()
 
@@ -56,9 +56,9 @@ def test_connection_info(setup_env):
     server_version = cur.execute("SELECT version()").fetchall()[0][0]
     assert server_version is not None, "Server version should be available"
     assert setup_env.info.vendor is not None, "Vendor should be available"
-    assert setup_env.info.server_version is not None, (
-        "Server version info should be available"
-    )
+    assert (
+        setup_env.info.server_version is not None
+    ), "Server version info should be available"
 
 
 def test_table_operations(setup_env):
