@@ -28,7 +28,6 @@ jobs:
           --privileged=true
           --name opengauss-custom
           --volume ${{ github.workspace }}/opengauss/certs:/var/lib/opengauss/certs
-          --volume ${{ github.workspace }}/opengauss/conf:/var/lib/opengauss/conf
 
     steps:
       - name: Reset permissions for checkout
@@ -161,7 +160,7 @@ jobs:
           ssl_key_file = '"'"'/var/lib/opengauss/certs/server.key'"'"'
           ssl_ca_file = '"'"'/var/lib/opengauss/certs/ca.crt'"'"'
           EOF'
-          sudo chmod 600 ${{ github.workspace }}/opengauss/conf/postgresql.conf
+          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/postgresql.conf
 
       - name: Create pg_hba.conf with SSL
         run: |
@@ -173,10 +172,18 @@ jobs:
           hostssl all all 0.0.0.0/0 cert
           host replication gaussdb 0.0.0.0/0 md5
           EOF'
-          sudo chmod 600 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
+          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
+
+      - name: Debug file permissions
+        run: |
+          ls -l ${{ github.workspace }}/opengauss/conf/
+          whoami
+          docker info --format '{{.ServerVersion}}'
+          docker ps -a
 
       - name: Copy configuration files to container data directory
         run: |
+          docker exec opengauss-custom mkdir -p /var/lib/opengauss/data
           docker cp ${{ github.workspace }}/opengauss/conf/postgresql.conf opengauss-custom:/var/lib/opengauss/data/postgresql.conf
           docker cp ${{ github.workspace }}/opengauss/conf/pg_hba.conf opengauss-custom:/var/lib/opengauss/data/pg_hba.conf
 
@@ -215,7 +222,6 @@ jobs:
           pip install ./tools/isort-gaussdb/
           pip install "./gaussdb[dev,test]"
           pip install ./gaussdb_pool
-
           
       - name: Wait for openGauss to be ready
         env:
