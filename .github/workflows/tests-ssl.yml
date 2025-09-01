@@ -159,11 +159,6 @@ jobs:
           docker exec opengauss-custom chown omm:omm /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf
           docker exec opengauss-custom chmod 600 /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf
 
-      - name: Set certificate permissions
-        run: |
-          sudo chown -R $(stat -c '%U' /var/lib/opengauss 2>/dev/null || echo omm) ${{ github.workspace }}/opengauss/certs/*
-          sudo chmod 600 ${{ github.workspace }}/opengauss/certs/*
-
       - name: Restart openGauss to apply configuration
         run: |
           docker restart opengauss-custom
