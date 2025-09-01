@@ -159,7 +159,7 @@ jobs:
 
       - name: Fix SSL cert permissions
         run: |
-          sudo chmod -R $(whoami):$(whoami) ${{ github.workspace }}/certs
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}/certs
           sudo chmod 600 ${{ github.workspace }}/certs/*.crt
           sudo chmod 600 ${{ github.workspace }}/certs/*.key
           
