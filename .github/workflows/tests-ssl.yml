@@ -159,9 +159,9 @@ jobs:
 
       - name: Fix SSL cert permissions
         run: |
-          sudo chmod -R u+w /home/runner/work/gaussdb-python/gaussdb-python/certs
-          sudo chmod 600 /home/runner/work/gaussdb-python/gaussdb-python/certs/*.crt
-          sudo chmod 600 /home/runner/work/gaussdb-python/gaussdb-python/certs/*.key
+          sudo chmod -R $(whoami):$(whoami) ${{ github.workspace }}/certs
+          sudo chmod 600 ${{ github.workspace }}/certs/*.crt
+          sudo chmod 600 ${{ github.workspace }}/certs/*.key
           
       - name: Set permissions inside container
         run: |
