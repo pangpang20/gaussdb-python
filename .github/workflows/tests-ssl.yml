@@ -159,7 +159,7 @@ jobs:
 
       - name: Fix SSL cert permissions
         run: |
-          chmod 600 certs/ca.crt
+          chmod 600 ${{ github.workspace }}/certs/ca.crt
           
       - name: Set permissions inside container
         run: |
