@@ -160,8 +160,7 @@ jobs:
       - name: Fix SSL cert permissions
         run: |
           sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}/certs
-          sudo chmod 600 ${{ github.workspace }}/certs/*.crt
-          sudo chmod 600 ${{ github.workspace }}/certs/*.key
+          sudo chmod 600 ${{ github.workspace }}/certs/*
           
       - name: Set permissions inside container
         run: |
@@ -228,7 +227,7 @@ jobs:
         env:
           PYTHONPATH: ./gaussdb:./gaussdb_pool
           GAUSSDB_IMPL: python
-          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=verify-ca sslrootcert=${{ github.workspace }}/certs/ca.crt "
+          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=verify-ca sslrootcert=${{ github.workspace }}/certs/ca.crt sslcert=${{ github.workspace }}/certs/client.crt sslkey=${{ github.workspace }}/certs/client.key"
         run: |
           export PGSSLDEBUG=1
           source venv/bin/activate
