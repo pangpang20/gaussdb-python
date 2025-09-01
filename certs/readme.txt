@@ -31,7 +31,7 @@ openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
 
 # Optional: client certificate (mutual TLS)
 openssl genrsa -out client.key 2048
-openssl req -new -key client.key -subj "/CN=dbclient" -out client.csr
+openssl req -new -key client.key -subj "/CN=root" -out client.csr
 openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
 -out client.crt -days 730 -sha256
 
