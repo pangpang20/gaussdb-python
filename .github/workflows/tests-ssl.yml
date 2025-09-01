@@ -65,7 +65,7 @@ jobs:
       - name: Set certificate permissions
         run: |
           sudo chown -R omm:omm ${{ github.workspace }}/certs
-          sudo chmod 600 ${{ github.workspace }}/certs/*key || true
+          sudo chmod 644 ${{ github.workspace }}/certs/*key || true
           sudo chmod 644 ${{ github.workspace }}/certs/*.crt || true
 
       - name: Create postgresql.conf with SSL
