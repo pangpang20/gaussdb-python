@@ -135,8 +135,8 @@ jobs:
           local   all             all                                     trust
           host    all             all             127.0.0.1/32            trust
           host    all             all             ::1/128                 trust
-          host all all 0.0.0.0/0 md5
           hostssl all all 0.0.0.0/0 cert
+          host all all 0.0.0.0/0 md5
           host replication gaussdb 0.0.0.0/0 md5
           EOF'
           sudo chmod 644 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
@@ -156,8 +156,8 @@ jobs:
 
       - name: Set permissions inside container
         run: |
-          docker exec opengauss-custom chown omm:omm /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf
-          docker exec opengauss-custom chmod 600 /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf
+          docker exec opengauss-custom chown omm:omm /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf /var/lib/opengauss/certs/server.crt /var/lib/opengauss/certs/server.key /var/lib/opengauss/certs/ca.crt
+          docker exec opengauss-custom chmod 600 /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf /var/lib/opengauss/certs/server.crt /var/lib/opengauss/certs/server.key /var/lib/opengauss/certs/ca.crt
 
       - name: Restart openGauss to apply configuration
         run: |
