@@ -13,7 +13,7 @@ concurrency:
     
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
 
     services:
       opengauss:
@@ -47,34 +47,11 @@ jobs:
           python-version: "3.9"
           cache: pip
 
-      - name: Install OpenSSL 1.1.1f
-        run: |
-          wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz
-          tar -xzvf openssl-1.1.1f.tar.gz
-          cd openssl-1.1.1f
-          ./config --prefix=/home/runner/openssl-1.1.1f --openssldir=/home/runner/openssl-1.1.1f shared enable-mdc2 enable-weak-ssl-ciphers
-          make -j$(nproc)
-          make install
-
-          echo "PATH=/home/runner/openssl-1.1.1f/bin:$PATH" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-
-          echo "CFLAGS=-I/home/runner/openssl-1.1.1f/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/home/runner/openssl-1.1.1f/lib" >> $GITHUB_ENV
-
-          grep -i mdc2 configdata.pm || echo "MDC2 not enabled!"
-          /home/runner/openssl-1.1.1f/bin/openssl version -a
-          ldd /home/runner/openssl-1.1.1f/bin/openssl | grep ssl || true
-          nm -D /home/runner/openssl-1.1.1f/lib/libcrypto.so | grep EVP_mdc2 || echo "EVP_mdc2 not found"
-
       - name: Create and activate virtual environment
         run: |
           python -m venv venv
           echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
           source venv/bin/activate
-          echo "LDFLAGS=-L/home/runner/openssl-1.1.1f/lib" >> $GITHUB_ENV
-          echo "CFLAGS=-I/home/runner/openssl-1.1.1f/include" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=/home/runner/openssl-1.1.1f/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
 
       - name: Create omm user
         run: |
