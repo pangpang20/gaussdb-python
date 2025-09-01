@@ -361,7 +361,7 @@ Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker 
 
     # Set the test DSN (Data Source Name) as an environment variable
     export GAUSSDB_TEST_DSN="dbname=test user=root password=Password@123 host=127.0.0.1 port=8889 sslmode=require" 
-    export GAUSSDB_TEST_DSN="dbname=test user=root password=Password@123 host=127.0.0.1 port=8889 sslmode=verify-ca sslrootcert=/opengauss8889/certs/ca.crt"
+    export GAUSSDB_TEST_DSN="dbname=test user=root password=Password@123 host=127.0.0.1 port=8889 sslmode=verify-ca sslrootcert=/opengauss8889/certs/ca.crt sslcert=/opengauss8889/certs/client.crt sslkey=/opengauss8889/certs/client.key"
 
     # Run all tests using pytest, showing verbose output and test durations
     pytest --durations=0 -s -v
