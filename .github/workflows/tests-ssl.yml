@@ -31,7 +31,6 @@ jobs:
     steps:
       - name: Reset permissions for checkout
         run: |
-          sudo chown -R runner:runner certs || true
           sudo chmod -R u+rwX certs || true
         if: always()
 
@@ -60,8 +59,8 @@ jobs:
       - name: Create configuration directories
         run: |
           mkdir -p ${{ github.workspace }}/opengauss/conf
-          sudo chown omm:omm ${{ github.workspace }}/opengauss/conf
-          sudo chmod 755 ${{ github.workspace }}/opengauss/conf
+          sudo chown omm:omm ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
+          sudo chmod 755 ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
 
       - name: Set certificate permissions
         run: |
