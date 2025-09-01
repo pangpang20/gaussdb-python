@@ -259,6 +259,7 @@ jobs:
           GAUSSDB_IMPL: python
           GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=require "
         run: |
+          export PGSSLDEBUG=1
           source venv/bin/activate
           pytest -s -v
 
