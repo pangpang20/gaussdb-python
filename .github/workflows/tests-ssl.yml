@@ -27,7 +27,6 @@ jobs:
         options: >-
           --privileged=true
           --name opengauss-custom
-          --volume ${{ github.workspace }}/certs:/var/lib/opengauss/certs
 
     steps:
       - name: Reset permissions for checkout
@@ -154,6 +153,11 @@ jobs:
           docker cp ${{ github.workspace }}/opengauss/conf/postgresql.conf opengauss-custom:/var/lib/opengauss/data/postgresql.conf
           docker cp ${{ github.workspace }}/opengauss/conf/pg_hba.conf opengauss-custom:/var/lib/opengauss/data/pg_hba.conf
 
+          docker exec opengauss-custom mkdir -p /var/lib/opengauss/certs
+          docker cp ${{ github.workspace }}/certs/server.crt opengauss-custom:/var/lib/opengauss/certs/
+          docker cp ${{ github.workspace }}/certs/server.key opengauss-custom:/var/lib/opengauss/certs/
+          docker cp ${{ github.workspace }}/certs/ca.crt opengauss-custom:/var/lib/opengauss/certs/
+          
       - name: Set permissions inside container
         run: |
           docker exec opengauss-custom chown omm:omm /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf /var/lib/opengauss/certs/server.crt /var/lib/opengauss/certs/server.key /var/lib/opengauss/certs/ca.crt
