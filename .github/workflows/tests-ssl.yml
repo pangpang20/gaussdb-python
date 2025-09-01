@@ -222,7 +222,7 @@ jobs:
         env:
           PYTHONPATH: ./gaussdb:./gaussdb_pool
           GAUSSDB_IMPL: python
-          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=require "
+          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=verify-ca sslrootcert=${{ github.workspace }}/certs/ca.crt "
         run: |
           export PGSSLDEBUG=1
           source venv/bin/activate
