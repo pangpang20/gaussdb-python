@@ -156,6 +156,10 @@ jobs:
           docker cp ${{ github.workspace }}/certs/server.crt opengauss-custom:/var/lib/opengauss/certs/
           docker cp ${{ github.workspace }}/certs/server.key opengauss-custom:/var/lib/opengauss/certs/
           docker cp ${{ github.workspace }}/certs/ca.crt opengauss-custom:/var/lib/opengauss/certs/
+
+      - name: Fix SSL cert permissions
+        run: |
+          chmod 600 certs/ca.crt
           
       - name: Set permissions inside container
         run: |
