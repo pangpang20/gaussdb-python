@@ -61,7 +61,8 @@ class Proxy:
         # Make a connection string to the proxy
         cdict["host"] = self.client_host
         cdict["port"] = self.client_port
-        cdict["sslmode"] = "disable"  # not supported by the proxy
+        if "sslmode" not in cdict:
+            cdict["sslmode"] = "disable"
         self.client_dsn = conninfo.make_conninfo("", **cdict)
 
         # The running proxy process

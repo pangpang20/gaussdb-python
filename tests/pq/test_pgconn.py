@@ -301,6 +301,12 @@ def test_used_password(pgconn, dsn, monkeypatch):
         "PGPASSWORD" in os.environ
         or [i for i in info if i.keyword == b"password"][0].val is not None
     )
+
+    kv = {i.keyword.decode(): (i.val.decode() if i.val else None) for i in info}
+    sslmode = (kv.get("sslmode") or "").lower()
+    if sslmode in ("require", "verify-ca", "verify-full"):
+        pytest.skip(f"Skipping password usage check under sslmode={sslmode}")
+
     if has_password:
         assert pgconn.used_password
 

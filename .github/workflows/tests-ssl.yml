@@ -1,0 +1,240 @@
+name: Tests with SSL
+
+on:
+  push:
+    branches:
+        - "*"
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+    
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    services:
+      opengauss:
+        image: opengauss/opengauss-server:latest
+        ports:
+          - 5432:5432
+        env:
+          GS_USERNAME: root
+          GS_USER_PASSWORD: Passwd@123
+          GS_PASSWORD: Passwd@123
+        options: >-
+          --privileged=true
+          --name opengauss-custom
+
+    steps:
+      - name: Reset permissions for checkout
+        run: |
+          sudo chmod -R u+rwX certs || true
+        if: always()
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - name: Create and activate virtual environment
+        run: |
+          python -m venv venv
+          echo "VENV_PATH=$GITHUB_WORKSPACE/venv/bin" >> $GITHUB_ENV
+          source venv/bin/activate
+
+      - name: Create omm user
+        run: |
+          sudo useradd -m -s /bin/bash omm || true
+          sudo usermod -aG docker omm || true
+
+      - name: Create configuration directories
+        run: |
+          mkdir -p ${{ github.workspace }}/opengauss/conf
+          sudo chown omm:omm ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
+          sudo chmod 755 ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
+
+      - name: Set certificate permissions
+        run: |
+          sudo chown -R omm:omm ${{ github.workspace }}/certs
+          sudo chmod 644 ${{ github.workspace }}/certs/*key || true
+          sudo chmod 644 ${{ github.workspace }}/certs/*.crt || true
+
+      - name: Create postgresql.conf with SSL
+        run: |
+          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/postgresql.conf <<EOF
+          max_connections = 200
+          session_timeout = 10min
+          bulk_write_ring_size = 2GB
+          max_prepared_transactions = 200
+          cstore_buffers = 512MB
+          enable_incremental_checkpoint = on
+          incremental_checkpoint_timeout = 60s
+          enable_double_write = on
+          wal_keep_segments = 16
+          enable_slot_log = off
+          synchronous_standby_names = '"'"'*'"'"'
+          walsender_max_send_size = 8MB
+          hot_standby = on
+          enable_kill_query = off
+          logging_collector = on
+          log_filename = '"'"'postgresql-%Y-%m-%d_%H%M%S.log'"'"'
+          log_file_mode = 0600
+          log_rotation_size = 20MB
+          log_min_duration_statement = 1800000
+          log_connections = off
+          log_disconnections = off
+          log_duration = off
+          log_hostname = off
+          log_line_prefix = '"'"'%m %u %d %h %p %S '"'"'
+          log_timezone = '"'"'UTC'"'"'
+          enable_alarm = on
+          connection_alarm_rate = 0.9
+          alarm_report_interval = 10
+          alarm_component = '"'"'/opt/snas/bin/snas_cm_cmd'"'"'
+          use_workload_manager = on
+          datestyle = '"'"'iso, mdy'"'"'
+          timezone = '"'"'UTC'"'"'
+          lc_messages = '"'"'en_US.utf8'"'"'
+          lc_monetary = '"'"'en_US.utf8'"'"'
+          lc_numeric = '"'"'en_US.utf8'"'"'
+          lc_time = '"'"'en_US.utf8'"'"'
+          default_text_search_config = '"'"'pg_catalog.english'"'"'
+          lockwait_timeout = 1200s
+          pgxc_node_name = '"'"'gaussdb'"'"'
+          audit_enabled = on
+          job_queue_processes = 10
+          dolphin.nulls_minimal_policy = on
+          password_encryption_type = 0
+          wal_level = logical
+          application_name = '"'"''"'"'
+          listen_addresses = '"'"'*'"'"'
+          max_replication_slots = 10
+          max_wal_senders = 10
+          shared_buffers = 512MB
+          ssl = on
+          ssl_cert_file = '"'"'/var/lib/opengauss/certs/server.crt'"'"'
+          ssl_key_file = '"'"'/var/lib/opengauss/certs/server.key'"'"'
+          ssl_ca_file = '"'"'/var/lib/opengauss/certs/ca.crt'"'"'
+          EOF'
+          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/postgresql.conf
+
+      - name: Create pg_hba.conf with SSL
+        run: |
+          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/pg_hba.conf <<EOF
+          local   all             all                                     trust
+          host    all             all             127.0.0.1/32            trust
+          host    all             all             ::1/128                 trust
+          hostssl all all 0.0.0.0/0 cert
+          host all all 0.0.0.0/0 md5
+          host replication gaussdb 0.0.0.0/0 md5
+          EOF'
+          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
+
+      - name: Debug file permissions
+        run: |
+          ls -l ${{ github.workspace }}/opengauss/conf/
+          whoami
+          docker info --format '{{.ServerVersion}}'
+          docker ps -a
+
+      - name: Copy configuration files to container data directory
+        run: |
+          docker exec opengauss-custom mkdir -p /var/lib/opengauss/data
+          docker cp ${{ github.workspace }}/opengauss/conf/postgresql.conf opengauss-custom:/var/lib/opengauss/data/postgresql.conf
+          docker cp ${{ github.workspace }}/opengauss/conf/pg_hba.conf opengauss-custom:/var/lib/opengauss/data/pg_hba.conf
+
+          docker exec opengauss-custom mkdir -p /var/lib/opengauss/certs
+          docker cp ${{ github.workspace }}/certs/server.crt opengauss-custom:/var/lib/opengauss/certs/
+          docker cp ${{ github.workspace }}/certs/server.key opengauss-custom:/var/lib/opengauss/certs/
+          docker cp ${{ github.workspace }}/certs/ca.crt opengauss-custom:/var/lib/opengauss/certs/
+
+      - name: Fix SSL cert permissions
+        run: |
+          sudo chown -R $(whoami):$(whoami) ${{ github.workspace }}/certs
+          sudo chmod 600 ${{ github.workspace }}/certs/*
+          
+      - name: Set permissions inside container
+        run: |
+          docker exec opengauss-custom chown omm:omm /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf /var/lib/opengauss/certs/server.crt /var/lib/opengauss/certs/server.key /var/lib/opengauss/certs/ca.crt
+          docker exec opengauss-custom chmod 600 /var/lib/opengauss/data/postgresql.conf /var/lib/opengauss/data/pg_hba.conf /var/lib/opengauss/certs/server.crt /var/lib/opengauss/certs/server.key /var/lib/opengauss/certs/ca.crt
+
+      - name: Restart openGauss to apply configuration
+        run: |
+          docker restart opengauss-custom
+
+      - name: Install GaussDB libpq driver
+        run: |
+          sudo apt update
+          sudo apt install -y wget unzip
+          wget -O /tmp/GaussDB_driver.zip https://dbs-download.obs.cn-north-1.myhuaweicloud.com/GaussDB/1730887196055/GaussDB_driver.zip
+          unzip /tmp/GaussDB_driver.zip -d /tmp/ && rm -rf /tmp/GaussDB_driver.zip
+          \cp /tmp/GaussDB_driver/Centralized/Hce2_X86_64/GaussDB-Kernel*64bit_Python.tar.gz /tmp/
+          tar -zxvf /tmp/GaussDB-Kernel*64bit_Python.tar.gz -C /tmp/ && rm -rf /tmp/GaussDB-Kernel*64bit_Python.tar.gz && rm -rf /tmp/_GaussDB && rm -rf /tmp/GaussDB_driver
+          echo /tmp/lib | sudo tee /etc/ld.so.conf.d/gauss-libpq.conf
+          sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
+          sudo ldconfig
+          ldconfig -p | grep pq
+
+      - name: Install dependencies
+        run: |
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ./tools/isort-gaussdb/
+          pip install "./gaussdb[dev,test]"
+          pip install ./gaussdb_pool
+          
+      - name: Wait for openGauss to be ready
+        env:
+          GSQL_PASSWORD: Passwd@123
+        run: |
+          source venv/bin/activate
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U root && break
+            sleep 10
+          done
+          if ! pg_isready -h localhost -p 5432 -U root; then
+            echo "openGauss is not ready"
+            exit 1
+          fi
+
+      - name: Verify SSL configuration
+        run: |
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl;\"'" | grep -q "on" || { echo "ERROR: ssl is not set to 'on'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_cert_file;\"'" | grep -q "/var/lib/opengauss/certs/server.crt" || { echo "ERROR: ssl_cert_file is not set to '/var/lib/opengauss/certs/server.crt'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_key_file;\"'" | grep -q "/var/lib/opengauss/certs/server.key" || { echo "ERROR: ssl_key_file is not set to '/var/lib/opengauss/certs/server.key'"; exit 1; }
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"SHOW ssl_ca_file;\"'" | grep -q "/var/lib/opengauss/certs/ca.crt" || { echo "ERROR: ssl_ca_file is not set to '/var/lib/opengauss/certs/ca.crt'"; exit 1; }
+          echo "SSL configuration verified successfully"
+
+      - name: Create test database
+        run: |
+          docker exec opengauss-custom bash -c "su - omm -c 'gsql -d postgres -c \"CREATE DATABASE test ;\"'"
+
+      - name: Create report directory
+        run: |
+          mkdir -p reports
+
+      - name: Run tests
+        env:
+          PYTHONPATH: ./gaussdb:./gaussdb_pool
+          GAUSSDB_IMPL: python
+          GAUSSDB_TEST_DSN: "host=127.0.0.1 port=5432 dbname=test user=root password=Passwd@123 sslmode=verify-ca sslrootcert=${{ github.workspace }}/certs/ca.crt sslcert=${{ github.workspace }}/certs/client.crt sslkey=${{ github.workspace }}/certs/client.key"
+        run: |
+          export PGSSLDEBUG=1
+          source venv/bin/activate
+          pytest -s -v
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop opengauss-custom
+          docker rm opengauss-custom

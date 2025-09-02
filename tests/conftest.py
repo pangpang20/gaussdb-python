@@ -165,3 +165,11 @@ def pytest_collection_modifyitems(config, items):
                 else "Marked as opengauss_skip"
             )
             item.add_marker(pytest.mark.skip(reason=reason))
+
+
+@pytest.fixture(autouse=True)
+def skip_if_ssl(request):
+    dsn = os.environ.get("GAUSSDB_TEST_DSN", "")
+    if "sslmode=require" in dsn or "sslmode=verify-ca" in dsn:
+        if ("timing" in request.node.keywords) or ("slow" in request.node.keywords):
+            pytest.skip("Skip timing-sensitive pool tests under SSL mode")
