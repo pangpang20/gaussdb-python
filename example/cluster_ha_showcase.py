@@ -81,7 +81,7 @@ def get_node_role(conn: Connection, cluster_mode: str, host: str, port: str) -> 
                 )
                 row = cur.fetchone()
                 if row is None:
-                    return 'single'
+                    return "single"
                 return row[0]
             elif cluster_mode == "distributed":
                 cur.execute(

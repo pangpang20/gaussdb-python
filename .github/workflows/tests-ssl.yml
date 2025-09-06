@@ -68,14 +68,9 @@ jobs:
           sudo chmod 644 ${{ github.workspace }}/certs/*key || true
           sudo chmod 644 ${{ github.workspace }}/certs/*.crt || true
 
-      - name: Set config permissions
-        run: |
-          sudo mkdir -p ${{ github.workspace }}/opengauss/conf
-          sudo chown -R omm:omm ${{ github.workspace }}/opengauss
-
       - name: Create postgresql.conf with SSL
         run: |
-          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/postgresql.conf <<EOF
+          sudo -u omm tee ${{ github.workspace }}/opengauss/conf/postgresql.conf > /dev/null <<'EOF'
           max_connections = 200
           session_timeout = 10min
           bulk_write_ring_size = 2GB
@@ -86,12 +81,12 @@ jobs:
           enable_double_write = on
           wal_keep_segments = 16
           enable_slot_log = off
-          synchronous_standby_names = '"'"'*'"'"'
+          synchronous_standby_names = '*'
           walsender_max_send_size = 8MB
           hot_standby = on
           enable_kill_query = off
           logging_collector = on
-          log_filename = '"'"'postgresql-%Y-%m-%d_%H%M%S.log'"'"'
+          log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
           log_file_mode = 0600
           log_rotation_size = 20MB
           log_min_duration_statement = 1800000
@@ -99,49 +94,49 @@ jobs:
           log_disconnections = off
           log_duration = off
           log_hostname = off
-          log_line_prefix = '"'"'%m %u %d %h %p %S '"'"'
-          log_timezone = '"'"'UTC'"'"'
+          log_line_prefix = '%m %u %d %h %p %S '
+          log_timezone = 'UTC'
           enable_alarm = on
           connection_alarm_rate = 0.9
           alarm_report_interval = 10
-          alarm_component = '"'"'/opt/snas/bin/snas_cm_cmd'"'"'
+          alarm_component = '/opt/snas/bin/snas_cm_cmd'
           use_workload_manager = on
-          datestyle = '"'"'iso, mdy'"'"'
-          timezone = '"'"'UTC'"'"'
-          lc_messages = '"'"'en_US.utf8'"'"'
-          lc_monetary = '"'"'en_US.utf8'"'"'
-          lc_numeric = '"'"'en_US.utf8'"'"'
-          lc_time = '"'"'en_US.utf8'"'"'
-          default_text_search_config = '"'"'pg_catalog.english'"'"'
+          datestyle = 'iso, mdy'
+          timezone = 'UTC'
+          lc_messages = 'en_US.utf8'
+          lc_monetary = 'en_US.utf8'
+          lc_numeric = 'en_US.utf8'
+          lc_time = 'en_US.utf8'
+          default_text_search_config = 'pg_catalog.english'
           lockwait_timeout = 1200s
-          pgxc_node_name = '"'"'gaussdb'"'"'
+          pgxc_node_name = 'gaussdb'
           audit_enabled = on
           job_queue_processes = 10
           dolphin.nulls_minimal_policy = on
           password_encryption_type = 0
           wal_level = logical
-          application_name = '"'"''"'"'
-          listen_addresses = '"'"'*'"'"'
+          application_name = ''
+          listen_addresses = '*'
           max_replication_slots = 10
           max_wal_senders = 10
           shared_buffers = 512MB
           ssl = on
-          ssl_cert_file = '"'"'/var/lib/opengauss/certs/server.crt'"'"'
-          ssl_key_file = '"'"'/var/lib/opengauss/certs/server.key'"'"'
-          ssl_ca_file = '"'"'/var/lib/opengauss/certs/ca.crt'"'"'
-          EOF'
+          ssl_cert_file = '/var/lib/opengauss/certs/server.crt'
+          ssl_key_file = '/var/lib/opengauss/certs/server.key'
+          ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
+          EOF
           sudo chmod 644 ${{ github.workspace }}/opengauss/conf/postgresql.conf
 
       - name: Create pg_hba.conf with SSL
         run: |
-          sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/pg_hba.conf <<EOF
+          sudo -u omm tee ${{ github.workspace }}/opengauss/conf/pg_hba.conf > /dev/null <<'EOF'
           local   all             all                                     trust
           host    all             all             127.0.0.1/32            trust
           host    all             all             ::1/128                 trust
           hostssl all all 0.0.0.0/0 cert
-          host all all 0.0.0.0/0 md5
-          host replication gaussdb 0.0.0.0/0 md5
-          EOF'
+          host    all all 0.0.0.0/0 md5
+          host    replication gaussdb 0.0.0.0/0 md5
+          EOF
           sudo chmod 644 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
 
       - name: Debug file permissions
