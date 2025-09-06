@@ -68,6 +68,10 @@ jobs:
           sudo chmod 644 ${{ github.workspace }}/certs/*key || true
           sudo chmod 644 ${{ github.workspace }}/certs/*.crt || true
 
+      - name: Set config permissions
+        run: |
+          sudo chown -R omm:omm ${{ github.workspace }}/opengauss/conf
+
       - name: Create postgresql.conf with SSL
         run: |
           sudo -u omm bash -c 'cat > ${{ github.workspace }}/opengauss/conf/postgresql.conf <<EOF
