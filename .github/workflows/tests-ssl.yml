@@ -70,7 +70,7 @@ jobs:
 
       - name: Create postgresql.conf with SSL
         run: |
-          sudo -u omm tee ${{ github.workspace }}/opengauss/conf/postgresql.conf > /dev/null <<'EOF'
+          sudo cat > ${{ github.workspace }}/opengauss/conf/postgresql.conf <<'EOF'
           max_connections = 200
           session_timeout = 10min
           bulk_write_ring_size = 2GB
@@ -125,11 +125,10 @@ jobs:
           ssl_key_file = '/var/lib/opengauss/certs/server.key'
           ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
           EOF
-          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/postgresql.conf
 
       - name: Create pg_hba.conf with SSL
         run: |
-          sudo -u omm tee ${{ github.workspace }}/opengauss/conf/pg_hba.conf > /dev/null <<'EOF'
+          sudo cat >${{ github.workspace }}/opengauss/conf/pg_hba.conf <<'EOF'
           local   all             all                                     trust
           host    all             all             127.0.0.1/32            trust
           host    all             all             ::1/128                 trust
@@ -137,7 +136,11 @@ jobs:
           host    all all 0.0.0.0/0 md5
           host    replication gaussdb 0.0.0.0/0 md5
           EOF
-          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/pg_hba.conf
+
+      - name: Fix ownership
+        run: |
+          sudo chown -R omm:omm ${{ github.workspace }}/opengauss
+          sudo chmod 644 ${{ github.workspace }}/opengauss/conf/*
 
       - name: Debug file permissions
         run: |
