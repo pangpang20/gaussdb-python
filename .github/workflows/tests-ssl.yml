@@ -59,7 +59,7 @@ jobs:
       - name: Create configuration directories
         run: |
           mkdir -p ${{ github.workspace }}/opengauss/conf
-          sudo chown omm:omm ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
+          sudo chown omm:omm ${{ github.workspace }}/certs || true
           sudo chmod 755 ${{ github.workspace }}/opengauss/conf ${{ github.workspace }}/certs || true
 
       - name: Set certificate permissions
