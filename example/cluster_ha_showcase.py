@@ -35,13 +35,20 @@ def get_cluster_mode(conn: Connection) -> str:
         with conn.cursor() as cur:
             try:
                 cur.execute("SELECT local_role FROM pg_stat_get_stream_replications()")
-                local_role = cur.fetchone()[0].lower()
+                row = cur.fetchone()
+                if row is None:
+                    return "single"
+                local_role = row[0].lower()
                 if local_role in ("primary", "standby"):
                     return "master-standby"
                 elif local_role == "normal":
                     try:
                         cur.execute("SELECT count(1) FROM pgxc_node")
-                        node_count = cur.fetchone()[0]
+                        row = cur.fetchone()
+                        if row is None:
+                            node_count = 0
+                        else:
+                            node_count = row[0]
                         return "distributed" if node_count > 0 else "single"
                     except Error:
                         logger.warning("pgxc_node 表不存在，返回 single 模式")
@@ -72,7 +79,10 @@ def get_node_role(conn: Connection, cluster_mode: str, host: str, port: str) -> 
                     "SELECT CASE WHEN pg_is_in_recovery() "
                     "THEN 'Standby' ELSE 'Primary' END"
                 )
-                return cur.fetchone()[0]
+                row = cur.fetchone()
+                if row is None:
+                    return 'single'
+                return row[0]
             elif cluster_mode == "distributed":
                 cur.execute(
                     "SELECT node_name, node_host FROM pgxc_node "
@@ -108,6 +118,7 @@ def connect_with_retry(
             if attempt == max_attempts:
                 raise
             time.sleep(2**attempt)
+    raise RuntimeError(f"连接失败: {dsn}")
 
 
 def disaster_recovery(params, simulate_failure: bool = False):

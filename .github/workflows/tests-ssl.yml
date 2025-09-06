@@ -70,7 +70,8 @@ jobs:
 
       - name: Set config permissions
         run: |
-          sudo chown -R omm:omm ${{ github.workspace }}/opengauss/conf
+          sudo mkdir -p ${{ github.workspace }}/opengauss/conf
+          sudo chown -R omm:omm ${{ github.workspace }}/opengauss
 
       - name: Create postgresql.conf with SSL
         run: |
