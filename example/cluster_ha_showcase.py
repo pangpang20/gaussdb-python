@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import sys
 import time
 import random
@@ -105,20 +106,29 @@ def connect_with_retry(
     dsn: str, max_attempts: int = 5, timeout: int = 10
 ) -> Connection:
     """带重试的数据库连接"""
+    masked_dsn = re.sub(
+        r"user=[^ ]+|password=[^ ]+",
+        lambda m: f"{m.group(0).split('=')[0]}=***",
+        dsn,
+    )
     for attempt in range(1, max_attempts + 1):
         try:
             start_time = time.time()
             conn = connect(
                 dsn, connect_timeout=timeout, application_name="pg_connection_test"
             )
-            logger.info(f"连接成功: {dsn}，耗时: {time.time() - start_time:.2f} 秒")
+            logger.info(
+                f"连接成功: {masked_dsn}，耗时: {time.time() - start_time:.2f} 秒"
+            )
             return conn
         except Error as e:
-            logger.error(f"连接失败 ({dsn})，第 {attempt}/{max_attempts} 次尝试: {e}")
+            logger.error(
+                f"连接失败 ({masked_dsn})，第 {attempt}/{max_attempts} 次尝试: {e}"
+            )
             if attempt == max_attempts:
                 raise
             time.sleep(2**attempt)
-    raise RuntimeError(f"连接失败: {dsn}")
+    raise RuntimeError(f"连接失败: {masked_dsn}")
 
 
 def disaster_recovery(params, simulate_failure: bool = False):
