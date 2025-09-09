@@ -105,7 +105,7 @@ def get_node_role(conn: Connection, cluster_mode: str, host: str, port: str) -> 
 def connect_with_retry(
     dsn: str, max_attempts: int = 5, timeout: int = 10
 ) -> Connection:
-    """带重试的数据库连接"""
+    """带重试的数据库连接，使用固定间隔重试"""
     masked_dsn = re.sub(
         r"user=[^ ]+|password=[^ ]+",
         lambda m: f"{m.group(0).split('=')[0]}=***",
@@ -127,7 +127,7 @@ def connect_with_retry(
             )
             if attempt == max_attempts:
                 raise
-            time.sleep(2**attempt)
+            time.sleep(2)  # 固定 2 秒重试间隔
     raise RuntimeError(f"连接失败: {masked_dsn}")
 
 
@@ -135,75 +135,90 @@ def disaster_recovery(params, simulate_failure: bool = False):
     """容灾场景：优先连接主节点，失败则尝试其他节点"""
     print(f"\n=== 容灾场景测试{'（模拟主节点故障）' if simulate_failure else ''} ===")
     nodes = get_nodes(params)
-    primary_dsn = (
-        f"host={nodes[0][0]} port={nodes[0][1]} "
+    dsns = [
+        f"host={host} port={port} "
         f"user={params['user']} password={params['password']} "
         f"dbname={params['dbname']}"
-    )
-    other_dsns = [
-        f"host={host} port={port} user={params['user']} "
-        f"password={params['password']} dbname={params['dbname']}"
-        for host, port in nodes[1:]
+        for host, port in nodes
     ]
+    start_index = 1 if simulate_failure else 0
 
     # 检测集群模式
     cluster_mode = "single"
-    if not simulate_failure:
-        try:
-            with connect_with_retry(primary_dsn) as conn:
-                cluster_mode = get_cluster_mode(conn)
-                role = get_node_role(conn, cluster_mode, nodes[0][0], nodes[0][1])
-                print(
-                    f"容灾测试通过: 连接到节点 {nodes[0][0]}:{nodes[0][1]}，"
-                    f"角色: {role}，模式: {cluster_mode}"
-                )
-                return
-        except Error as e:
-            logger.error(f"主节点连接失败: {e}")
-
-    # 尝试其他节点
-    for dsn, (host, port) in zip(other_dsns, nodes[1:]):
+    for dsn, (host, port) in zip(dsns[start_index:], nodes[start_index:]):
         try:
             with connect_with_retry(dsn) as conn:
                 cluster_mode = get_cluster_mode(conn)
                 role = get_node_role(conn, cluster_mode, host, port)
-                print(
-                    f"容灾测试通过: 切换到节点 {host}:{port}，角色: {role}，模式: {cluster_mode}"
-                )
-                return
+                if cluster_mode in (
+                    "master-standby",
+                    "main standby",
+                    "cascade standby",
+                ):
+                    if role == "Primary":
+                        print(
+                            f"容灾测试通过: 主节点 {host}:{port}，角色: {role}，模式: {cluster_mode}"
+                        )
+                        return
+                    else:
+                        logger.info(
+                            f"节点 {host}:{port} 是 {role}，模式: {cluster_mode}，继续查找主节点"
+                        )
+                else:
+                    print(
+                        f"容灾测试通过: 连接到节点 {host}:{port}，角色: {role}，模式: {cluster_mode}"
+                    )
+                    return
         except Error as e:
             logger.error(f"节点 {host}:{port} 连接失败: {e}")
 
-    print("容灾测试失败: 无法连接到任何节点")
+    print("容灾测试失败: 无法连接到任何主节点或有效节点")
 
 
 def load_balancing(params):
     """负载均衡场景：写操作到主节点，读操作测试顺序和随机模式"""
     print("\n=== 负载均衡场景测试 ===")
     nodes = get_nodes(params)
-    primary_dsn = (
-        f"host={nodes[0][0]} port={nodes[0][1]} "
-        f"user={params['user']} password={params['password']} "
-        f"dbname={params['dbname']}"
-    )
-    all_dsns = [
+    dsns = [
         f"host={host} port={port} "
         f"user={params['user']} password={params['password']} "
         f"dbname={params['dbname']}"
         for host, port in nodes
     ]
 
-    # 检测集群模式
+    # 查找主节点
+    primary_dsn = None
+    primary_node = None
     cluster_mode = "single"
-    try:
-        with connect_with_retry(primary_dsn) as conn:
-            cluster_mode = get_cluster_mode(conn)
-            role = get_node_role(conn, cluster_mode, nodes[0][0], nodes[0][1])
-            logger.info(
-                f"主节点 {nodes[0][0]}:{nodes[0][1]}，角色: {role}，模式: {cluster_mode}"
-            )
-    except Error as e:
-        logger.error(f"主节点连接失败: {e}")
+    for dsn, (host, port) in zip(dsns, nodes):
+        try:
+            with connect_with_retry(dsn) as conn:
+                cluster_mode = get_cluster_mode(conn)
+                role = get_node_role(conn, cluster_mode, host, port)
+                logger.info(
+                    f"检查节点 {host}:{port}，角色: {role}，模式: {cluster_mode}"
+                )
+                if cluster_mode in (
+                    "master-standby",
+                    "main standby",
+                    "cascade standby",
+                ):
+                    if role == "Primary":
+                        primary_dsn = dsn
+                        primary_node = (host, port)
+                        primary_role = role
+                        break
+                elif cluster_mode == "distributed":
+                    primary_dsn = dsn
+                    primary_node = (host, port)
+                    primary_role = role
+                    break
+        except Error as e:
+            logger.error(f"检查节点 {host}:{port} 失败: {e}")
+            continue
+
+    if not primary_dsn:
+        logger.error("无法找到主节点或协调节点，负载均衡测试失败")
         return
 
     # 写操作：连接主节点，创建普通表
@@ -226,12 +241,16 @@ def load_balancing(params):
                     "INSERT INTO test_table (id, data) VALUES (1, 'test write')"
                 )
                 conn.commit()
-                print(
-                    f"写操作成功: 连接到主节点 {nodes[0][0]}:{nodes[0][1]}，角色: {role}"
-                )
+                print(f"""
+                    写操作成功: 连接到主节点 {primary_node[0]}:{primary_node[1]}，
+                    角色: {primary_role}
+                """)
     except Error as e:
         logger.error(f"写操作失败，主节点连接失败或数据库错误: {e}")
         return
+
+    # 等待数据同步（视同步延迟调整）
+    time.sleep(1)
 
     # 读操作：测试顺序和随机模式
     for load_balance_mode in ["disable", "random"]:
@@ -241,11 +260,9 @@ def load_balancing(params):
         unavailable_nodes = []
 
         # 优先测试主节点
-        dsn = primary_dsn
         try:
-            with connect_with_retry(dsn) as conn:
-                host = nodes[0][0]
-                port = nodes[0][1]
+            with connect_with_retry(primary_dsn) as conn:
+                host, port = primary_node
                 role = get_node_role(conn, cluster_mode, host, port)
                 with conn.cursor() as cur:
                     cur.execute("SELECT data FROM test_table WHERE id = 1")
@@ -263,7 +280,7 @@ def load_balancing(params):
             unavailable_nodes.append(f"{nodes[0][0]}:{nodes[0][1]}")
 
         # 测试其他节点（19 次，总计 20 次读操作）
-        shuffled_dsns = all_dsns.copy()
+        shuffled_dsns = dsns.copy()
         if load_balance_mode == "random":
             random.shuffle(shuffled_dsns)
         else:
@@ -294,7 +311,7 @@ def load_balancing(params):
         # 验证连接顺序
         expected_hosts = [host for host, _ in nodes]
         if load_balance_mode == "disable":
-            if connected_hosts == [nodes[0][0]] * len(connected_hosts):
+            if connected_hosts == [primary_node[0]] * len(connected_hosts):
                 print(
                     f"负载均衡测试通过 ({load_balance_mode} 模式): 连接顺序符合预期 {connected_hosts}"
                 )
