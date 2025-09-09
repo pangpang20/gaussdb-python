@@ -4,6 +4,7 @@ import sys
 import time
 import random
 import logging
+from typing import Tuple
 
 from gaussdb import Connection, Error, connect
 
@@ -71,7 +72,7 @@ def get_cluster_mode(conn: Connection) -> str:
         return "single"
 
 
-def get_node_role(conn: Connection, cluster_mode: str, host: str, port: str) -> str:
+def get_node_role(conn: Connection, cluster_mode: str, host: str, port: int) -> str:
     """获取节点角色（Primary/Standby 或 node_name）"""
     try:
         with conn.cursor() as cur:
@@ -188,7 +189,7 @@ def load_balancing(params):
 
     # 查找主节点
     primary_dsn = None
-    primary_node = None
+    primary_node: Tuple[str, int]
     cluster_mode = "single"
     for dsn, (host, port) in zip(dsns, nodes):
         try:
@@ -241,10 +242,9 @@ def load_balancing(params):
                     "INSERT INTO test_table (id, data) VALUES (1, 'test write')"
                 )
                 conn.commit()
-                print(f"""
-                    写操作成功: 连接到主节点 {primary_node[0]}:{primary_node[1]}，
-                    角色: {primary_role}
-                """)
+                print(
+                    f"写操作成功: 主节点 {primary_node[0]}:{primary_node[1]}，角色: {primary_role}"
+                )
     except Error as e:
         logger.error(f"写操作失败，主节点连接失败或数据库错误: {e}")
         return
