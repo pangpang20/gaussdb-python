@@ -16,7 +16,7 @@
 运行程序
 
 ```bash
-export  DSN="dbname=postgres user=root password=Audaque@123 host=192.168.2.154,192.168.2.35,192.168.2.113 port=8000,8000,8000"
+export  DSN="dbname=postgres user=root password=YourPassword host=192.168.2.154,192.168.2.35,192.168.2.113 port=8000,8000,8000"
 python cluster_ha_showcase.py "$DSN"
 ```
 
@@ -160,7 +160,7 @@ python cluster_ha_showcase.py "$DSN"
 运行程序
 
 ```bash
-export  DSN="dbname=postgres user=root password=Audaque@123 host=192.168.2.154,192.168.2.35,192.168.2.113 port=8000,8000,8000"
+export  DSN="dbname=postgres user=root password=YourPassword host=192.168.2.154,192.168.2.35,192.168.2.113 port=8000,8000,8000"
 python cluster_ha_showcase.py "$DSN"
 ```
 
@@ -323,7 +323,7 @@ python cluster_ha_showcase.py "$DSN"
 运行程序
 
 ```bash
-export  DSN="dbname=postgres user=root password=Audaque@123 host=192.168.2.154,192.168.2.35,192.168.2.113,192.168.2.34,192.168.2.245,192.168.2.73 port=8000,8000,8000,8000,8000,8000"
+export  DSN="dbname=postgres user=root password=YourPassword host=192.168.2.154,192.168.2.35,192.168.2.113,192.168.2.34,192.168.2.245,192.168.2.73 port=8000,8000,8000,8000,8000,8000"
 python cluster_ha_showcase.py "$DSN"
 ```
 
@@ -490,7 +490,7 @@ python cluster_ha_showcase.py "$DSN"
 运行程序
 
 ```bash
-export  DSN="dbname=postgres user=root password=Audaque@123 host=192.168.2.154,192.168.2.35,192.168.2.113,192.168.2.34,192.168.2.245,192.168.2.73 port=8000,8000,8000,8000,8000,8000"
+export  DSN="dbname=postgres user=root password=YourPassword host=192.168.2.154,192.168.2.35,192.168.2.113,192.168.2.34,192.168.2.245,192.168.2.73 port=8000,8000,8000,8000,8000,8000"
 python cluster_ha_showcase.py "$DSN"
 ```
 
