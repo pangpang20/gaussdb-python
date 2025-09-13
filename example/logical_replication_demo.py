@@ -2,6 +2,7 @@
 
 import os
 import sys
+
 from gaussdb import connect
 
 # Set the GaussDB implementation
@@ -12,6 +13,7 @@ SLOT_NAME = "demo_slot"
 SCHEMA = "demo_schema"
 TABLE = "demo_table"
 
+
 def _slot_exists(conn, slot_name):
     """Check if a replication slot exists."""
     with conn.cursor() as cur:
@@ -21,6 +23,7 @@ def _slot_exists(conn, slot_name):
         )
         row = cur.fetchone()
         return bool(row and row[0] > 0)
+
 
 def _cleanup_slot_and_schema(conn):
     """Clean up replication slot and schema."""
@@ -43,6 +46,7 @@ def _cleanup_slot_and_schema(conn):
             print(f"Error dropping schema: {e}")
         conn.commit()
 
+
 def _create_slot(conn):
     """Create a logical replication slot."""
     with conn.cursor() as cur:
@@ -53,6 +57,7 @@ def _create_slot(conn):
         conn.commit()
         print(f"Created replication slot: {SLOT_NAME}")
 
+
 def _read_changes(conn):
     """Read changes from the replication slot."""
     with conn.cursor() as cur:
@@ -62,6 +67,7 @@ def _read_changes(conn):
         )
         rows = cur.fetchall()
         return [str(row[0]) for row in rows if row and row[0] is not None]
+
 
 def main():
     # Get database connection string from environment variable
@@ -75,7 +81,9 @@ def main():
         sys.exit(1)
 
     # Connect to the database
-    with connect(dsn, connect_timeout=10, application_name="logical-replication-demo") as conn:
+    with connect(
+        dsn, connect_timeout=10, application_name="logical-replication-demo"
+    ) as conn:
         # Display server information
         with conn.cursor() as cur:
             server_version = conn.execute("SELECT version()").fetchall()[0][0]
@@ -89,7 +97,9 @@ def main():
         with conn.cursor() as cur:
             cur.execute(f"CREATE SCHEMA {SCHEMA};")
             cur.execute(f"SET search_path TO {SCHEMA};")
-            cur.execute(f"CREATE TABLE {TABLE} (id int PRIMARY KEY, name varchar(255));")
+            cur.execute(
+                f"CREATE TABLE {TABLE} (id int PRIMARY KEY, name varchar(255));"
+            )
             cur.execute(f"ALTER TABLE {TABLE} REPLICA IDENTITY FULL;")
             conn.commit()
             print(f"Created schema {SCHEMA} and table {TABLE}")
@@ -105,7 +115,9 @@ def main():
             print("Inserted: (1, 'hello world')")
 
             # Update
-            cur.execute(f"UPDATE {TABLE} SET name = %s WHERE id = %s;", ("hello gaussdb", 1))
+            cur.execute(
+                f"UPDATE {TABLE} SET name = %s WHERE id = %s;", ("hello gaussdb", 1)
+            )
             conn.commit()
             print("Updated: name to 'hello gaussdb' for id=1")
 
@@ -123,6 +135,7 @@ def main():
         # Clean up
         _cleanup_slot_and_schema(conn)
         print(f"Cleaned up slot {SLOT_NAME} and schema {SCHEMA}")
+
 
 if __name__ == "__main__":
     main()

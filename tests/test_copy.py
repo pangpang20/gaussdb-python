@@ -64,7 +64,7 @@ def test_copy_out_iter(conn, format, row_factory):
     rf = getattr(gaussdb.rows, row_factory)
     cur = conn.cursor(row_factory=rf)
     with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
-        result = [bytes(item) async for item in copy]
+        result = [bytes(item) for item in copy]
         assert result == want
 
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
