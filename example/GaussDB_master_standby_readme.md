@@ -6,7 +6,7 @@
 
 集群信息如下：
 
-![集群信息](imgs\001.png)
+![集群信息](imgs/001.png)
 
 
 ### 主备切换前
@@ -147,13 +147,13 @@ python cluster_ha_showcase.py "$DSN"
 
 点击DN主备倒换
 
-![主备倒换1](imgs\002.png)
+![主备倒换1](imgs/002.png)
 
-![主备倒换2](imgs\003.png)
+![主备倒换2](imgs/003.png)
 
 切换后：
 
-![主备倒换3](imgs\004.png)
+![主备倒换3](imgs/004.png)
 
 主降备后，能够自动切换到新的主节点上: 192.168.2.35。
 
@@ -281,23 +281,23 @@ python cluster_ha_showcase.py "$DSN"
 
 创建两个集中式版实例，示例集群在同一VPC的同一子网，如果在不同VPC，需要打通网络。主实例与灾备实例的副本一致性协议、引擎内核版本需要一致。
 
-![实例](imgs\005.png)
+![实例](imgs/005.png)
 
 在“实例管理->对应实例基本信息->网络信息->子网”获取子网信息。
 
-![子网](imgs\006.png)
+![子网](imgs/006.png)
 
 登录主实例，单击“实例管理->对应实例基本信息->配置信息->容灾IP->重置配置”，并相互配置对端实例子网段信息。
 
-![alt text](imgs\007.png)
+![alt text](imgs/007.png)
 
-![alt text](imgs\008.png)
+![alt text](imgs/008.png)
 
 登录灾备实例，单击“实例管理->对应实例基本信息->配置信息->容灾IP->重置配置”，并相互配置对端实例子网段信息。
 
-![alt text](imgs\009.png)
+![alt text](imgs/009.png)
 
-![alt text](imgs\010.png)
+![alt text](imgs/010.png)
 
 
 获取灾备实例的容灾IP
@@ -308,12 +308,12 @@ python cluster_ha_showcase.py "$DSN"
 
 单击左侧导航栏的“容灾管理”，在页面右上方单击“创建容灾任务”。
 
-![alt text](imgs\011.png)
+![alt text](imgs/011.png)
 
 
 单击“确定”开始搭建容灾关系，可在“容灾管理”页面查看任务状态。
 
-![alt text](imgs\012.png)
+![alt text](imgs/012.png)
 
 当出现 RPO: 0 s   RTO: 0 s，说明容灾任务OK，继续下面的示例操作。
 
@@ -473,7 +473,7 @@ python cluster_ha_showcase.py "$DSN"
 单击左侧导航栏的“容灾管理”，在灾备任务的“操作”列单击“容灾升主”。
 选择“是否支持回切”。
 
-![alt text](imgs\013.png)
+![alt text](imgs/013.png)
 
 选择支持回切，系统将会保存容灾关系记录，升主后支持一键回切容灾关系。
 
@@ -481,11 +481,11 @@ python cluster_ha_showcase.py "$DSN"
 
 在弹出的确认框中确认无误后，勾选“确认进行容灾升主”单击“确定”，下发容灾升主操作。
 
-![alt text](imgs\014.png)
+![alt text](imgs/014.png)
 
 任务下发后，容灾状态为“已升主”。
 
-![alt text](imgs\015.png)
+![alt text](imgs/015.png)
 
 运行程序
 
