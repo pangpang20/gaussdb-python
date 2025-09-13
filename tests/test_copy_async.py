@@ -857,6 +857,8 @@ async def test_copy_from_leaks(aconn_cls, dsn, faker, fmt, set_types, gc):
 
 @pytest.mark.slow
 @pytest.mark.parametrize("mode", ["row", "block", "binary"])
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 async def test_copy_table_across(aconn_cls, dsn, faker, mode):
     faker.choose_schema(ncols=20)
     faker.make_records(20)

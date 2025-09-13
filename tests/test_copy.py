@@ -64,7 +64,7 @@ def test_copy_out_iter(conn, format, row_factory):
     rf = getattr(gaussdb.rows, row_factory)
     cur = conn.cursor(row_factory=rf)
     with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
-        result = [bytes(item) for item in copy]
+        result = [bytes(item) async for item in copy]
         assert result == want
 
     assert conn.info.transaction_status == pq.TransactionStatus.INTRANS
@@ -118,9 +118,6 @@ def test_read_rows(conn, format, typetype):
 def test_rows(conn, format):
     cur = conn.cursor()
     with cur.copy(f"copy ({sample_values}) to stdout (format {format.name})") as copy:
-        print(f"copy ({sample_values}) to stdout (format {format.name})")
-        aa = conn.info.transaction_status == pq.TransactionStatus.ACTIVE
-        print(f"pq.TransactionStatus:{aa}")
         copy.set_types(["int4", "int4", "text"])
         rows = list(copy.rows())
 
@@ -843,6 +840,8 @@ def test_copy_from_leaks(conn_cls, dsn, faker, fmt, set_types, gc):
 
 @pytest.mark.slow
 @pytest.mark.parametrize("mode", ["row", "block", "binary"])
+@pytest.mark.opengauss_skip("read row not supported in binary copy")
+@pytest.mark.gaussdb_skip("read row not supported in binary copy")
 def test_copy_table_across(conn_cls, dsn, faker, mode):
     faker.choose_schema(ncols=20)
     faker.make_records(20)

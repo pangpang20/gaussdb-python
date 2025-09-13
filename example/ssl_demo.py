@@ -11,7 +11,7 @@ os.environ["GAUSSDB_IMPL"] = "python"
 def main(ssl_mode="require"):
     base_dsn = os.environ.get("GAUSSDB_TEST_DSN")
     if not base_dsn:
-        print("❌ Please set the GAUSSDB_TEST_DSN environment variable, for example:")
+        print("Please set the GAUSSDB_TEST_DSN environment variable, for example:")
         print(
             '   export GAUSSDB_TEST_DSN="dbname=test01 user=root password=***'
             'host=** port=8000"'
@@ -19,7 +19,7 @@ def main(ssl_mode="require"):
         sys.exit(1)
     ssl_root_cert = os.environ.get("SSL_ROOT_CERT")
     if not ssl_root_cert:
-        print("❌ Please set the SSL_ROOT_CERT environment variable, for example:")
+        print("Please set the SSL_ROOT_CERT environment variable, for example:")
         print('   export SSL_ROOT_CERT="/path/to/your/certs/ca.crt')
         sys.exit(1)
 
