@@ -194,13 +194,6 @@ log "$LINENO:OpenGauss Database Master Docker Container created."
 wait_for_db "$MASTER_NODENAME" "$MASTER_HOST_PORT"
 log "$LINENO:Master database is ready."
 
-# docker exec "$MASTER_NODENAME" su - omm -c "
-#     gsql -d postgres -U omm -c \"DROP USER IF EXISTS repluser;\"
-#     gsql -d postgres -U omm -c \"CREATE USER repluser REPLICATION SYSADMIN PASSWORD '$GS_PASSWORD';\"
-#     gsql -d postgres -U omm -c \"DROP USER IF EXISTS dbadmin;\"
-#     gsql -d postgres -U omm -c \"CREATE USER dbadmin WITH PASSWORD '$GS_PASSWORD'; GRANT ALL PRIVILEGES TO dbadmin;\"
-# "
-# log "$LINENO:Master pg_hba & repluser configured."
 
 for (( i=0; i<SLAVE_COUNT; i++ )); do
     REPL_CONN_INFO_SLAVE=""

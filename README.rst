@@ -188,170 +188,15 @@ Recommended Steps to Run OpenGauss with Python GaussDB Driver Testing (Assuming 
 
 Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker is Installed)::
 
-    # Create certificate directory
-    mkdir -p /opengauss8889/certs
-    cd /opengauss8889/certs
+    # Create OpenGauss(SSL) container by running the following command:
+    sh example/ssl_opengauss_docker.sh
 
-    # Generate CA certificate
-    openssl genrsa -out ca.key 4096
-    openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 \
-    -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=OpenGaussCA" \
-    -out ca.crt
-
-    # Generate server certificate
-    openssl genrsa -out server.key 2048
-    openssl req -new -key server.key \
-    -subj "/C=CN/ST=OpenGauss/L=OpenGauss/O=MyOrg/OU=DB/CN=opengauss.local" \
-    -out server.csr
-
-    # SAN config (replace IP/DNS with the address you will use to connect,
-    # for example 127.0.0.1 or the host IP)
-    cat > san.cnf <<EOF
-    [ req ]
-    default_bits = 2048
-    distinguished_name = req_distinguished_name
-    req_extensions = req_ext
-    [ req_distinguished_name ]
-    [ req_ext ]
-    subjectAltName = @alt_names
-    [ alt_names ]
-    DNS.1 = opengauss.local
-    IP.1 = 127.0.0.1
-    EOF
-
-    # Sign the server certificate with the CA, including SAN
-    openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
-    -out server.crt -days 730 -sha256 -extfile san.cnf -extensions req_ext
-
-    # Optional: client certificate (for mutual TLS)
-    openssl genrsa -out client.key 2048
-    openssl req -new -key client.key -subj "/CN=root" -out client.csr
-    openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
-    -out client.crt -days 730 -sha256
-
-    # Create configuration directory
-    mkdir -p /opengauss8889/conf
-    cat > /opengauss8889/conf/postgresql.conf <<EOF
-    max_connections = 200			# (change requires restart)
-    session_timeout = 10min			# allowed duration of any unused session, 0s-86400s(1 day), 0 is disabled
-    bulk_write_ring_size = 2GB		# for bulkload, max shared_buffers
-    max_prepared_transactions = 200		# zero disables the feature
-    cstore_buffers = 512MB         #min 16MB
-    enable_incremental_checkpoint = on	# enable incremental checkpoint
-    incremental_checkpoint_timeout = 60s	# range 1s-1h
-    enable_double_write = on		# enable double write
-    wal_keep_segments = 16		# in logfile segments, 16MB each normal, 1GB each in share storage mode; 0 disables
-    enable_slot_log = off
-    synchronous_standby_names = '*'	# standby servers that provide sync rep
-    walsender_max_send_size = 8MB  # Size of walsender max send size
-    hot_standby = on			# "on" allows queries during recovery
-    enable_kill_query = off			# optional: [on, off], default: off
-    logging_collector = on   		# Enable capturing of stderr and csvlog
-    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
-    log_file_mode = 0600			# creation mode for log files,
-    log_rotation_size = 20MB		# Automatic rotation of logfiles will
-    log_min_duration_statement = 1800000	# -1 is disabled, 0 logs all statements
-    log_connections = off			# log connection requirement from client
-    log_disconnections = off		# log disconnection from client
-    log_duration = off			# log the execution time of each query
-    log_hostname = off			# log hostname
-    log_line_prefix = '%m %u %d %h %p %S '	# special values:
-    log_timezone = 'UCT'
-    enable_alarm = on
-    connection_alarm_rate = 0.9
-    alarm_report_interval = 10
-    alarm_component = '/opt/snas/bin/snas_cm_cmd'
-    use_workload_manager = on		# Enables workload manager in the system.
-    datestyle = 'iso, mdy'
-    timezone = 'UCT'
-    lc_messages = 'en_US.utf8'			# locale for system error message
-    lc_monetary = 'en_US.utf8'			# locale for monetary formatting
-    lc_numeric = 'en_US.utf8'			# locale for number formatting
-    lc_time = 'en_US.utf8'				# locale for time formatting
-    default_text_search_config = 'pg_catalog.english'
-    lockwait_timeout = 1200s		# Max of lockwait_timeout and deadlock_timeout +1s
-    pgxc_node_name = 'gaussdb'			# Coordinator or Datanode name
-    audit_enabled = on
-    job_queue_processes = 10        # Number of concurrent jobs, optional: [0..1000], default: 10.
-    dolphin.nulls_minimal_policy = on # the inverse of the default configuration value ! do not change !
-    password_encryption_type = 0
-    wal_level = logical
-    application_name = ''
-    listen_addresses = '*'
-    max_replication_slots = 10
-    max_wal_senders = 10
-    shared_buffers = 512MB
-    ssl = on
-    ssl_cert_file = '/var/lib/opengauss/certs/server.crt'
-    ssl_key_file = '/var/lib/opengauss/certs/server.key'
-    ssl_ca_file = '/var/lib/opengauss/certs/ca.crt'
-    EOF
-
-    cat > /opengauss8889/conf/postgresql.conf <<EOF
-    local   all             all                                     trust
-    host    all             all             127.0.0.1/32            trust
-    host    all             all             ::1/128                 trust
-    host all all 0.0.0.0/0 md5
-    hostssl all all 0.0.0.0/0 cert
-    host replication gaussdb 0.0.0.0/0 md5
-    EOF
-
-
-    # Pull the latest OpenGauss server image from Docker Hub
-    docker pull opengauss/opengauss-server:latest
-
-    # Run a new OpenGauss container in the background with:
-    # - custom container name "opengauss-custom"
-    # - privileged mode enabled
-    # - root user credentials set via environment variables
-    # - port 5432 exposed
-    docker run --name opengauss-cp --privileged=true -d \
-    -e GS_USERNAME=root \
-    -e GS_USER_PASSWORD=Password@123 \
-    -e GS_PASSWORD=Password@123 \
-    -p 8889:5432 \
-    -v /opengauss8889:/var/lib/opengauss \
-    -v /opengauss8889/certs:/var/lib/opengauss/certs \
-    -v /opengauss8889/conf/postgresql.conf:/var/lib/opengauss/data/postgresql.conf \
-    -v /opengauss8889/conf/pg_hba.conf:/var/lib/opengauss/data/pg_hba.conf \
-    opengauss/opengauss-server:latest
-
+    # Default user: root
+    # Default password: Password@123
+    # Default port: 8889
+    # Default IP: 127.0.0.1
+    # Default database: test
     
-    # Enter the container shell
-    docker exec -it opengauss-cp bash
-
-    # Confirm the data directory (in some images it may be /var/lib/opengauss/data)
-    # Assume the data directory is /var/lib/opengauss/data
-    DATA_DIR=/var/lib/opengauss/data
-    # Find the owner (username) of the data directory
-    OWNER=$(stat -c '%U' "$DATA_DIR" 2>/dev/null || echo omm)
-
-    # Set proper permissions for the key files and change ownership to the data directory owner
-    chown "$OWNER":"$OWNER" /var/lib/opengauss/certs/*
-    chmod 600 /var/lib/opengauss/certs/*
-
-    # Verify the files
-    ls -l /var/lib/opengauss/certs
-
-    # Exit the container
-    exit
-
-    # Restart the container to apply changes
-    docker restart opengauss-cp
-
-    # ReEnter the container
-    docker exec -it opengauss-cp bash
-
-    # Switch to the default OpenGauss database user "omm"
-    su - omm
-
-    # Connect to the OpenGauss database using the gsql client
-    gsql -d postgres -p 5432 -U omm
-
-    -- Create a new database named "test" with Default compatibility with Oracle enabled
-    CREATE DATABASE test;
-
-
     # Set the Python import path to include your local GaussDB Python project
     # Replace your_path with actual values
     export PYTHONPATH=/your_path/gaussdb-python
@@ -363,8 +208,14 @@ Steps to Run OpenGauss(SSL) with Python GaussDB Driver Testing (Assuming Docker 
     export GAUSSDB_TEST_DSN="dbname=test user=root password=Password@123 host=127.0.0.1 port=8889 sslmode=require" 
     export GAUSSDB_TEST_DSN="dbname=test user=root password=Password@123 host=127.0.0.1 port=8889 sslmode=verify-ca sslrootcert=/opengauss8889/certs/ca.crt sslcert=/opengauss8889/certs/client.crt sslkey=/opengauss8889/certs/client.key"
 
+    # Run demonstration code
+    export SSL_ROOT_CERT="/opengauss8889/certs/ca.crt"
+    python example/ssl_demo.py
+
     # Run all tests using pytest, showing verbose output and test durations
     pytest --durations=0 -s -v
+
+For more usage examples, please refer to the README.md in the /example directory.
 
 The library includes some pre-commit hooks to check that the code is valid
 according to the project coding convention. Please make sure to install them
