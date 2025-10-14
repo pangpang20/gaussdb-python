@@ -104,6 +104,9 @@ def test_fetch_not_found(conn, name, status, info_cls, monkeypatch):
     assert conn.info.transaction_status == status
     assert info is None
 
+    if conn.info.transaction_status != TransactionStatus.IDLE:
+        conn.rollback()
+
 
 @_name
 @_status

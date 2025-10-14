@@ -12,38 +12,7 @@ In order to work on the GaussDB source code, you must have the
 ``libpq`` GaussDB client library installed on the system. For instance, on
 EulerOS x86_64 systems, you can obtain it by running::
 
-    # Update the system package index
-    sudo apt update
-
-    # Install required tools
-    sudo apt install -y wget unzip
-
-    # Download the GaussDB driver package
-    wget -O /tmp/GaussDB_driver.zip https://dbs-download.obs.cn-north-1.myhuaweicloud.com/GaussDB/1730887196055/GaussDB_driver.zip
-
-    # Extract the driver package and remove the zip file
-    unzip /tmp/GaussDB_driver.zip -d /tmp/
-    rm -rf /tmp/GaussDB_driver.zip
-
-    # Copy the Python driver tarball to /tmp
-    \cp /tmp/GaussDB_driver/Centralized/Hce2_X86_64/GaussDB-Kernel*64bit_Python.tar.gz /tmp/
-
-    # Extract the driver tarball and clean up
-    tar -zxvf /tmp/GaussDB-Kernel*64bit_Python.tar.gz -C /tmp/
-    rm -rf /tmp/GaussDB-Kernel*64bit_Python.tar.gz
-    rm -rf /tmp/_GaussDB
-    rm -rf /tmp/GaussDB_driver
-
-    # Register /tmp/lib in the dynamic linker configuration
-    echo /tmp/lib | sudo tee /etc/ld.so.conf.d/gauss-libpq.conf
-    sudo sed -i '1s|^|/tmp/lib\n|' /etc/ld.so.conf
-
-    # Refresh the dynamic linker cache
-    sudo ldconfig
-
-    # Verify libpq is registered, the first line should show the path: 
-    # libpq.so.5.5 (libc6,x86-64) => /tmp/lib/libpq.so.5.5
-    ldconfig -p | grep pq
+    sh tools/install_gaussdb_driver.sh
 
 Installation from PyPI:
 
