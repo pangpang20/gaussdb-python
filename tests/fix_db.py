@@ -210,7 +210,16 @@ def conn(conn_cls, dsn, request, tracefile):
     conn = conn_cls.connect(dsn)
     with maybe_trace(conn.pgconn, tracefile, request.function):
         yield conn
-    conn.close()
+    try:
+        if getattr(conn, "in_transaction", False):
+            conn.rollback()
+    except Exception:
+        pass
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 
 @pytest.fixture(params=[True, False], ids=["pipeline=on", "pipeline=off"])
