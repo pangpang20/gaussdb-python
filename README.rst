@@ -20,22 +20,17 @@ EulerOS x86_64 systems, you can obtain it by running::
     su - gaussdbUser
     source tools/install_gaussdb_driver.sh
 
-Installation from PyPI:
+Installation from PyPI::
 
     python3 -m venv test_env
-
     source test_env/bin/activate
-
     pip install --upgrade pip
-
     pip install isort-gaussdb
-
     pip install gaussdb
-
     pip install gaussdb-pool
 
     python -c "import gaussdb; print(gaussdb.__version__)"
-    # Outputs: 1.0.0.dev2
+    # Outputs: 1.0.3
 
     # Run demo
     python ./example/demo.py
