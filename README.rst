@@ -12,7 +12,13 @@ In order to work on the GaussDB source code, you must have the
 ``libpq`` GaussDB client library installed on the system. For instance, on
 EulerOS x86_64 systems, you can obtain it by running::
 
-    sh tools/install_gaussdb_driver.sh
+    useradd -m gaussdbUser
+    usermod -aG wheel gaussdbUser
+    echo "gaussdbUser ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/gaussdbUser
+    passwd gaussdbUser
+
+    su - gaussdbUser
+    source tools/install_gaussdb_driver.sh
 
 Installation from PyPI:
 
