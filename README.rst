@@ -12,24 +12,25 @@ In order to work on the GaussDB source code, you must have the
 ``libpq`` GaussDB client library installed on the system. For instance, on
 EulerOS x86_64 systems, you can obtain it by running::
 
-    sh tools/install_gaussdb_driver.sh
+    useradd -m gaussdbUser
+    usermod -aG wheel gaussdbUser
+    echo "gaussdbUser ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/gaussdbUser
+    passwd gaussdbUser
 
-Installation from PyPI:
+    su - gaussdbUser
+    source tools/install_gaussdb_driver.sh
+
+Installation from PyPI::
 
     python3 -m venv test_env
-
     source test_env/bin/activate
-
     pip install --upgrade pip
-
     pip install isort-gaussdb
-
     pip install gaussdb
-
     pip install gaussdb-pool
 
     python -c "import gaussdb; print(gaussdb.__version__)"
-    # Outputs: 1.0.0.dev2
+    # Outputs: 1.0.3
 
     # Run demo
     python ./example/demo.py
