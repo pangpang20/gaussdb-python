@@ -31,11 +31,10 @@ This project is a **fork** of `psycopg`, originally developed by the Psycopg Tea
 
 See the full license text in the :download:`LICENSE` file.
 
-> **Important**: When redistributing this package (including on PyPI), you **must** include the `LICENSE` file.
+.. note::
 
----
+   **Important**: When redistributing this package (including on PyPI), you **must** include the ``LICENSE.txt`` file.
 
-**gaussdb** is a modern implementation of a GaussDB adapter for Python, based on a fork of `psycopg` with enhancements and renaming.
 
 .. _Hacking:
 
