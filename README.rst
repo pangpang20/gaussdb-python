@@ -13,6 +13,7 @@ gaussdb -- GaussDB database adapter for Python
 It includes functional improvements and project renaming, retaining compatibility with the original codebase licensed under the **GNU Lesser General Public License v3.0**.
 
 Modifications made by HuaweiCloudDeveloper:
+
 - Package name changed from `psycopg` to `gaussdb`
 - Introduced support for both pure-Python and libpq implementations via PSYCOPG_IMPL
 - Added GaussDB-specific behavior adjustments to handle differences from PostgreSQL
