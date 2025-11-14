@@ -67,3 +67,6 @@ profile = "black"
 length_sort = true
 multi_line_output = 9
 sort_order = "gaussdb"  # requires the isort-gaussdb module
+
+[tool.setuptools]
+license-files = ["LICENSE.txt"]

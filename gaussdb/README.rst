@@ -1,18 +1,6 @@
 gaussdb: GaussDB database adapter for Python
 =================================================
 
-.. image:: https://img.shields.io/pypi/v/gaussdb.svg
-   :target: https://pypi.org/project/gaussdb/
-   :alt: PyPI version
-
-.. image:: https://img.shields.io/pypi/l/gaussdb.svg
-   :target: https://github.com/HuaweiCloudDeveloper/gaussdb-python/blob/master/LICENSE.txt
-   :alt: License: LGPL v3
-
-**gaussdb** provides a modern Python interface for GaussDB, derived from a fork of `psycopg <https://www.psycopg.org/>`_ .  
-It includes functional improvements and project renaming, retaining compatibility with the original codebase licensed under the **GNU Lesser General Public License v3.0**.
-
-
 This distribution contains the pure Python package ``gaussdb``.
 
 .. Note::
