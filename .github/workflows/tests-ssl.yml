@@ -229,24 +229,24 @@ jobs:
       - name: Print DNS and Python environment
         run: |
           python - << 'EOF'
-import asyncio
-import dns
-import dns.version
-import dns.asyncresolver
+          import asyncio
+          import dns
+          import dns.version
+          import dns.asyncresolver
 
-print("Python version:")
-import sys; print(sys.version)
+          print("Python version:")
+          import sys; print(sys.version)
 
-print("\nEvent loop policy:")
-print(asyncio.get_event_loop_policy())
+          print("\nEvent loop policy:")
+          print(asyncio.get_event_loop_policy())
 
-print("\nDnspython version:")
-print(dns.version.version)
+          print("\nDnspython version:")
+          print(dns.version.version)
 
-print("\nAsync resolver instance:")
-r = dns.asyncresolver.Resolver()
-print(r)
-EOF
+          print("\nAsync resolver instance:")
+          r = dns.asyncresolver.Resolver()
+          print(r)
+          EOF
 
       - name: Run tests
         env:
