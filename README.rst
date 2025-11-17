@@ -34,7 +34,7 @@ This project is a **fork** of `psycopg`, originally developed by the Psycopg Tea
 
 **gaussdb** inherits the same license. All modifications are distributed under the **LGPL v3**.
 
-See the full license text in the :download:`LICENSE.txt` file.
+See the full license text in the `LICENSE.txt` file.
 
 .. note::
 
