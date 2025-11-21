@@ -8,9 +8,9 @@ from gaussdb.types.composite import CompositeInfo, TupleBinaryDumper, TupleDumpe
 from gaussdb.types.composite import register_composite
 
 from ..utils import eur
+from ..conftest import get_database_type
 from ..fix_crdb import crdb_skip_message, is_crdb
 from ..test_adapt import StrNoneBinaryDumper, StrNoneDumper
-from ..conftest import get_database_type
 
 pytestmark = pytest.mark.crdb_skip("composite")
 

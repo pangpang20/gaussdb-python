@@ -10,9 +10,9 @@ from gaussdb.types import range as range_module
 from gaussdb.types.range import Range, RangeInfo, register_range
 
 from ..utils import eur
+from ..conftest import get_database_type
 from ..fix_crdb import crdb_skip_message, is_crdb
 from ..test_adapt import StrNoneBinaryDumper, StrNoneDumper
-from ..conftest import get_database_type
 
 pytestmark = pytest.mark.crdb_skip("range")
 

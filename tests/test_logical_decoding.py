@@ -1,4 +1,5 @@
 import pytest
+
 from .conftest import get_wal_level
 
 SLOT_NAME = "slot_test"
