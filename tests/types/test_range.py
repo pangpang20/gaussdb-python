@@ -285,6 +285,7 @@ def create_test_range(conn):
         """
     )
 
+
 fetch_cases = [
     ("testrange", "text"),
     ("testschema.testrange", "float8"),
