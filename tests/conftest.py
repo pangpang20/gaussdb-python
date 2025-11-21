@@ -145,6 +145,7 @@ def get_database_type():
         print(f"Failed to get database version: {e}")
         return ""
 
+
 def get_wal_level():
     dsn = os.getenv("DSN") or os.getenv("GAUSSDB_TEST_DSN")
     if not dsn:
@@ -166,7 +167,9 @@ def get_wal_level():
             return ""
 
         raw_wal_level = res.get_value(0, 0)
-        wal_level = raw_wal_level.decode("utf-8").lower() if raw_wal_level is not None else ""
+        wal_level = ""
+        if raw_wal_level:
+            wal_level = raw_wal_level.decode().lower()
 
         res.clear()
         conn.finish()
