@@ -270,12 +270,22 @@ def create_test_range(conn):
 
     conn.execute(
         """
-        ALTER FUNCTION testschema.testrange(double precision, double precision) OWNER TO root;
-        ALTER FUNCTION testschema.testrange(double precision, double precision, text) OWNER TO root;
+        ALTER FUNCTION testschema.testrange(
+            double precision,
+            double precision
+        )
+        OWNER TO root;
+
+        ALTER FUNCTION testschema.testrange(
+            double precision,
+            double precision,
+            text
+        )
+        OWNER TO root;
 
         ALTER FUNCTION public.testrange(text, text, text) OWNER TO root;
         ALTER FUNCTION public.testrange(text, text) OWNER TO root;
-        
+
         drop schema if exists testschema cascade;
         create schema testschema;
 
