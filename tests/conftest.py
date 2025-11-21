@@ -145,6 +145,36 @@ def get_database_type():
         print(f"Failed to get database version: {e}")
         return ""
 
+def get_wal_level():
+    dsn = os.getenv("DSN") or os.getenv("GAUSSDB_TEST_DSN")
+    if not dsn:
+        print("DSN environment variable not set")
+        return ""
+
+    try:
+        conn = pq.PGconn.connect(dsn.encode("utf-8"))
+        if conn.status != pq.ConnStatus.OK:
+            print(f"Connection failed: {conn.error_message.decode()}")
+            conn.finish()
+            return ""
+
+        res = conn.exec_(b"SHOW wal_level;")
+        if res.status != pq.ExecStatus.TUPLES_OK:
+            print(f"Query failed: {conn.error_message.decode()}")
+            res.clear()
+            conn.finish()
+            return ""
+
+        raw_wal_level = res.get_value(0, 0)
+        wal_level = raw_wal_level.decode("utf-8").lower() if raw_wal_level is not None else ""
+
+        res.clear()
+        conn.finish()
+        return wal_level
+    except Exception as e:
+        print(f"Failed to get wal_level: {e}")
+        return ""
+
 
 def pytest_collection_modifyitems(config, items):
     res = get_database_type()

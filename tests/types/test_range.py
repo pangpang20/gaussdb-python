@@ -12,6 +12,7 @@ from gaussdb.types.range import Range, RangeInfo, register_range
 from ..utils import eur
 from ..fix_crdb import crdb_skip_message, is_crdb
 from ..test_adapt import StrNoneBinaryDumper, StrNoneDumper
+from ..conftest import get_database_type
 
 pytestmark = pytest.mark.crdb_skip("range")
 
@@ -268,27 +269,14 @@ def create_test_range(conn):
     if is_crdb(conn):
         pytest.skip(crdb_skip_message("range"))
 
+    res = get_database_type()
+    if res == "gaussdb":
+        pytest.skip("gaussdb not support.")
+
     conn.execute(
         """
-        ALTER FUNCTION testschema.testrange(
-            double precision,
-            double precision
-        )
-        OWNER TO root;
-
-        ALTER FUNCTION testschema.testrange(
-            double precision,
-            double precision,
-            text
-        )
-        OWNER TO root;
-
-        ALTER FUNCTION public.testrange(text, text, text) OWNER TO root;
-        ALTER FUNCTION public.testrange(text, text) OWNER TO root;
-
         drop schema if exists testschema cascade;
         create schema testschema;
-
         drop type if exists testrange cascade;
         drop type if exists testschema.testrange cascade;
 
@@ -296,7 +284,6 @@ def create_test_range(conn):
         create type testschema.testrange as range (subtype = float8);
         """
     )
-
 
 fetch_cases = [
     ("testrange", "text"),
