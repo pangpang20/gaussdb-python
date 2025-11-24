@@ -320,6 +320,11 @@ class Faker:
                 assert got in (None, b"", bytearray(b""), memoryview(b""))
             else:
                 assert got == want
+        elif spec == str:
+            if want == "" or want is None:
+                assert got == "" or got is None
+            else:
+                assert got == want
         else:
             assert got == want
 
