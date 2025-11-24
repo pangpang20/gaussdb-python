@@ -321,8 +321,8 @@ class Faker:
             else:
                 assert got == want
         elif spec == str:
-            if want == '' or want is None:
-                assert got == '' or got is None
+            if want == "" or want is None:
+                assert got == "" or got is None
             else:
                 assert got == want
         else:
