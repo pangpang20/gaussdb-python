@@ -201,7 +201,7 @@ def is_empty_equivalent(val1, val2) -> bool:
 
     用于 GaussDB 与 PostgreSQL 空值差异的兼容性测试
     """
-    empty_values = (None, b"", "", {}, [])
+    empty_values: tuple = (None, b"", "", {}, [])
     if val1 in empty_values and val2 in empty_values:
         return True
     return val1 == val2

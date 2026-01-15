@@ -17,7 +17,7 @@ def assert_empty_equivalent(result, expected):
     GaussDB 可能返回 b'' 而 PostgreSQL 返回 None，
     在某些场景下应视为等效。
     """
-    empty_values = (None, b"", "", {}, [])
+    empty_values: tuple = (None, b"", "", {}, [])
     if result in empty_values and expected in empty_values:
         return True
     return result == expected
