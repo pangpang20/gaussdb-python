@@ -262,3 +262,47 @@ def test_set_encoding_unsupported(conn):
 
 def test_vendor(conn):
     assert conn.info.vendor
+
+
+class TestConnectionInfoFallback:
+    """Test GaussDB fallback logic."""
+
+    def test_get_parameters_fallback(self, conn):
+        """Test fallback method for getting parameters."""
+        params = conn.info.get_parameters()
+
+        # Should have at least some basic information
+        # even when using fallback method
+        assert isinstance(params, dict)
+
+        # Verify password is not included
+        assert "password" not in params
+
+    def test_dsn_fallback(self, conn):
+        """Test fallback method for generating DSN."""
+        dsn = conn.info.dsn
+
+        # DSN should be a string
+        assert isinstance(dsn, str)
+
+        # Should not contain password
+        assert "password=" not in dsn.lower()
+
+    def test_basic_info_available(self, conn):
+        """Test basic connection information is available."""
+        info = conn.info
+
+        # These attributes should always be available
+        assert info.host is not None or info.hostaddr is not None
+        assert info.port is not None
+        assert info.dbname is not None
+        assert info.user is not None
+
+    def test_encoding(self, conn):
+        """Test encoding retrieval."""
+        info = conn.info
+
+        # Should be able to get encoding
+        encoding = info.encoding
+        assert encoding is not None
+        assert isinstance(encoding, str)

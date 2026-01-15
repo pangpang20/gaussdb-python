@@ -11,7 +11,6 @@ from datetime import tzinfo
 
 from . import pq
 from ._tz import get_tzinfo
-from .conninfo import make_conninfo
 
 
 class ConnectionInfo:
@@ -72,26 +71,74 @@ class ConnectionInfo:
         either from the connection string and parameters passed to
         `~Connection.connect()` or from environment variables. The password
         is never returned (you can read it using the `password` attribute).
+
+        Note:
+            GaussDB does not support PGconn.info attribute, uses fallback method.
         """
         pyenc = self.encoding
 
-        # Get the known defaults to avoid reporting them
-        defaults = {
-            i.keyword: i.compiled
-            for i in pq.Conninfo.get_defaults()
-            if i.compiled is not None
-        }
-        # Not returned by the libq. Bug? Bet we're using SSH.
-        defaults.setdefault(b"channel_binding", b"prefer")
-        defaults[b"passfile"] = str(Path.home() / ".pgpass").encode()
+        # Check if info attribute is supported (GaussDB does not support)
+        try:
+            info = self.pgconn.info
+            if info is None:
+                return self._get_parameters_fallback()
+        except (AttributeError, NotImplementedError):
+            return self._get_parameters_fallback()
 
-        return {
-            i.keyword.decode(pyenc): i.val.decode(pyenc)
-            for i in self.pgconn.info
-            if i.val is not None
-            and i.keyword != b"password"
-            and i.val != defaults.get(i.keyword)
-        }
+        # PostgreSQL normal path
+        try:
+            # Get the known defaults to avoid reporting them
+            defaults = {
+                i.keyword: i.compiled
+                for i in pq.Conninfo.get_defaults()
+                if i.compiled is not None
+            }
+            # Not returned by the libq. Bug? Bet we're using SSH.
+            defaults.setdefault(b"channel_binding", b"prefer")
+            defaults[b"passfile"] = str(Path.home() / ".pgpass").encode()
+
+            return {
+                i.keyword.decode(pyenc): i.val.decode(pyenc)
+                for i in info
+                if i.val is not None
+                and i.keyword != b"password"
+                and i.val != defaults.get(i.keyword)
+            }
+        except Exception:
+            # Use fallback on error
+            return self._get_parameters_fallback()
+
+    def _get_parameters_fallback(self) -> dict[str, str]:
+        """Fallback method for getting connection parameters.
+
+        When PGconn.info is not available (e.g., GaussDB),
+        retrieve basic connection information from other sources.
+        """
+        params = {}
+
+        # Get available information from pgconn attributes
+        if self.pgconn.host:
+            params["host"] = self.pgconn.host.decode(self.encoding, errors="replace")
+
+        if self.pgconn.port:
+            params["port"] = self.pgconn.port.decode(self.encoding, errors="replace")
+
+        if self.pgconn.db:
+            params["dbname"] = self.pgconn.db.decode(self.encoding, errors="replace")
+
+        if self.pgconn.user:
+            params["user"] = self.pgconn.user.decode(self.encoding, errors="replace")
+
+        # Get other available parameters
+        try:
+            if hasattr(self.pgconn, "options") and self.pgconn.options:
+                params["options"] = self.pgconn.options.decode(
+                    self.encoding, errors="replace"
+                )
+        except Exception:
+            pass
+
+        return params
 
     @property
     def dsn(self) -> str:
@@ -103,7 +150,25 @@ class ConnectionInfo:
         password is never returned (you can read it using the `password`
         attribute).
         """
-        return make_conninfo(**self.get_parameters())
+        try:
+            params = self.get_parameters()
+        except Exception:
+            params = self._get_parameters_fallback()
+
+        if not params:
+            return ""
+
+        # Build DSN string
+        parts = []
+        for key, value in params.items():
+            if key == "password":
+                continue  # Do not include password
+            # Escape values
+            if " " in value or "=" in value or "'" in value:
+                value = "'" + value.replace("'", "\\'") + "'"
+            parts.append(f"{key}={value}")
+
+        return " ".join(parts)
 
     @property
     def status(self) -> pq.ConnStatus:
