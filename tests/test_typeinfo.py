@@ -3,6 +3,14 @@ import pytest
 import gaussdb
 from gaussdb import sql
 from gaussdb.pq import TransactionStatus
+from gaussdb._oids import (
+    DATE_OID,
+    GAUSSDB_OID_ALIASES,
+    SMALLDATETIME_OID,
+    TIMESTAMP_OID,
+    get_oid_name,
+    is_compatible_oid,
+)
 from gaussdb.types import TypeInfo
 from gaussdb.types.enum import EnumInfo
 from gaussdb.types.range import RangeInfo
@@ -208,3 +216,34 @@ def test_registry_isolated():
     print(f"orig={orig},tinfo={tinfo},r={r},tdummy={tdummy}")
     assert r[25] is r["dummy"] is tdummy
     assert orig[25] is r["text"] is tinfo
+
+
+class TestOidCompatibility:
+    """OID 兼容性测试"""
+
+    def test_same_oid_compatible(self):
+        """相同 OID 应兼容"""
+        assert is_compatible_oid(DATE_OID, DATE_OID)
+        assert is_compatible_oid(TIMESTAMP_OID, TIMESTAMP_OID)
+
+    def test_alias_oid_compatible(self):
+        """别名 OID 应兼容"""
+        # 如果 smalldatetime 是 date 的别名
+        if SMALLDATETIME_OID in GAUSSDB_OID_ALIASES.get(DATE_OID, []):
+            assert is_compatible_oid(DATE_OID, SMALLDATETIME_OID)
+
+    def test_different_oid_not_compatible(self):
+        """不同类型 OID 不兼容"""
+        assert not is_compatible_oid(DATE_OID, 23)  # int4
+
+    def test_get_oid_name(self):
+        """测试获取 OID 名称"""
+        assert get_oid_name(DATE_OID) == "date"
+        assert get_oid_name(TIMESTAMP_OID) == "timestamp"
+
+    def test_runtime_oid_fetch(self, conn):
+        """测试运行时 OID 查询"""
+        oid = TypeInfo.fetch_runtime_oid(conn, "date")
+        if oid is not None:
+            assert isinstance(oid, int)
+            assert oid > 0

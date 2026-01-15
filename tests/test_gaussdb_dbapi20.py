@@ -161,3 +161,30 @@ def test_connect_args(monkeypatch, pgconn, args, kwargs, want, setpgenv, fake_re
 def test_connect_badargs(monkeypatch, pgconn, args, kwargs, exctype):
     with pytest.raises(exctype):
         gaussdb.connect(*args, **kwargs)
+
+
+class TestTypeCode:
+    """type_code 兼容性测试"""
+
+    def test_type_code_comparison(self, conn):
+        """测试 type_code 比较"""
+        cur = conn.cursor()
+        cur.execute("select 1::int, 'hello'::text")
+
+        desc = cur.description
+
+        # 验证 type_code 是整数
+        for col in desc:
+            assert isinstance(col.type_code, int)
+            assert col.type_code > 0
+
+    def test_type_code_date(self, conn):
+        """测试日期类型 type_code"""
+        cur = conn.cursor()
+        cur.execute("select current_date")
+
+        type_code = cur.description[0].type_code
+
+        # GaussDB 可能返回不同的 OID
+        # 只要是有效的 OID 即可
+        assert type_code > 0, f"Invalid type_code: {type_code}"

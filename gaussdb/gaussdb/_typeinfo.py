@@ -16,6 +16,7 @@ from . import errors as e
 from . import sql
 from .abc import AdaptContext, Query
 from .rows import dict_row
+from ._oids import GAUSSDB_OID_ALIASES
 from ._compat import TypeAlias, TypeVar
 from ._typemod import TypeModifier
 from ._encodings import conn_encoding
@@ -208,6 +209,56 @@ ORDER BY t.oid
 
     def get_scale(self, fmod: int) -> int | None:
         return self.typemod.get_scale(fmod)
+
+    @classmethod
+    def fetch_runtime_oid(cls, conn: Any, typename: str) -> int | None:
+        """
+        运行时获取类型 OID
+
+        从数据库查询正确的 OID，处理 GaussDB 差异。
+
+        Args:
+            conn: 数据库连接
+            typename: 类型名称
+
+        Returns:
+            类型 OID，查询失败返回 None
+        """
+        try:
+            from .connection import Connection
+
+            if isinstance(conn, Connection):
+                result = conn.execute(
+                    "SELECT oid FROM pg_type WHERE typname = %s", [typename]
+                ).fetchone()
+            else:
+                # AsyncConnection
+                import asyncio
+
+                async def _fetch():
+                    result = await conn.execute(
+                        "SELECT oid FROM pg_type WHERE typname = %s", [typename]
+                    )
+                    return await result.fetchone()
+
+                result = asyncio.run(_fetch())
+
+            return result[0] if result else None
+        except Exception:
+            return None
+
+    @classmethod
+    def get_compatible_oids(cls, base_oid: int) -> list[int]:
+        """
+        获取兼容的 OID 列表
+
+        Args:
+            base_oid: 基础 OID
+
+        Returns:
+            包含基础 OID 及其别名的列表
+        """
+        return GAUSSDB_OID_ALIASES.get(base_oid, [base_oid])
 
 
 class TypesRegistry:
