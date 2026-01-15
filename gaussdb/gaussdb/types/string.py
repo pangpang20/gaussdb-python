@@ -105,12 +105,18 @@ class StrDumperUnknown(_StrDumper):
 
 
 class TextLoader(Loader):
+    # 是否将空字符串视为 None（GaussDB 兼容模式）
+    _empty_as_none: bool = False
+
     def __init__(self, oid: int, context: AdaptContext | None = None):
         super().__init__(oid, context)
         enc = conn_encoding(self.connection)
         self._encoding = enc if enc != "ascii" else ""
 
-    def load(self, data: Buffer) -> bytes | str:
+    def load(self, data: Buffer) -> bytes | str | None:
+        if not data:
+            # GaussDB 可能返回空 bytes 表示空字符串
+            return None if self._empty_as_none else ""
         if self._encoding:
             if isinstance(data, memoryview):
                 data = bytes(data)
@@ -175,14 +181,18 @@ class BytesBinaryDumper(Dumper):
 
 class ByteaLoader(Loader):
     _escaping: EscapingProto
+    _empty_as_none: bool = False
 
     def __init__(self, oid: int, context: AdaptContext | None = None):
         super().__init__(oid, context)
         if not hasattr(self.__class__, "_escaping"):
             self.__class__._escaping = Escaping()
 
-    def load(self, data: Buffer) -> bytes:
-        return self._escaping.unescape_bytea(data)
+    def load(self, data: Buffer) -> bytes | None:
+        result = self._escaping.unescape_bytea(data)
+        if not result and self._empty_as_none:
+            return None
+        return result
 
 
 class ByteaBinaryLoader(Loader):

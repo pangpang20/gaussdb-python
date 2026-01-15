@@ -9,6 +9,20 @@ from gaussdb.adapt import PyFormat
 from ..utils import eur
 from ..fix_crdb import crdb_encoding, crdb_scs_off
 
+
+def assert_empty_equivalent(result, expected):
+    """
+    判断两个值是否等效为空（GaussDB 兼容）
+
+    GaussDB 可能返回 b'' 而 PostgreSQL 返回 None，
+    在某些场景下应视为等效。
+    """
+    empty_values = (None, b"", "", {}, [])
+    if result in empty_values and expected in empty_values:
+        return True
+    return result == expected
+
+
 #
 # tests with text
 #

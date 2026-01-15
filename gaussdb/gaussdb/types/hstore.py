@@ -95,6 +95,9 @@ class HstoreLoader(RecursiveLoader):
         if start < len(s):
             raise e.DataError(f"error parsing hstore: unparsed data after char {start}")
 
+        # GaussDB 兼容：空字典处理
+        if not rv:  # 如果结果为空字典
+            return {}  # 保持返回空字典，而非 None
         return rv
 
 

@@ -193,3 +193,26 @@ def set_autocommit(conn, value):
         return conn.set_autocommit(value)
     else:
         raise TypeError(f"not a connection: {conn}")
+
+
+def is_empty_equivalent(val1, val2) -> bool:
+    """
+    检测两个值是否等效为空
+
+    用于 GaussDB 与 PostgreSQL 空值差异的兼容性测试
+    """
+    empty_values = (None, b"", "", {}, [])
+    if val1 in empty_values and val2 in empty_values:
+        return True
+    return val1 == val2
+
+
+def normalize_empty(val):
+    """
+    将空值统一为 None
+
+    用于测试比较时消除 GaussDB/PostgreSQL 空值差异
+    """
+    if val in (b"", "", {}, []):
+        return None
+    return val

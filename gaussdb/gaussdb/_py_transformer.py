@@ -38,6 +38,33 @@ TEXT = pq.Format.TEXT
 PY_TEXT = PyFormat.TEXT
 
 
+def _is_empty_value(val: Any) -> bool:
+    """检测值是否为等效空值（GaussDB 兼容）"""
+    if val is None:
+        return True
+    if isinstance(val, (bytes, str)) and len(val) == 0:
+        return True
+    if isinstance(val, (dict, list)) and len(val) == 0:
+        return True
+    return False
+
+
+def _normalize_empty_value(val: Any, normalize_to_none: bool = False) -> Any:
+    """
+    将空值规范化处理
+
+    Args:
+        val: 要处理的值
+        normalize_to_none: 如果为 True，将空字符串/空字典等转为 None
+
+    Returns:
+        规范化后的值
+    """
+    if normalize_to_none and _is_empty_value(val):
+        return None
+    return val
+
+
 class Transformer(AdaptContext):
     """
     An object that can adapt efficiently between Python and GaussDB.
