@@ -149,6 +149,7 @@ def test_get_data_no_copy(pgconn):
 
 @pytest.mark.parametrize("format", [pq.Format.TEXT, pq.Format.BINARY])
 @pytest.mark.opengauss_skip("Incompatible binary COPY output in OpenGauss")
+@pytest.mark.gaussdb_skip("binary copy signature may differ")
 def test_copy_out_read(pgconn, format):
     stmt = f"copy ({sample_values}) to stdout (format {format.name})"
     res = pgconn.exec_(stmt.encode("ascii"))
