@@ -471,3 +471,23 @@ def _load_binary(data: Buffer, tx: Transformer) -> list[Any]:
         out = [out[i : i + dim] for i in range(0, len(out), dim)]
 
     return out
+
+
+def array_equals_unordered(arr1: list[Any], arr2: list[Any]) -> bool:
+    """
+    Compare two arrays without considering element order.
+
+    Used for GaussDB compatibility scenarios where array element order may differ.
+    """
+    if arr1 is None and arr2 is None:
+        return True
+    if arr1 is None or arr2 is None:
+        return False
+    if len(arr1) != len(arr2):
+        return False
+
+    try:
+        return sorted(arr1) == sorted(arr2)
+    except TypeError:
+        # Elements not sortable, fall back to set comparison
+        return set(map(str, arr1)) == set(map(str, arr2))
