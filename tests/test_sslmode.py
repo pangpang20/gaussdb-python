@@ -10,7 +10,15 @@ TABLE = "test01"
 
 @pytest.fixture(params=["require", "verify-ca"])
 def dsn(request):
-    """Retrieve DSN from environment variable based on SSL mode."""
+    """Retrieve DSN from environment variable based on SSL mode.
+
+    GaussDB SSL modes supported:
+    - require: Encrypted connection without certificate verification
+    - verify-ca: Encrypted connection with CA certificate verification
+
+    Set GAUSSDB_TEST_DSN with appropriate sslmode to run these tests:
+    export GAUSSDB_TEST_DSN="...sslmode=require..."
+    """
     dsn = os.environ.get("GAUSSDB_TEST_DSN")
     if not dsn:
         raise ValueError("GAUSSDB_TEST_DSN environment variable not set")

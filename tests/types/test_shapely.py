@@ -25,6 +25,7 @@ else:
 pytestmark = [
     pytest.mark.postgis,
     pytest.mark.crdb("skip"),
+    pytest.mark.gaussdb_skip("PostGIS not supported on GaussDB USTORE storage mode"),
 ]
 
 SAMPLE_POINT = Point(1.2, 3.4)
