@@ -487,15 +487,14 @@ class TimestampBinaryLoader(Loader):
     def load(self, data: Buffer) -> datetime:
         micros = unpack_int8(data)[0]
         try:
-            # GaussDB 边界检查
-            if micros < self._GAUSSDB_MIN_MICROS:
-                raise DataError("timestamp too small (before year 1)") from None
-            if micros > self._GAUSSDB_MAX_MICROS:
-                raise DataError("timestamp too large (after year 9999)") from None
             return _pg_datetime_epoch + timedelta(microseconds=micros)
         except OverflowError:
-            if micros <= 0:
+            # GaussDB 边界检查：根据实际的 micros 值判断错误类型
+            # 年份1: -62135596800000000, 年份9999: ~253402300799999999
+            if micros < -62135596800000000:  # 小于年份1
                 raise DataError("timestamp too small (before year 1)") from None
+            elif micros > 253402300799999999:  # 大于年份9999
+                raise DataError("timestamp too large (after year 9999)") from None
             else:
                 raise DataError("timestamp too large (after year 10K)") from None
 
