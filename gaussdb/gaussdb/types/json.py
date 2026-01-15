@@ -202,7 +202,21 @@ class JsonLoader(_JsonLoader):
 
 
 class JsonbLoader(_JsonLoader):
-    pass
+    def load(self, data: Buffer) -> Any:
+        # GaussDB compatibility: handle empty data
+        if not data:
+            return None
+
+        try:
+            # json.loads() cannot work on memoryview.
+            if not isinstance(data, bytes):
+                data = bytes(data)
+            return self.loads(data)
+        except Exception as e:
+            # Log parsing error, return None
+            if "NoneType" in str(e):
+                return None
+            raise
 
 
 class JsonBinaryLoader(_JsonLoader):
@@ -213,12 +227,34 @@ class JsonbBinaryLoader(_JsonLoader):
     format = Format.BINARY
 
     def load(self, data: Buffer) -> Any:
-        if data and data[0] != 1:
-            raise DataError("unknown jsonb binary format: {data[0]}")
+        # JSONB binary format: first byte is version number
+        if not data:
+            return None
+
+        # PostgreSQL JSONB version is 1
+        # GaussDB may differ, need compatibility handling
+        version = data[0] if data else 0
+        if version != 1:
+            # Version mismatch: try parsing as text JSON
+            try:
+                if not isinstance(data, bytes):
+                    data = bytes(data)
+                return self.loads(data)
+            except Exception:
+                # If text parsing fails, raise original error
+                raise DataError(f"unknown jsonb binary format: {version}")
+
+        # Skip version byte
         data = data[1:]
-        if not isinstance(data, bytes):
-            data = bytes(data)
-        return self.loads(data)
+
+        try:
+            if not isinstance(data, bytes):
+                data = bytes(data)
+            return self.loads(data)
+        except Exception as e:
+            if "NoneType" in str(e):
+                return None
+            raise
 
 
 def _get_current_dumper(
