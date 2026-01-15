@@ -9,6 +9,8 @@ __pycache__/
 /gaussdb_binary/
 .vscode
 .venv
+myenv
+activate_dev.ps1
 .coverage
 htmlcov
 .idea

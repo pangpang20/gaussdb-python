@@ -89,7 +89,7 @@ class TestDate:
         except Exception as e:
             pytest.skip(f"Database does not support this date format: {e}")
             return
-        
+
         expected = as_date(val)
         # GaussDB 可能返回 datetime 而非 date
         if isinstance(result, dt.datetime) and not isinstance(expected, dt.datetime):
@@ -147,7 +147,7 @@ class TestDate:
         # GaussDB 不支持 infinity 日期
         if "infinity" in val.lower():
             pytest.skip("GaussDB does not support infinity dates")
-        
+
         try:
             cur = conn.cursor(binary=True)
             cur.execute("select %s::date", (val,))

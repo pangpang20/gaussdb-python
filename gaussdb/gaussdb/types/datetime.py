@@ -491,9 +491,9 @@ class TimestampBinaryLoader(Loader):
         except OverflowError:
             # GaussDB 边界检查：根据实际的 micros 值判断错误类型
             # 年份1: -62135596800000000, 年份9999: ~253402300799999999
-            if micros < -62135596800000000:  # 小于年份1
+            if micros < self._GAUSSDB_MIN_MICROS:  # 小于年份1
                 raise DataError("timestamp too small (before year 1)") from None
-            elif micros > 253402300799999999:  # 大于年份9999
+            elif micros > self._GAUSSDB_MAX_MICROS:  # 大于年份9999
                 raise DataError("timestamp too large (after year 9999)") from None
             else:
                 raise DataError("timestamp too large (after year 10K)") from None
@@ -584,6 +584,9 @@ class TimestamptzLoader(Loader):
 class TimestamptzBinaryLoader(Loader):
     format = Format.BINARY
 
+    # GaussDB 时间戳边界（微秒）
+    _GAUSSDB_MAX_MICROS = 253402300799999999  # 约9999年底
+
     def __init__(self, oid: int, context: AdaptContext | None = None):
         super().__init__(oid, context)
         self._timezone = get_tzinfo(self.connection.pgconn if self.connection else None)
@@ -613,7 +616,7 @@ class TimestamptzBinaryLoader(Loader):
 
             if micros <= 0:
                 raise DataError("timestamp too small (before year 1)") from None
-            elif micros > 253402300799999999:  # GaussDB 9999年边界
+            elif micros > self._GAUSSDB_MAX_MICROS:  # GaussDB 9999年边界
                 raise DataError("timestamp too large (after year 9999)") from None
             else:
                 raise DataError("timestamp too large (after year 10K)") from None
