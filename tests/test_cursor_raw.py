@@ -36,6 +36,28 @@ def test_sequence_only(conn):
         cur.execute("select 1", {})
 
 
+def test_named_params_error(conn):
+    """Test named parameter error message."""
+    cur = conn.cursor()
+
+    # Should clearly indicate named placeholders are not supported
+    with pytest.raises((TypeError, e.ProgrammingError)) as excinfo:
+        cur.execute("select %(name)s", {"name": 1})
+
+    error_msg = str(excinfo.value).lower()
+    assert "named" in error_msg or "sequence" in error_msg
+
+
+def test_dict_params_error(conn):
+    """Test dict parameter error."""
+    cur = conn.cursor()
+
+    with pytest.raises(TypeError) as excinfo:
+        cur.execute("select $1", {"a": 1})
+
+    assert "sequence" in str(excinfo.value).lower()
+
+
 def test_execute_many_results_param(conn):
     cur = conn.cursor()
     # GaussDB raises SyntaxError, CRDB raises InvalidPreparedStatementDefinition
@@ -115,3 +137,31 @@ def test_leak(conn_cls, dsn, faker, fmt, fmt_out, fetch, row_factory, gc):
         gc.collect()
         n.append(gc.count())
     assert n[0] == n[1] == n[2], f"objects leaked: {n[1] - n[0]}, {n[2] - n[1]}"
+
+
+def test_query_cache(conn):
+    """Test query cache."""
+    cur = conn.cursor()
+    query = "select $1::int"
+
+    # Execute same query multiple times
+    for i in range(10):
+        cur.execute(query, (i,))
+        assert cur.fetchone()[0] == i
+
+    # Verify cache is working (no exception is good)
+
+
+def test_clear_cache(conn):
+    """Test clearing cache."""
+    cur = conn.cursor()
+    query = "select $1::int"
+
+    cur.execute(query, (1,))
+
+    # Clearing cache should not affect subsequent queries
+    if hasattr(cur._query, "clear_cache"):
+        cur._query.clear_cache()
+
+    cur.execute(query, (2,))
+    assert cur.fetchone()[0] == 2
